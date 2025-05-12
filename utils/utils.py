@@ -18,10 +18,24 @@ def user_profile_path(instance, filename):
     Generate the file path for uploading profile image.
 
     The uploaded file will be stored in the following format:
-        MEDIA_ROOT/<user-id>/profile/<unique_id>.<extension>
+        MEDIA_ROOT/Users/<user-id>/profile/<unique_filename>.<extension>
     '''
 
     extension = filename.split('.')[-1]
     new_file_name = f'{generate_uuid_hex()}.{extension}'
 
-    return f'{instance.id}/"profile"/{new_file_name}'
+    return f'Users/{instance.id}/"profile"/{new_file_name}'
+
+
+def company_logo_path(instance, filename):
+    '''
+    Generate the file path for uploading company image.
+
+    The uploaded file will be stored in the following format:
+        MEDIA_ROOT/Company/<company-name>/profile/<unique_filename>.<extension>
+    '''
+
+    extension = filename.split('.')[-1]
+    new_file_name = f'{generate_uuid_hex()}.{extension}'
+
+    return f'Company/{instance.name}/"profile"/{new_file_name}'
