@@ -1,0 +1,138 @@
+{% extends 'root.html' %}
+
+{% load static %}
+
+{% block content %}
+	<link rel="stylesheet" href="{% static 'css/index.css' %}" />
+
+	<section id="features" class="features">
+		<h2>Core Features</h2>
+		<div class="feature-cards">
+			<div class="card">
+				<i class="fas fa-chart-line"></i>
+				<h3>Live Holdings</h3>
+				<p>Track your investment quantity, price per share, and portfolio health.</p>
+			</div>
+			<div class="card">
+				<i class="fas fa-star"></i>
+				<h3>Wishlist Management</h3>
+				<p>Add favorite companies and watch their market trends in real-time.</p>
+			</div>
+			<div class="card">
+				<i class="fas fa-history"></i>
+				<h3>Historical Analytics</h3>
+				<p>View detailed company price history and trends to predict future gains.</p>
+			</div>
+		</div>
+	</section>
+
+	<section class="companies">
+		<h2>Featured Listed Companies</h2>
+		<div class="company-carousel">
+			<div class="company-card">
+				<img src="https://via.placeholder.com/100?text=NABIL" alt="NABIL Bank">
+				<h4>NABIL Bank</h4>
+				<p>Symbol: NABIL</p>
+			</div>
+			<div class="company-card">
+				<img src="https://via.placeholder.com/100?text=NTC" alt="Nepal Telecom">
+				<h4>Nepal Telecom</h4>
+				<p>Symbol: NTC</p>
+			</div>
+			<div class="company-card">
+				<img src="https://via.placeholder.com/100?text=NICA" alt="NIC Asia Bank">
+				<h4>NIC Asia Bank</h4>
+				<p>Symbol: NICA</p>
+			</div>
+			<div class="company-card">
+				<img src="https://via.placeholder.com/100?text=EBL" alt="Everest Bank">
+				<h4>Everest Bank</h4>
+				<p>Symbol: EBL</p>
+			</div>
+			<div class="company-card">
+				<img src="https://via.placeholder.com/100?text=SCB" alt="Standard Chartered">
+				<h4>Standard Chartered</h4>
+				<p>Symbol: SCB</p>
+			</div>
+		</div>
+	</section>
+
+	<section class="why">
+		<h2>Why Choose Stock Vault?</h2>
+		<div class="why-grid">
+			<div>
+				<h3>📊 Data Driven</h3>
+				<p>Make informed decisions based on historical price patterns and trends.</p>
+			</div>
+			<div>
+				<h3>🔒 Secure</h3>
+				<p>Your data is stored securely with modern authentication methods.</p>
+			</div>
+			<div>
+				<h3>⚡ Lightning Fast</h3>
+				<p>Optimized performance ensures smooth experience even on low bandwidth.</p>
+			</div>
+		</div>
+	</section>
+
+	<section class="how">
+		<h2>How It Works</h2>
+		<div class="steps">
+			<div class="step">
+				<span>1</span>
+				<h4>Register</h4>
+				<p>Create your free account with email and start tracking.</p>
+			</div>
+			<div class="step">
+				<span>2</span>
+				<h4>Add Holdings</h4>
+				<p>Enter share quantity, price, and companies you invested in.</p>
+			</div>
+			<div class="step">
+				<span>3</span>
+				<h4>Analyze</h4>
+				<p>Visualize portfolio health, profit/loss and market movement.</p>
+			</div>
+		</div>
+	</section>
+
+	<section class="testimonials">
+		<h2>What Users Say</h2>
+		<div class="testimony">
+			<p>"Stock Vault simplified my investment tracking. I love the historical charts!"</p>
+			<strong>– Aayush Shrestha, Investor</strong>
+		</div>
+		<div class="testimony">
+			<p>"As a BCA student, I built this to help others and it's now used by 100+ users!"</p>
+			<strong>– You (Creator)</strong>
+		</div>
+	</section>
+
+	<section class="faq" id="faq">
+		<h2>Frequently Asked Questions</h2>
+		<div class="faq-list">
+			<details>
+				<summary>Is Stock Vault free to use?</summary>
+				<p>Yes, it's 100% free and open for all Nepali investors.</p>
+			</details>
+			<details>
+				<summary>Where does price data come from?</summary>
+				<p>We update prices manually or via scraping from NEPSE portals.</p>
+			</details>
+			<details>
+				<summary>Can I export my portfolio?</summary>
+				<p>This feature is under development for the next release.</p>
+			</details>
+		</div>
+	</section>
+
+	<section class="about">
+		<h2>About Stock Vault</h2>
+		<p>
+			A cutting-edge platform developed as a university final project to help investors stay ahead in Nepal's
+			stock market. Simple, secure, and insightful.
+		</p>
+	</section>
+
+	<script src="{% static 'js/index.js' %}"></script>
+{% endblock %}
