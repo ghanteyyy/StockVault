@@ -24,7 +24,7 @@ def user_profile_path(instance, filename):
     extension = filename.split('.')[-1]
     new_file_name = f'{generate_uuid_hex()}.{extension}'
 
-    return f'Users/{instance.id}/"profile"/{new_file_name}'
+    return f'Users/{instance.id}/profile/{new_file_name}'
 
 
 def company_logo_path(instance, filename):
@@ -38,4 +38,4 @@ def company_logo_path(instance, filename):
     extension = filename.split('.')[-1]
     new_file_name = f'{generate_uuid_hex()}.{extension}'
 
-    return f'Company/{instance.name}/"profile"/{new_file_name}'
+    return f'Company/{instance.name}/profile/{new_file_name}'
