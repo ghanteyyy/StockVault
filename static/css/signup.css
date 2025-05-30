@@ -1,0 +1,194 @@
+.body-container{
+    padding: 30px;
+    display: flex;
+    justify-content: center;
+}
+
+.signup-container {
+    width: 80%;
+    display: flex;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.left-panel {
+    flex: 1;
+    background-color: #a7f3d0;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #1e293b;
+}
+
+.left-panel h1 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.rocket {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+}
+
+.dots {
+    display: flex;
+    gap: 10px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    background-color: #fff;
+    border-radius: 50%;
+}
+
+.dot.inactive {
+    background-color: #9ca3af;
+}
+
+.right-panel {
+    flex: 1;
+    background-color: #1e293b;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.right-panel a {
+    color: #14b8a6;
+    text-decoration: none;
+}
+
+.right-panel a:hover {
+    text-decoration: underline;
+}
+
+.right-panel h2 {
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 24px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    color: #9ca3af;
+    margin-bottom: 4px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    background-color: #374151;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 1rem;
+}
+
+/* Gender dropdown specific styling */
+.form-group label[for="gender"] {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    color: 9ca3af;;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+/* Gender select styling */
+.form-group select#gender {
+    width: 100%;
+    padding: 10px 30px 10px 10px; /* Extra padding-right for arrow */
+    font-size: 16px;
+    color: #9ca3af;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+    appearance: none; /* Remove default browser styling */
+    background: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") no-repeat right 10px center;
+    background-size: 16px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.form-group select#gender option {
+    color: black; /* Text color for dropdown menu options */
+    background-color: #fff; /* Background for dropdown menu */
+}
+
+/* Focus and hover states */
+.form-group select#gender:focus {
+    border-color: #0066cc;
+    box-shadow: 0 0 5px rgba(0, 102, 204, 0.2);
+}
+
+.form-group select#gender:hover {
+    border-color: #999;
+}
+
+/* Disabled or placeholder option */
+.form-group select#gender option[disabled][selected] {
+    color: #999;
+}
+
+/* Error message styling */
+.form-group #gender-error {
+    display: none;
+    color: #d32f2f;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.terms-of-conditions{
+    display: flex;
+    align-items: center;
+}
+
+.terms-of-conditions label{
+    margin-bottom: 0;
+}
+
+.error-message {
+    display: none;
+    color: #ef4444;
+    font-size: 0.75rem;
+    margin-top: 4px;
+}
+
+.form-group input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    color: #1e293b;
+    font-weight: bold;
+    border-radius: 4px;
+    background-color: #14b8a6;
+}
+
+button:hover {
+    background-color: #10b39b;
+}
+
+.backend-error{
+    display: block;
+}
