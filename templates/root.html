@@ -5,7 +5,7 @@
 
 <head>
 	<meta charset="UTF-8" />
-	<title>Stock Vault – Smarter Stock Tracking</title>
+	<title>{{page_title}}</title>
 	<link rel="stylesheet" href="{% static 'css/root.css' %}">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<link rel = "icon" type = "image/png" href = "{% static 'images/icon.png' %}">
@@ -17,8 +17,10 @@
 <body>
     {% include 'shared/navbar.html' %}
 
-    {% block content %}
-    {% endblock %}
+	<div class="body-container">
+		{% block content %}
+		{% endblock %}
+	</div>
 
     {% include 'shared/footer.html' %}
 </body>
