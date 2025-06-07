@@ -20,7 +20,10 @@
             <a href="{% url 'index' %}">Home</a>
             <a href="#features">Features</a>
             <a href="#faq">FAQ</a>
-            <a href="/login">Login</a>
+
+            {% if not user.is_authenticated %}
+                <a href="/login">Login</a>
+            {% endif %}
         </div>
         <div class="footer-section footer-newsletter">
             <h4>Stay Updated</h4>
