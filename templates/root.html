@@ -22,5 +22,7 @@
 		{% endblock %}
 	</div>
 
-    {% include 'shared/footer.html' %}
+	{% if not "Dashboard" in page_title %}
+		{% include 'shared/footer.html' %}
+	{% endif %}
 </body>
