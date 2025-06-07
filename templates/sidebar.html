@@ -1,0 +1,24 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
+
+<button class="hamburger" id="hamburger-btn">☰</button>
+
+<div class="sidebar">
+    <a class="logo" href="{% url 'dashboard' %}">
+        <img src="{% static 'images/icon.png' %}" alt="Stock Vault Logo" id="logo-image">
+        <p id="logo-name">Stock Vault</p>
+    </a>
+    <div>
+        <ul>
+            <li class="active"><a class="sidebar-links" href="{% url 'dashboard' %}">📊 Dashboard</a></li>
+            <li><a class='sidebar-links' href="#"">⭐ Wishlist</a></li>
+            <li><a class='sidebar-links' href="#">📉 Profit / Loss</a></li>
+            <li><a class='sidebar-links' href="#">💹 Portfolio</a></li>
+            <li><a class='sidebar-links' href="#">⚙️ Settings</a></li>
+            <li><a class='sidebar-links' href="{% url 'logout' %}">🚪 Logout</a></li>
+        </ul>
+    </div>
+</div>
+
+<script src="{% static 'js/sidebar.js' %}"></script>
