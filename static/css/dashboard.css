@@ -1,0 +1,113 @@
+.container {
+	display: flex;
+	height: 100vh;
+	width: 100%;
+}
+
+.main-content {
+	flex: 1;
+	padding: 30px;
+	overflow-y: auto;
+}
+
+.main-content>div:first-child {
+	margin-bottom: 30px;
+}
+
+.main-content>div:first-child h1 {
+	font-size: 2em;
+	margin-bottom: 5px;
+}
+
+.content {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.card {
+	background: white;
+	padding: 20px;
+	border-radius: 12px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+	transition: transform 0.3s;
+}
+
+.card h2{
+	padding-bottom: 10px;
+}
+
+.card:hover {
+	transform: translateY(-5px);
+}
+
+.card ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.card ul li {
+	padding: 10px 0;
+	border-bottom: 1px solid #edf2f7;
+}
+
+.card ul li:last-child {
+	border-bottom: none;
+}
+
+.dashboard-stats {
+	gap: 20px;
+	display: flex;
+	margin-top: 30px;
+	flex-direction: column;
+}
+
+.positive {
+	font-weight: bold;
+	color: #2ecc71;
+}
+
+.negative {
+	font-weight: bold;
+	color: #e53e3e;
+}
+
+.portfolio_performance_error{
+	padding: 20px;
+	font-weight: bold;
+	font-size: 1.25rem;
+	color: #e53e3e;
+}
+
+table {
+	width: 100%;
+	border: 2px solid #333;
+	border-collapse: collapse;
+}
+
+th {
+	padding: 10px;
+	text-align: center;
+	border-collapse: collapse;
+	border: 2px solid #333;
+}
+
+td {
+	padding: 10px;
+	border-collapse: collapse;
+	border: 2px solid #333;
+}
+
+/* Center content of all columns except company name */
+td:not(:nth-child(2)) {
+  text-align: center;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #e9e5e5;
+}
+
+tbody tr:hover {
+    background-color: #c9caca;
+}
