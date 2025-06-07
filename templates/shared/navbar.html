@@ -2,22 +2,24 @@
 
 <link rel="stylesheet" href="{% static 'css/navbar.css' %}" />
 
-<div class="nav-bar">
-    <a class="logo" href="{% url 'index' %}">
-        <img src="{% static 'images/icon.png' %}" alt="Stock Vault Logo" id="logo-image">
-        <p id="logo-name">Stock Vault</p>
-    </a>
+{% if "Dashboard" not in page_title %}
+    <div class="nav-bar">
+        <a class="logo" href="{% url 'index' %}">
+            <img src="{% static 'images/icon.png' %}" alt="Stock Vault Logo" id="logo-image">
+            <p id="logo-name">Stock Vault</p>
+        </a>
 
-    <div class="nav-links">
-        <a href="#features">Features</a>
-        <a href="#faq">FAQ</a>
-        <a href="{% url 'login' %}">Login</a>
-        <a href="{% url 'signup' %}" class="btn">Register</a>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#faq">FAQ</a>
+            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'signup' %}" class="btn">Register</a>
+        </div>
+
+        <button class="hamburger" aria-label="Menu" aria-expanded="false">
+            <i class="iconoir-menu"></i>
+        </button>
+
+        <script src="{% static 'js/nav.js' %}"></script>
     </div>
-
-    <button class="hamburger" aria-label="Menu" aria-expanded="false">
-        <i class="iconoir-menu"></i>
-    </button>
-
-    <script src="{% static 'js/nav.js' %}"></script>
-</div>
+{% endif %}
