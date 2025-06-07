@@ -16,7 +16,7 @@ class ListedCompanies(models.Model):
     id = models.CharField(primary_key=True, default=utils.generate_uuid_hex, max_length=255)
 
     name = models.CharField(max_length=255, null=False, blank=False, unique=True)
-    abbreviation = models.CharField(verbose_name=_('abbreviation'), max_length=255, null=False, blank=False, unique=True)
+    abbreviation = models.CharField(verbose_name=_('abbreviation'), max_length=255, null=False, blank=False)
     logo = models.ImageField(verbose_name=('logo'), blank=True, null=True, upload_to=utils.company_logo_path)
     created_at = models.DateTimeField(editable=False, default=now)
 
@@ -64,5 +64,7 @@ class HistoricalPrices(models.Model):
     id = models.CharField(primary_key=True, default=utils.generate_uuid_hex, max_length=255)
     company_id = models.ForeignKey(to='ListedCompanies', on_delete=models.CASCADE)
 
-    price = models.IntegerField(blank=True, null=True)
+    opening_price = models.IntegerField(blank=True, null=True)
+    closing_price = models.IntegerField(blank=True, null=True)
+
     recorded_at = models.DateTimeField(editable=False, default=now)
