@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.timezone import now
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _
 from utils import utils
@@ -103,3 +104,11 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
+
+
+class RecentActivities(models.Model):
+    id = models.CharField(primary_key=True, editable=False, default=utils.generate_uuid_hex, max_length=255)
+    user_id = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE)
+
+    activity = models.TextField(editable=False)
+    recorded_at = models.DateTimeField(editable=False, default=now)
