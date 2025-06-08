@@ -1,40 +1,42 @@
 {% load static %}
 
-<link rel="stylesheet" href="{% static 'css/footer.css' %}" />
+{% if not request.user.is_authenticated %}
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}" />
 
-<script>
-    window.onload = function(){
-        var date = new Date();
-        document.getElementById('footer-text').innerHTML = '&copy ' + date.getFullYear() + ' Stock Vault';
-    }
-</script>
+    <script>
+        window.onload = function(){
+            var date = new Date();
+            document.getElementById('footer-text').innerHTML = '&copy ' + date.getFullYear() + ' Stock Vault';
+        }
+    </script>
 
-<footer>
-    <div class="footer-content">
-        <div class="footer-section footer-brand">
-            <h4>Stock Vault</h4>
-            <p>Track stocks, seize profits, vibe smart.</p>
-        </div>
-        <div class="footer-section footer-links">
-            <h4>Explore</h4>
-            <a href="{% url 'index' %}">Home</a>
-            <a href="#features">Features</a>
-            <a href="#faq">FAQ</a>
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section footer-brand">
+                <h4>Stock Vault</h4>
+                <p>Track stocks, seize profits, vibe smart.</p>
+            </div>
+            <div class="footer-section footer-links">
+                <h4>Explore</h4>
+                <a href="{% url 'index' %}">Home</a>
+                <a href="#features">Features</a>
+                <a href="#faq">FAQ</a>
 
-            {% if not user.is_authenticated %}
-                <a href="/login">Login</a>
-            {% endif %}
-        </div>
-        <div class="footer-section footer-newsletter">
-            <h4>Stay Updated</h4>
-            <div class="social-icons">
-                <a href="#"><i class="fab fa-twitter"></i></a>
-                <a href="#"><i class="fab fa-linkedin"></i></a>
-                <a href="https://www.github.com/ghanteyyy/" target="_blank"><i class="fab fa-github"></i></a>
+                {% if not user.is_authenticated %}
+                    <a href="/login">Login</a>
+                {% endif %}
+            </div>
+            <div class="footer-section footer-newsletter">
+                <h4>Stay Updated</h4>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="https://www.github.com/ghanteyyy/" target="_blank"><i class="fab fa-github"></i></a>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="footer-bottom">
-        <p id="footer-text"></p>
-    </div>
-</footer>
+        <div class="footer-bottom">
+            <p id="footer-text"></p>
+        </div>
+    </footer>
+{% endif %}

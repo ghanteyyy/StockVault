@@ -2,7 +2,7 @@
 
 <link rel="stylesheet" href="{% static 'css/navbar.css' %}" />
 
-{% if "Dashboard" not in page_title %}
+{% if not request.user.is_authenticated %}
     <div class="nav-bar">
         <a class="logo" href="{% url 'index' %}">
             <img src="{% static 'images/icon.png' %}" alt="Stock Vault Logo" id="logo-image">
