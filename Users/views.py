@@ -1,3 +1,4 @@
+import json
 import datetime as dt
 from django.contrib import messages
 from django.shortcuts import render, redirect
@@ -5,6 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from Users.models import *
 from Shares.models import *
 from . import fetch_models
+from . import serializers
 
 
 def HomePage(request):
@@ -109,3 +111,28 @@ def Dashboard(request):
         }
 
     return render(request, 'dashboard.html', context)
+
+
+def WishListPage(request):
+    if request.method == 'POST':
+        form_data = request.POST.get('company').split('(')[0].strip()
+        company = ListedCompanies.objects.get(name=form_data)
+
+        WishLists.objects.create(user_id=request.user, company_id=company)
+
+    user_companies = WishLists.objects.filter(user_id=request.user).values_list('company_id', flat=True)
+    companies = ListedCompanies.objects.exclude(id__in=user_companies)
+
+    serialized_companies = serializers.CompaniesSerializer(companies, many=True).data
+    companies = [f"{company['name']} ({company['abbreviation']})" for company in serialized_companies]
+
+    saved_companies = WishLists.objects.filter(user_id=request.user)
+    saved_companies = serializers.WishlistsSerializer(saved_companies, many=True).data
+
+    context = {
+        'page_title': 'Wishlist | Stock Vault',
+        'saved_companies': saved_companies,
+        'companies': json.dumps(companies),
+    }
+
+    return render(request, 'wishlist.html', context)
