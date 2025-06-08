@@ -1,0 +1,63 @@
+.input-wrapper {
+    position: relative;
+}
+
+.input-group {
+    display: flex;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.autocomplete-input {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+}
+
+.add-btn {
+    padding: 8px 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.add-btn:hover {
+    background-color: #45a049;
+}
+
+.suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0px;
+    right: 0;
+    border: 1px solid #ddd;
+    border-top: none;
+    background-color: white;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    z-index: 1000;
+    margin-top: -1px;
+}
+
+.suggestion-item {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.suggestion-item:hover {
+    background-color: #f0f0f0;
+}
+
+
+.error-searching-stocks{
+    color: #ef4444;
+    font-size: 1rem;
+    font-weight: bold;
+}
