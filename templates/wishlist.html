@@ -1,0 +1,39 @@
+{% extends 'root.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/wishlist.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+<script id="companies" type="application/json">
+    {{ companies|safe }}
+</script>
+
+
+<div class="container">
+    {% include 'sidebar.html' %}
+
+    <div class="main-content">
+        <div class="content">
+            <div class="card">
+                {% include 'stock_searching.html' %}
+            </div>
+
+            <h2>Your wishlists</h2>
+            <div class="card company-list">
+                {% for data in saved_companies %}
+                    <div class="company">
+                        <p>{{ data.company_name }}</p>
+                    </div>
+                {% empty %}
+                    <p class="empty-company-list">No wishlist</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{% endblock %}
