@@ -2,7 +2,6 @@ from django.db import models
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from utils import utils
-from Users.models import *
 
 
 class ListedCompanies(models.Model):
@@ -31,11 +30,13 @@ class ShareHoldings(models.Model):
 
     id = models.CharField(primary_key=True, default=utils.generate_uuid_hex, max_length=255)
 
-    user_id = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(to='Users.CustomUser', on_delete=models.CASCADE)
     company_id = models.ForeignKey(to="ListedCompanies", on_delete=models.CASCADE)
 
     quantity = models.IntegerField(blank=True, null=True)
     price_per_share = models.FloatField(blank=True, null=True)
+    bonus_quantity = models.IntegerField(blank=True, null=True, default=0)
+
     purchased_date = models.DateTimeField(editable=False, default=now)
 
 
@@ -49,7 +50,7 @@ class WishLists(models.Model):
 
     id = models.CharField(primary_key=True, default=utils.generate_uuid_hex, max_length=255)
 
-    user_id = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(to='Users.CustomUser', on_delete=models.CASCADE)
     company_id = models.ForeignKey(to="ListedCompanies", on_delete=models.CASCADE)
 
 
@@ -67,4 +68,13 @@ class HistoricalPrices(models.Model):
     opening_price = models.IntegerField(blank=True, null=True)
     closing_price = models.IntegerField(blank=True, null=True)
 
+    recorded_at = models.DateTimeField(editable=False, default=now)
+
+
+class RecentActivities(models.Model):
+    id = models.CharField(primary_key=True, editable=False, default=utils.generate_uuid_hex, max_length=255)
+    user_id = models.ForeignKey('Users.CustomUser', on_delete=models.CASCADE)
+    company_id = models.ForeignKey('Shares.ListedCompanies', on_delete=models.CASCADE)
+
+    activity = models.TextField(editable=False)
     recorded_at = models.DateTimeField(editable=False, default=now)
