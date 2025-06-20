@@ -7,5 +7,7 @@ urlpatterns = [
     path('login/', views.LoginPage, name='login'),
     path('register/', views.SignupPage, name='signup'),
     path('dashboard/', views.Dashboard, name='dashboard'),
+    path('portfolio/', views.Portfolio, name='portfolio'),
     path('wishlist/', views.WishListPage, name='wishlist'),
+    path('portfolio/<str:company_name>', views.EachPortfolio, name='each-portfolio'),
 ]
