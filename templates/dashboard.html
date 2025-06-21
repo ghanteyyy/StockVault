@@ -3,6 +3,7 @@
 
 {% block content %}
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
     <script id="portfolio_datasets" type="application/json">
@@ -41,7 +42,7 @@
                     <h2>📈 Portfolio Performance</h2>
 
                     {% if not portfolio_datasets %}
-                        <p class="portfolio_performance_error">The dataset is currently empty or incomplete.</p>
+                        <p class="error-message">The dataset is currently empty or incomplete.</p>
 
                     {% else %}
                         <table>
@@ -73,9 +74,9 @@
                     <h2>🔔 Recent Activity</h2>
                     <ul>
                         {% for activity in recent_activities %}
-                            <li>{{ activity.description }} - {{ activity.date }}</li>
+                            <li>{{ activity.activity }} at {{ activity.recorded_at }}</li>
                         {% empty %}
-                            <li class="portfolio_performance_error">No recent activity</li>
+                            <li class="error-message">No recent activity</li>
                         {% endfor %}
                     </ul>
                 </div>
