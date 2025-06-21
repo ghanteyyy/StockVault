@@ -28,17 +28,10 @@
 .card {
 	background: white;
 	padding: 20px;
-	border-radius: 12px;
-	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-	transition: transform 0.3s;
 }
 
 .card h2{
 	padding-bottom: 10px;
-}
-
-.card:hover {
-	transform: translateY(-5px);
 }
 
 .card ul {
@@ -47,9 +40,15 @@
 	margin: 0;
 }
 
+.card ul li::before {
+    content: "🔹"; /* Unicode or custom character */
+    margin-right: 4px;
+    font-size: 1.5rem;
+}
+
 .card ul li {
 	padding: 10px 0;
-	border-bottom: 1px solid #edf2f7;
+	font-size: 1.15rem;
 }
 
 .card ul li:last-child {
@@ -70,13 +69,6 @@
 
 .negative {
 	font-weight: bold;
-	color: #e53e3e;
-}
-
-.portfolio_performance_error{
-	padding: 20px;
-	font-weight: bold;
-	font-size: 1.25rem;
 	color: #e53e3e;
 }
 

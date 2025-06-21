@@ -1,17 +1,11 @@
 .card {
     background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 20px;
-    margin-bottom: 20px;
 }
 
 .card.company-list {
     background: #ffffff;
-    border-radius: 8px;
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
     padding: 20px;
-    margin-bottom: 20px;
     overflow: hidden;
     display: flex;
     flex-wrap: wrap;
@@ -42,12 +36,6 @@
 
 .company:hover p {
     color: white;
-}
-
-.empty-company-list{
-    color: #e53e3e;
-    font-size: 1.25rem;
-    font-weight: bold;
 }
 
 @media (max-width: 768px) {
