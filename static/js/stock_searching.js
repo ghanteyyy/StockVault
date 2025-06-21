@@ -11,12 +11,21 @@ const stockData = JSON.parse(companiesElement.textContent);
 function validateForm(){
     input_value = input.value;
 
-    if(!input_value || !filterSuggestions(input_value)){
-        error_searching_stocks.innerHTML = 'Valid company was only expected'
+    if(!input_value || !checkValidCompany(input_value).length){
+        suggestions.style.display = 'none';
+        error_searching_stocks.innerHTML = 'Please complete all required fields before submitting';
         return false;
     }
 
     return true;
+}
+
+
+// Check if the input value exactly matches with the listed companies
+function checkValidCompany(query){
+    return stockData.filter(stock =>
+        stock.toLowerCase() == query.toLowerCase()
+    );
 }
 
 
