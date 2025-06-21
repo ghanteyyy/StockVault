@@ -1,0 +1,12 @@
+.card{
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.inner_card_content input{
+    width: 10%;
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 10px;
+}

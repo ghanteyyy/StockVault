@@ -1,0 +1,37 @@
+{% extends 'root.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<div class="container">
+    {% include 'sidebar.html' %}
+
+    <div class="main-content">
+        <div class="content">
+            <div class="card company-list">
+                {% for share_holding in share_holdings %}
+                    <p class="company_name">{{ share_holding.company_name }} ({{ share_holding.abbreviation }})</p>
+
+                    <div class="inner_card_content">
+                        <p>Share Quantity</p>
+                        <p>{{ share_holding.quantity }}</p>
+                    </div>
+
+                    <div class="inner_card_content">
+                        <p>Bonus Share Quantity</p>
+                        <p>{{ share_holding.bonus_quantity|default:0 }}</p>
+                    </div>
+                {% endfor %}
+                {% include 'timeline.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="{% static 'css/portfolio.css' %}">
+<link rel="stylesheet" href="{% static 'css/each_portfolio.css' %}">
+{% endblock %}

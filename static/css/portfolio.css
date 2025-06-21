@@ -1,0 +1,60 @@
+.input-group{
+    gap: 20px;
+    border: none;
+    outline: none;
+}
+
+.add-btn{
+    width: 10%;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.input-group{
+    border: none;
+    outline: none;
+}
+
+input[type="text"]{
+    outline: none;
+    border: 1px solid rgb(168, 167, 167);
+}
+
+.share_numbering{
+    padding: 8px;
+    font-size: 16px;
+}
+
+.company_name{
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: underline;
+    text-align: center;
+}
+
+.company-list{
+    box-shadow: none;
+}
+
+.inner_card{
+    flex: 1 1 calc(50% - 10px);
+    gap: 20px;
+    flex-wrap: wrap;
+    display: flex;
+    padding: 20px;
+    flex-direction: column;
+    border: 2px solid grey;
+
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.inner_card_content{
+    display: flex;
+    justify-content: space-between;
+}
+
+.inner_card_content p:first-of-type{
+    font-weight: bold;
+}
