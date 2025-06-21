@@ -3,7 +3,6 @@ import datetime as dt
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from . import serializers
 import Shares.views as share_views
 import Users.models as user_models
 import Shares.models as share_models
@@ -21,7 +20,7 @@ def LoginPage(request):
         if user_models.CustomUser.objects.filter(email=email).exists() is False:
             messages.error(request, 'Credentials not matched')
 
-            return render(request, 'login.html', {'page_title': 'Stock Vault | Login'})
+            return redirect('login')
 
         password = request.POST.get('password')
 
@@ -42,7 +41,7 @@ def SignupPage(request):
         if user_models.CustomUser.objects.filter(email=email).exists():
             messages.error(request, 'Email already exists')
 
-            return render(request, 'signup.html', {'page_title': 'Stock Vault | Register'})
+            return redirect('signup')
 
         gender = request.POST.get('gender')
         name = request.POST.get('fullName')
@@ -130,6 +129,8 @@ def Portfolio(request):
         share_models.ShareHoldings.objects.create(user_id=request.user, company_id=company, quantity=quantity, price_per_share=buying_rate)
         share_views.AddToRecentActivities(request, company, f'Added {quantity} number of shares of {company.name}')
 
+        return redirect('portfolio')
+
     # Getting share names along with its abbreviation. Eg: Green Venture Limited (GVL)
     user_companies = share_models.ShareHoldings.objects.filter(user_id=request.user).values_list('company_id', flat=True)
 
@@ -173,6 +174,8 @@ def WishListPage(request):
 
         share_models.WishLists.objects.create(user_id=request.user, company_id=company)
         share_views.AddToRecentActivities(request, company, f'{form_data} added to wishlist')
+
+        return redirect('wishlist')
 
     user_companies = share_models.WishLists.objects.filter(user_id=request.user).values_list('company_id', flat=True)
     companies = share_models.ListedCompanies.objects.exclude(id__in=user_companies)
