@@ -12,7 +12,7 @@
     <div>
         <ul>
             <li class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><a class="sidebar-links" href="{% url 'dashboard' %}">📊 Dashboard</a></li>
-            <li class="{% if request.resolver_match.url_name == 'portfolio' %}active{% endif %}"><a class='sidebar-links' href="#">💹 Portfolio</a></li>
+            <li class="{% if request.resolver_match.url_name == 'portfolio' or request.resolver_match.url_name == 'each-portfolio' %}active{% endif %}"><a class='sidebar-links' href="{% url 'portfolio' %}">💹 Portfolio</a></li>
             <li class="{% if request.resolver_match.url_name == 'profit_or_loss' %}active{% endif %}"><a class='sidebar-links' href="#">📉 Profit / Loss</a></li>
             <li class="{% if request.resolver_match.url_name == 'wishlist' %}active{% endif %}"><a class='sidebar-links' href="{% url 'wishlist' %}">⭐ Wishlist</a></li>
             <li class="{% if request.resolver_match.url_name == 'settings' %}active{% endif %}"><a class='sidebar-links' href="#">⚙️ Settings</a></li>
