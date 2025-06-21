@@ -4,6 +4,7 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 <link rel="stylesheet" href="{% static 'css/wishlist.css' %}">
+<link rel="stylesheet" href="{% static 'css/error-message.css' %}">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
 <script id="companies" type="application/json">
@@ -27,7 +28,7 @@
                         <p>{{ data.company_name }}</p>
                     </div>
                 {% empty %}
-                    <p class="empty-company-list">No wishlist</p>
+                    <p class="error-message">No wishlist</p>
                 {% endfor %}
             </div>
         </div>
