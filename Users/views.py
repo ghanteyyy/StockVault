@@ -169,11 +169,15 @@ def EachPortfolio(request, company_name):
 
 def WishListPage(request):
     if request.method == 'POST':
-        form_data = request.POST.get('company').split('(')[0].strip()
-        company = share_models.ListedCompanies.objects.get(name=form_data)
+        company_name = request.POST.get('company').split('(')[0].strip()
+        company = share_models.ListedCompanies.objects.get(name=company_name)
 
-        share_models.WishLists.objects.create(user_id=request.user, company_id=company)
-        share_views.AddToRecentActivities(request, company, f'{form_data} added to wishlist')
+        if share_models.WishLists.objects.filter(company_id=company).exists():
+            messages.error(request, f'A wishlist with this name ({company_name}) already exists.')
+
+        else:
+            share_models.WishLists.objects.create(user_id=request.user, company_id=company)
+            share_views.AddToRecentActivities(request, company, f'{company_name} added to wishlist')
 
         return redirect('wishlist')
 

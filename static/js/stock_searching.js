@@ -11,9 +11,15 @@ const stockData = JSON.parse(companiesElement.textContent);
 function validateForm(){
     input_value = input.value;
 
-    if(!input_value || !checkValidCompany(input_value).length){
+    if(!input_value){
         suggestions.style.display = 'none';
         error_searching_stocks.innerHTML = 'Please complete all required fields before submitting';
+        return false;
+    }
+
+    else if(!checkValidCompany(input_value).length){
+        suggestions.style.display = 'none';
+        error_searching_stocks.innerHTML = 'The selected category is not recognized. It may have been removed or is no longer available. Please choose from the current list.'
         return false;
     }
 
