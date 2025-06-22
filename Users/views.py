@@ -2,6 +2,7 @@ import json
 import datetime as dt
 from django.contrib import messages
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 import Shares.views as share_views
 import Users.models as user_models
@@ -14,6 +15,8 @@ def HomePage(request):
 
 
 def LoginPage(request):
+    next_url = request.POST.get('next', request.GET.get('next', 'dashboard'))
+
     if request.method.lower() == 'post':
         email = request.POST.get('email')
 
@@ -29,9 +32,9 @@ def LoginPage(request):
         if user:
             login(request, user)
 
-            return redirect('dashboard')
+            return redirect(next_url)
 
-    return render(request, 'login.html', {'page_title': 'Stock Vault | Login'})
+    return render(request, 'login.html', {'page_title': 'Stock Vault | Login', 'next': next_url})
 
 
 def SignupPage(request):
@@ -71,6 +74,7 @@ def Logout(request):
     return redirect('index')
 
 
+@login_required(login_url='login')
 def Dashboard(request):
     total_stocks = 0
     portfolio_data = []
@@ -119,6 +123,7 @@ def Dashboard(request):
     return render(request, 'dashboard.html', context)
 
 
+@login_required(login_url='login')
 def Portfolio(request):
     if request.method == 'POST':
         company = request.POST.get('company').split('(')[0].strip()
@@ -150,6 +155,7 @@ def Portfolio(request):
     return render(request, 'portfolio.html', context)
 
 
+@login_required(login_url='login')
 def EachPortfolio(request, company_name):
     share_holdings = share_models.ShareHoldings.objects.filter(user_id=request.user, company_id__name__iexact=company_name)
     share_holdings = share_serializers.ShareHoldingsSerializer(share_holdings, many=True).data
@@ -167,6 +173,7 @@ def EachPortfolio(request, company_name):
     return render(request, 'each_portfolio.html', context)
 
 
+@login_required(login_url='login')
 def WishListPage(request):
     if request.method == 'POST':
         company_name = request.POST.get('company').split('(')[0].strip()
