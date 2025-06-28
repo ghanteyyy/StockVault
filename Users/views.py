@@ -84,7 +84,8 @@ def Dashboard(request):
     portfolio_data = []
     portfolio_values = 0
     previous_portfolio_values = 0
-    share_holdings = share_models.ShareHoldings.objects.filter(user_id=request.user)
+
+    share_holdings = share_models.ShareHoldings.objects.filter(user_id=request.user).order_by('company_id__name').distinct('company_id__name')
 
     for index, share_holding in enumerate(share_holdings):
         total_stocks += share_holding.quantity
@@ -147,7 +148,7 @@ def Portfolio(request):
     serialized_companies = share_serializers.CompaniesSerializer(companies, many=True).data
     companies = [f"{company['name']} ({company['abbreviation']})" for company in serialized_companies]
 
-    share_holdings = share_models.ShareHoldings.objects.filter(user_id=request.user)
+    share_holdings = share_models.ShareHoldings.objects.filter(user_id=request.user).order_by('company_id__name').distinct('company_id__name')
     share_holdings = share_serializers.ShareHoldingsSerializer(share_holdings, many=True).data
 
     context = {
