@@ -113,7 +113,7 @@ def Dashboard(request):
     else:
         overall_gain_loss = round(((portfolio_values - previous_portfolio_values) / portfolio_values) * 100, 2)
 
-    recent_activites = share_models.RecentActivities.objects.filter(user_id=request.user)
+    recent_activites = share_models.RecentActivities.objects.filter(user_id=request.user).order_by('-recorded_at')
     recent_activites = share_serializers.RecentActivitiesSerializer(recent_activites, many=True).data[:5]
 
     context = {
