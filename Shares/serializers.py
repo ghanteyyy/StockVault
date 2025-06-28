@@ -32,7 +32,7 @@ class ShareHoldingsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.ShareHoldings
-        fields = ['id', 'company_name', 'abbreviation', 'quantity', 'bonus_quantity', 'purchased_date']
+        fields = ['id', 'company_name', 'abbreviation', 'quantity', 'price_per_share', 'bonus_quantity', 'purchased_date']
 
     def get_company_name(self, obj):
         return obj.company_id.name
