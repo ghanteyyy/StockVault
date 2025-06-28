@@ -12,6 +12,9 @@ import Shares.serializers as share_serializers
 
 
 def HomePage(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
     return render(request, 'index.html', {'page_title': 'Stock Vault – Smarter Stock Tracking'})
 
 
