@@ -1,0 +1,73 @@
+{% extends 'root.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/error-message.css' %}">
+<link rel="stylesheet" href="{% static 'css/profit_loss.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+<div class="container">
+    {% include 'sidebar.html' %}
+
+    <!-- <div class="main-content">
+            <div class="content">
+                {% for company in companies %}
+                    <a class="card" href="#">
+                        <div class="company-name">{{company.company_name}}</div>
+                        <div class="abbreviation">{{company.abbreviation}}</div>
+                        <div class="detail">Quantity: <span>{{company.quantity}}</span></div>
+                        <div class="detail">Bonus: <span>{{company.bonus_quantity}}</span></div>
+                        <div class="detail">Purchased: <span>{{company.purchased_date}}</span></div>
+                    </a>
+                {% endfor %}
+            </div>
+        </div> -->
+
+    <div class="main-content">
+        <div class="content">
+            <h1>Profit / Loss</h1>
+            <div class="summary">
+                <div>
+                    <h3>Total Invested</h3>
+                    <p id="total-invested">Rs. {{total_investment}}</p>
+                </div>
+                <div>
+                    <h3>Current Value</h3>
+                    <p id="current-value">Rs. {{ total_current_value}}</p>
+                </div>
+                <div>
+                    <h3>Total Profit/Loss</h3>
+                    <p id="total-profit-loss" class="profit">Rs. {{ total_changes }}</p>
+                </div>
+            </div>
+            <table id="transactions-table">
+                <thead>
+                    <tr>
+                        <th>Stock Symbol</th>
+                        <th>Quantity</th>
+                        <th>Purchase Price</th>
+                        <th>Current Price</th>
+                        <th>Profit/Loss</th>
+                    </tr>
+                </thead>
+                <tbody id="transactions-body">
+                    {% for data in profit_loss_data %}
+                        <tr>
+                            <td>{{data.company_name}}</td>
+                            <td>{{data.total_quantity}}</td>
+                            <td>{{data.purchased_price}}</td>
+                            <td>{{data.current_price}}</td>
+                            <td class="{% if data.changes > 0 %}profit{% else %}loss{% endif %}">{{data.changes}}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="{% static 'css/profit_loss.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{% endblock %}

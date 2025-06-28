@@ -1,4 +1,5 @@
 import json
+import collections
 import datetime as dt
 from django.contrib import messages
 from django.shortcuts import render, redirect
@@ -156,7 +157,7 @@ def Portfolio(request):
 
 
 @login_required(login_url='login')
-def EachPortfolio(request, company_name):
+def Timeline(request, company_name):
     share_holdings = share_models.ShareHoldings.objects.filter(user_id=request.user, company_id__name__iexact=company_name)
     share_holdings = share_serializers.ShareHoldingsSerializer(share_holdings, many=True).data
 
@@ -170,7 +171,7 @@ def EachPortfolio(request, company_name):
         'page_title': f'{company_name} | Stock Vault',
     }
 
-    return render(request, 'each_portfolio.html', context)
+    return render(request, 'timeline.html', context)
 
 
 @login_required(login_url='login')
@@ -204,3 +205,50 @@ def WishListPage(request):
     }
 
     return render(request, 'wishlist.html', context)
+
+
+@login_required(login_url='login')
+def ProfitLossPage(request):
+    share_holdings_objs = share_models.ShareHoldings.objects.filter(user_id=request.user)
+    share_holdings = share_serializers.ShareHoldingsSerializer(share_holdings_objs, many=True).data
+
+    summary = collections.defaultdict(lambda: {
+        'total_quantity': 0,
+        'purchased_price': 0,
+        'current_price': 0,
+        'changes': 0
+    })
+
+    total_investment = 0
+    total_current_value = 0
+
+    for share_holding in share_holdings:
+        company = share_holding['company_name']
+        summary[company]['total_quantity'] += share_holding['quantity']
+
+        purchase_price = share_holding['quantity'] * share_holding['price_per_share']
+        current_price = share_holding['quantity'] * share_models.HistoricalPrices.objects.filter(company_id__name__iexact=company).order_by('-recorded_at').first().opening_price
+
+        summary[company]['purchased_price'] += purchase_price
+        summary[company]['current_price'] += current_price
+        summary[company]['changes'] = current_price - purchase_price
+
+        total_investment += purchase_price
+        total_current_value += current_price
+
+    data = []
+
+    for key, value in dict(summary).items():
+        value.update({'company_name': key})
+        data.append(value)
+
+    context = {
+        'page_title': 'Profit-Loss | StockVault',
+        'companies': share_holdings,
+        'profit_loss_data': data,
+        'total_investment': total_investment,
+        'total_current_value': total_current_value,
+        'total_changes': total_current_value - total_investment
+    }
+
+    return render(request, 'profit_loss.html', context)
