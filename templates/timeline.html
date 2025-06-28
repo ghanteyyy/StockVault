@@ -1,19 +1,32 @@
+{% extends 'root.html' %}
 {% load static %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 <link rel="stylesheet" href="{% static 'css/timeline.css' %}">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<div class="timeline">
-    {% for history in histories %}
-        <div class="timeline-item {% if forloop.counter0|divisibleby:2 %}right{% else %}left{% endif %}">
-            <span>{{history.recorded_at}}</span>
 
-            <div class="timeline-content">
-                <p>{{history.activity}}</p>
+<div class="container">
+    {% include 'sidebar.html' %}
+
+    <div class="main-content">
+        <div class="content">
+            <div class="timeline">
+                {% for history in histories %}
+                    <div class="timeline-item {% if forloop.counter0|divisibleby:2 %}right{% else %}left{% endif %}">
+                        <span>{{history.recorded_at}}</span>
+
+                        <div class="timeline-content">
+                            <p>{{history.activity}}</p>
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
         </div>
-    {% endfor %}
+    </div>
 </div>
+
+<link rel="stylesheet" href="{% static 'css/portfolio.css' %}">
 {% endblock %}
