@@ -1,8 +1,11 @@
+import re
 import json
 import collections
 import datetime as dt
 from django.contrib import messages
 from django.shortcuts import render, redirect
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 import Shares.views as share_views
@@ -22,54 +25,106 @@ def LoginPage(request):
     next_url = request.POST.get('next', request.GET.get('next', 'dashboard'))
 
     if request.method.lower() == 'post':
-        email = request.POST.get('email')
+        email = request.POST.get('email').strip()
+        password = request.POST.get('password').strip()
 
-        if user_models.CustomUser.objects.filter(email=email).exists() is False:
-            messages.error(request, 'Credentials not matched')
+        try:
+            validate_email(email)
 
-            return redirect('login')
+            user = authenticate(request, email=email, password=password)
 
-        password = request.POST.get('password')
+            if not user:
+                messages.error(request, 'Credentials not matched')
+                return redirect('login')
 
-        user = authenticate(request, email=email, password=password)
-
-        if user:
             login(request, user)
-
             return redirect(next_url)
+
+        except ValidationError:
+            messages.error(request, 'Invalid email address')
 
     return render(request, 'login.html', {'page_title': 'Stock Vault | Login', 'next': next_url})
 
 
 def SignupPage(request):
-    if request.method.lower() == 'post':
-        email = request.POST.get('email')
+    errors = []
 
-        if user_models.CustomUser.objects.filter(email=email).exists():
-            messages.error(request, 'Email already exists')
-
-            return redirect('signup')
-
-        gender = request.POST.get('gender')
-        name = request.POST.get('fullName')
-        password = request.POST.get('password')
+    if request.method == 'POST':
+        email = request.POST.get('email').strip()
+        gender = request.POST.get('gender').strip()
+        name = request.POST.get('fullName').strip()
+        password = request.POST.get('password').strip()
         profile = request.FILES['profilePicture']
-        dob = dt.datetime.strptime(request.POST.get('dob'), '%Y/%m/%d')
+        dob = request.POST.get('dob').strip()
 
-        new_user = user_models.CustomUser(
-            email=email,
-            name=name,
-            gender=gender,
-            date_of_birth=dob
-        )
+        # Validating email
+        try:
+            validate_email(email)
 
-        new_user.profile_image = profile
-        new_user.set_password(password)
-        new_user.save()
+            if user_models.CustomUser.objects.filter(email=email).exists():
+                errors.append('Email already exists')
 
-        return LoginPage(request)
+        except ValidationError:
+            errors.append('Invalid email address')
 
-    return render(request, 'signup.html', {'page_title': 'Stock Vault | Register'})
+        # Validating genders
+        valid_genders = ['male', 'female', 'others']
+
+        if gender not in valid_genders:
+            errors.append('Invalid gender selected')
+
+        # Validating name
+        if not name and len(name) < 3:
+            errors.append('Name must be at least 3 characters long')
+
+        # Validating password
+        password_regex = r'^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*[0-9]).{8,}$'
+
+        if not re.match(password_regex, password):
+            errors.append('Password must be at least 8 characters long, contain at least one uppercase letter, one number, and one special character.')
+
+        # Validating profile picture
+        if not profile:
+            errors.append('Profile picture is required')
+
+        if profile.size == 0:
+            errors.append('Profile picture cannot be empty')
+
+        profile_size = 5 * 1024 * 1024  # 5MB limit
+
+        if profile.size > profile_size:
+            errors.append('Profile picture size must be less than 5MB')
+
+        if not profile.name.lower().endswith(('.jpg', '.jpeg', '.png')):
+            errors.append('Only JPG/PNG images are allowed.')
+
+        # Validating date of birth
+        try:
+            dob_obj = dt.datetime.strptime(dob, '%Y/%m/%d')
+
+            today = dt.datetime.today().date()
+
+            if (today - dob_obj).years < 13:
+                errors.append('You must be at least 13 years old to register.')
+
+        except (ValueError, TypeError):
+            errors.append('Invalid date of birth format. Use YYYY/MM/DD.')
+
+        if not errors:
+            new_user = user_models.CustomUser(
+                email=email,
+                name=name,
+                gender=gender,
+                date_of_birth=dob
+            )
+
+            new_user.profile_image = profile
+            new_user.set_password(password)
+            new_user.save()
+
+            return LoginPage(request)
+
+    return render(request, 'signup.html', {'page_title': 'Stock Vault | Register', 'errors': errors})
 
 
 def Logout(request):
@@ -130,16 +185,28 @@ def Dashboard(request):
 
 @login_required(login_url='login')
 def Portfolio(request):
-    if request.method == 'POST':
+    errors = []
+
+    if request.method.lower() == 'post':
         company = request.POST.get('company').split('(')[0].strip()
-        quantity = request.POST.get('share_quantity')
-        buying_rate = request.POST.get('buying_rate')
+        quantity = request.POST.get('share_quantity').strip()
+        buying_rate = request.POST.get('buying_rate').strip()
 
-        company = share_models.ListedCompanies.objects.get(name=company)
-        share_models.ShareHoldings.objects.create(user_id=request.user, company_id=company, quantity=quantity, price_per_share=buying_rate)
-        share_views.AddToRecentActivities(request, company, f'Added {quantity} number of shares of {company.name}')
+        if not any([company, quantity, buying_rate]):
+            errors.append('All fields are required')
 
-        return redirect('portfolio')
+        if not quantity.isdigit():
+            errors.append('Quantity must be a valid number')
+
+        if not buying_rate.isdigit():
+            errors.append('Buying rate must be a valid number')
+
+        errors = ['All fields are required', 'Quantity must be a valid number', 'Buying rate must be a valid number']
+
+        if not errors:
+            company = share_models.ListedCompanies.objects.get(name=company)
+            share_models.ShareHoldings.objects.create(user_id=request.user, company_id=company, quantity=quantity, price_per_share=buying_rate)
+            share_views.AddToRecentActivities(request, company, f'Added {quantity} number of shares of {company.name}')
 
     # Getting share names along with its abbreviation. Eg: Green Venture Limited (GVL)
     user_companies = share_models.ShareHoldings.objects.filter(user_id=request.user).values_list('company_id', flat=True)
@@ -155,6 +222,7 @@ def Portfolio(request):
             'page_title': 'Portfolio | Stock Vault',
             'companies': json.dumps(companies),
             'share_holdings': share_holdings,
+            'errors': errors,
         }
 
     return render(request, 'portfolio.html', context)
@@ -180,18 +248,19 @@ def Timeline(request, company_name):
 
 @login_required(login_url='login')
 def WishListPage(request):
-    if request.method == 'POST':
+    errors = []
+
+    if request.method.lower() == 'post':
         company_name = request.POST.get('company').split('(')[0].strip()
         company = share_models.ListedCompanies.objects.get(name=company_name)
 
         if share_models.WishLists.objects.filter(company_id=company).exists():
+            errors.append(f'A wishlist with this name ({company_name}) already exists.')
             messages.error(request, f'A wishlist with this name ({company_name}) already exists.')
 
         else:
             share_models.WishLists.objects.create(user_id=request.user, company_id=company)
             share_views.AddToRecentActivities(request, company, f'{company_name} added to wishlist')
-
-        return redirect('wishlist')
 
     user_companies = share_models.WishLists.objects.filter(user_id=request.user).values_list('company_id', flat=True)
     companies = share_models.ListedCompanies.objects.exclude(id__in=user_companies)
@@ -206,6 +275,7 @@ def WishListPage(request):
         'page_title': 'Wishlist | Stock Vault',
         'saved_companies': saved_companies,
         'companies': json.dumps(companies),
+        'errors': errors,
     }
 
     return render(request, 'wishlist.html', context)
