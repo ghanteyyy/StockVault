@@ -3,6 +3,7 @@ import json
 import collections
 import datetime as dt
 from django.contrib import messages
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
@@ -326,3 +327,76 @@ def ProfitLossPage(request):
     }
 
     return render(request, 'profit_loss.html', context)
+
+
+@login_required(login_url='login')
+def SettingsPage(request, errors=None):
+    errors = []
+
+    if request.method.lower() == 'post':
+        if 'change_profile' in request.POST:
+            errors = ChangeProfile(request)
+
+        elif 'change_password' in request.POST:
+            errors = ChangePassword(request)
+
+        return JsonResponse({'success': True, 'errors': errors})
+
+    context = {
+        'page_title': 'Settings | Stock Vault',
+        'errors': errors
+    }
+
+    return render(request, 'settings.html', context)
+
+
+def ChangeProfile(request):
+    errors = []
+
+    if request.method.lower() == 'post':
+        profile_image = request.FILES.get('profile_image')
+
+        if not profile_image:
+            errors.append('No file uploaded.')
+
+        # Validate file type
+        if not profile_image.name.lower().endswith(('.jpg', '.jpeg', '.png')):
+            errors.append('Only JPG/PNG images are allowed.')
+
+        # Validate file size (e.g., 5MB limit)
+        if profile_image.size > 5 * 1024 * 1024:
+            errors.append('File size must be less than 5MB.')
+
+        if not errors: # Update the user's profile image
+            user = user_models.CustomUser.objects.get(id=request.user.id)
+            user.profile_image = profile_image
+            user.save()
+
+    return errors
+
+
+def ChangePassword(request):
+    errors = []
+
+    if request.method.lower() == 'post':
+        current_password = request.POST.get('current_password').strip()
+        new_password = request.POST.get('new_password').strip()
+        confirm_password = request.POST.get('confirm_password').strip()
+
+        if not authenticate(request, email=request.user.email, password=current_password):
+            errors.append('Either email or current password not matched')
+
+        if not current_password or not new_password or not confirm_password:
+            errors.append('All fields are required')
+
+        if new_password != confirm_password:
+            errors.append('New password and confirm password do not match')
+
+        if not errors:
+            user = request.user
+            user.set_password(new_password)
+            user.save()
+
+            user = authenticate(request, email=request.user.email, password=new_password)
+
+    return errors
