@@ -1,41 +1,20 @@
 .error-container {
+    width: 100%;
+    background: #ffebee;
+    border: 1px solid #ef9a9a;
+    padding: 15px;
+    margin-bottom: 20px;
     position: relative;
-    margin: 1rem 0;
-    padding: 0.5rem 1rem;
-    display: flex;
-    flex-direction: column;
-    background-color: #ffffff;
-    border-left: 7px solid #ef4444;
-    border-radius: 0.375rem;
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-p.close{
-    top: 0;
-    right: 5px;
-    position: absolute;
-    text-align: right;
-    padding: 10px;
-    font-size: 1.25rem;
-    cursor: pointer;
-}
-
-p.close:hover{
-    font-weight: bold;
 }
 
 .error-list {
-    list-style-type: none;
-    padding: 0;
     margin: 0;
-    color: #e53e3e;
+    padding-left: 20px;
 }
 
 .error-item {
-    padding: 0.5rem 0;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    color: #c62828;
+    margin: 5px 0;
 }
 
 .error-item::before {
@@ -43,8 +22,10 @@ p.close:hover{
     font-size: 1rem;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+.close {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
+    margin: 0;
 }
-
