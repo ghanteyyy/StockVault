@@ -103,12 +103,12 @@ def SignupPage(request):
         try:
             dob_obj = dt.datetime.strptime(dob, '%Y/%m/%d')
 
-            today = dt.datetime.today().date()
+            today = dt.datetime.today()
 
-            if (today - dob_obj).years < 13:
+            if ((today - dob_obj).days) // 365 < 13:
                 errors.append('You must be at least 13 years old to register.')
 
-        except (ValueError, TypeError):
+        except (ValueError, TypeError) as e:
             errors.append('Invalid date of birth format. Use YYYY/MM/DD.')
 
         if not errors:
@@ -116,7 +116,7 @@ def SignupPage(request):
                 email=email,
                 name=name,
                 gender=gender,
-                date_of_birth=dob
+                date_of_birth=dob_obj.date()
             )
 
             new_user.profile_image = profile
@@ -201,8 +201,6 @@ def Portfolio(request):
 
         if not buying_rate.isdigit():
             errors.append('Buying rate must be a valid number')
-
-        errors = ['All fields are required', 'Quantity must be a valid number', 'Buying rate must be a valid number']
 
         if not errors:
             company = share_models.ListedCompanies.objects.get(name=company)
