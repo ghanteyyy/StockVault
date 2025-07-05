@@ -152,15 +152,6 @@
     margin-top: 5px;
 }
 
-.terms-of-conditions{
-    display: flex;
-    align-items: center;
-}
-
-.terms-of-conditions label{
-    margin-bottom: 0;
-}
-
 .error-message {
     display: none;
     color: #ef4444;
