@@ -12,45 +12,49 @@
 
     <div class="main-content">
         <div class="content">
-            <h1>Profit / Loss</h1>
-            <div class="summary">
-                <div>
-                    <h3>Total Invested</h3>
-                    <p id="total-invested">Rs. {{total_investment}}</p>
+            {% if data %}
+                <h1>Profit / Loss</h1>
+                <div class="summary">
+                    <div>
+                        <h3>Total Invested</h3>
+                        <p id="total-invested">Rs. {{total_investment}}</p>
+                    </div>
+                    <div>
+                        <h3>Current Value</h3>
+                        <p id="current-value">Rs. {{ total_current_value}}</p>
+                    </div>
+                    <div>
+                        <h3>Total Profit/Loss</h3>
+                        <p id="total-profit-loss" class="profit">Rs. {{ total_changes }}</p>
+                    </div>
                 </div>
-                <div>
-                    <h3>Current Value</h3>
-                    <p id="current-value">Rs. {{ total_current_value}}</p>
-                </div>
-                <div>
-                    <h3>Total Profit/Loss</h3>
-                    <p id="total-profit-loss" class="profit">Rs. {{ total_changes }}</p>
-                </div>
-            </div>
-            <table id="transactions-table">
-                <thead>
-                    <tr>
-                        <th>SN</th>
-                        <th>Stock Symbol</th>
-                        <th>Quantity</th>
-                        <th>Purchase Price</th>
-                        <th>Current Price</th>
-                        <th>Profit/Loss</th>
-                    </tr>
-                </thead>
-                <tbody id="transactions-body">
-                    {% for data in profit_loss_data %}
+                <table id="transactions-table">
+                    <thead>
                         <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{data.company_name}}</td>
-                            <td>{{data.total_quantity}}</td>
-                            <td>{{data.purchased_price}}</td>
-                            <td>{{data.current_price}}</td>
-                            <td class="{% if data.changes > 0 %}profit{% else %}loss{% endif %}">{{data.changes}}</td>
+                            <th>SN</th>
+                            <th>Stock Symbol</th>
+                            <th>Quantity</th>
+                            <th>Purchase Price</th>
+                            <th>Current Price</th>
+                            <th>Profit/Loss</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody id="transactions-body">
+                        {% for data in profit_loss_data %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{data.company_name}}</td>
+                                <td>{{data.total_quantity}}</td>
+                                <td>{{data.purchased_price}}</td>
+                                <td>{{data.current_price}}</td>
+                                <td class="{% if data.changes > 0 %}profit{% else %}loss{% endif %}">{{data.changes}}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="error-message">No Data Available. It seems like you haven't made any transactions yet.</p>
+            {% endif %}
         </div>
     </div>
 </div>
