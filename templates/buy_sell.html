@@ -1,0 +1,59 @@
+{% extends 'root.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/buy_sell.css' %}">
+<link rel="stylesheet" href="{% static 'css/stock_searching.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+<script src="{% static 'js/buy_sell.js' %}" defer></script>
+<script src="{% static 'js/stock_searching.js' %}" defer></script>
+
+<script id="companies" type="application/json">
+    {{ companies|safe }}
+</script>
+
+<div class="container">
+    {% include 'sidebar.html' %}
+
+    <div class="main-content">
+        <div class="content">
+            <div class="input-wrapper">
+                <form class="wishlist_form" onsubmit="return validateForm()" action="" method="POST">
+                    {% csrf_token %}
+
+                    <div class="choices">
+                        <div class="buy-container">
+                            <input type="radio" name="action" id="buy" class="radio-input" value="buy">
+                            <label for="buy" class="radio-label">
+                                <span class="radio-button"></span>
+                                <span class="radio-text">Buy</span>
+                            </label>
+                        </div>
+
+                        <div class="sell-container">
+                            <input type="radio" name="action" id="sell" class="radio-input" value="sell">
+                            <label for="sell" class="radio-label">
+                                <span class="radio-button"></span>
+                                <span class="radio-text">Sell</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" id="stock-input" name="company" class="autocomplete-input" placeholder="Search stocks...">
+
+                        <input type="text" placeholder="Number of stocks" class="share_quantity share_numbering" name="share_quantity">
+                        <input type="text" placeholder="Buying Rate" class="buying_rate share_numbering" name="buying_rate">
+
+                        <button type="submit" id="add-btn" class="add-btn">Add</button>
+                        <div id="suggestions" class="suggestions" style="width:46.8%;"></div>
+                    </div>
+                    <p class="error-searching-stocks"></p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
