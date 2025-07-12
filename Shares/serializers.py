@@ -26,22 +26,18 @@ class WishlistsSerializer(serializers.ModelSerializer):
 
 
 class ShareHoldingsSerializer(serializers.ModelSerializer):
-    purchased_date = serializers.SerializerMethodField()
     company_name = serializers.SerializerMethodField()
     abbreviation = serializers.SerializerMethodField()
 
     class Meta:
         model = models.ShareHoldings
-        fields = ['id', 'company_name', 'abbreviation', 'quantity', 'price_per_share', 'bonus_quantity', 'purchased_date']
+        fields = ['id', 'company_name', 'abbreviation', 'number_of_shares', 'total_cost']
 
     def get_company_name(self, obj):
         return obj.company_id.name
 
     def get_abbreviation(self, obj):
         return obj.company_id.abbreviation
-
-    def get_purchased_date(self, obj):
-        return dt.datetime.strptime(str(obj.purchased_date), "%Y-%m-%d %H:%M:%S.%f%z").strftime("%Y-%m-%d %H:%M:%S")
 
 
 class HistoricalPricesSerializer(serializers.ModelSerializer):
