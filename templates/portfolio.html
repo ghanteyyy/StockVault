@@ -27,12 +27,7 @@
 
                         <div class="inner_card_content">
                             <p>Share Quantity</p>
-                            <p>{{ share_holding.quantity }}</p>
-                        </div>
-
-                        <div class="inner_card_content">
-                            <p>Bonus Share Quantity</p>
-                            <p>{{ share_holding.bonus_quantity|default:0 }}</p>
+                            <p>{{ share_holding.number_of_shares }}</p>
                         </div>
                     </a>
                 {% empty %}
