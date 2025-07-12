@@ -144,15 +144,15 @@ def Dashboard(request):
     share_holdings = share_models.ShareHoldings.objects.filter(user_id=request.user).order_by('company_id__name').distinct('company_id__name')
 
     for index, share_holding in enumerate(share_holdings):
-        total_stocks += share_holding.quantity
+        total_stocks += share_holding.number_of_shares
 
         historical_prices = share_models.HistoricalPrices.objects.filter(company_id=share_holding.company_id)
 
         previous_closing_price = historical_prices.last().closing_price
         previous_opening_price = historical_prices.order_by('-recorded_at')[1].closing_price
 
-        previous_portfolio_values += share_holding.quantity * previous_opening_price
-        portfolio_values += share_holding.quantity * previous_closing_price
+        previous_portfolio_values += share_holding.number_of_shares * previous_opening_price
+        portfolio_values += share_holding.number_of_shares * previous_closing_price
 
         portfolio_data.append(
             {
@@ -203,9 +203,7 @@ def Portfolio(request):
             errors.append('Buying rate must be a valid number')
 
         if not errors:
-            company = share_models.ListedCompanies.objects.get(name=company)
-            share_models.ShareHoldings.objects.create(user_id=request.user, company_id=company, quantity=quantity, price_per_share=buying_rate)
-            share_views.AddToRecentActivities(request, company, f'Added {quantity} number of shares of {company.name}')
+            share_views.modify_shares(request.user, company, quantity, buying_rate, 'buy')
 
     # Getting share names along with its abbreviation. Eg: Green Venture Limited (GVL)
     user_companies = share_models.ShareHoldings.objects.filter(user_id=request.user).values_list('company_id', flat=True)
@@ -259,7 +257,7 @@ def WishListPage(request):
 
         else:
             share_models.WishLists.objects.create(user_id=request.user, company_id=company)
-            share_views.AddToRecentActivities(request, company, f'{company_name} added to wishlist')
+            share_views.AddToRecentActivities(request.user, company, f'{company_name} added to wishlist')
 
     user_companies = share_models.WishLists.objects.filter(user_id=request.user).values_list('company_id', flat=True)
     companies = share_models.ListedCompanies.objects.exclude(id__in=user_companies)
@@ -297,12 +295,12 @@ def ProfitLossPage(request):
 
     for share_holding in share_holdings:
         company = share_holding['company_name']
-        summary[company]['total_quantity'] += share_holding['quantity']
+        summary[company]['total_quantity'] += share_holding['number_of_shares']
 
-        purchase_price = share_holding['quantity'] * share_holding['price_per_share']
-        current_price = share_holding['quantity'] * share_models.HistoricalPrices.objects.filter(company_id__name__iexact=company).order_by('-recorded_at').first().opening_price
+        purchase_price = share_holding['total_cost']
+        current_price = share_holding['number_of_shares'] * share_models.HistoricalPrices.objects.filter(company_id__name__iexact=company).order_by('-recorded_at').first().opening_price
 
-        summary[company]['purchased_price'] += purchase_price
+        summary[company]['purchased_price'] += share_holding['total_cost']
         summary[company]['current_price'] += current_price
         summary[company]['changes'] = current_price - purchase_price
 
@@ -321,7 +319,7 @@ def ProfitLossPage(request):
         'profit_loss_data': data,
         'total_investment': total_investment,
         'total_current_value': total_current_value,
-        'total_changes': total_current_value - total_investment
+        'total_changes': float(total_current_value - total_investment)
     }
 
     return render(request, 'profit_loss.html', context)
@@ -398,3 +396,51 @@ def ChangePassword(request):
             user = authenticate(request, email=request.user.email, password=new_password)
 
     return errors
+
+
+@login_required(login_url='login')
+def BuySell(request):
+    if request.method.lower() == 'post':
+        company_name = request.POST.get('company').split('(')[0].strip()
+        quantity = request.POST.get('share_quantity').strip()
+        buying_selling_rate = request.POST.get('buying_rate').strip()
+        action = request.POST.get('action').strip()
+
+        if not any([company_name, quantity, action]):
+            messages.error(request, 'All fields are required')
+            return redirect('buy_sell')
+
+        if not quantity.isdigit():
+            messages.error(request, 'Quantity must be a valid number')
+            return redirect('buy_sell')
+
+        if int(quantity) <= 0:
+            messages.error(request, 'Quantity must be greater than 0 for selling shares')
+            return redirect('buy_sell')
+
+        if action == 'buy':
+            share_views.modify_shares(request.user, company_name, quantity, buying_selling_rate, mode='buy')
+
+        elif action == 'sell':
+            if share_models.ShareHoldings.objects.filter(user_id=request.user, company_id__name=company_name).exists() is False:
+                messages.error(request, f'You do not own any shares of {company_name} to sell')
+                return redirect('buy_sell')
+
+            if share_models.ShareHoldings.objects.get(user_id=request.user, company_id__name=company_name).number_of_shares < int(quantity):
+                messages.error(request, f'You do not own enough shares of {company_name} to sell {quantity} shares')
+                return redirect('buy_sell')
+
+            share_views.modify_shares(request.user, company_name, quantity, buying_selling_rate, mode='sell')
+
+        return redirect('dashboard')
+
+    companies = share_models.ListedCompanies.objects.all().order_by('name')
+    serialized_companies = share_serializers.CompaniesSerializer(companies, many=True).data
+    companies = [f"{company['name']} ({company['abbreviation']})" for company in serialized_companies]
+
+    context = {
+        'companies': json.dumps(companies),
+        'page_title': 'Buy/Sell | Stock Vault',
+    }
+
+    return render(request, 'buy_sell.html', context)
