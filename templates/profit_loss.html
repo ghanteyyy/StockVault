@@ -25,7 +25,7 @@
                     </div>
                     <div>
                         <h3>Total Profit/Loss</h3>
-                        <p id="total-profit-loss" class="profit">Rs. {{ total_changes }}</p>
+                        <p id="total-profit-loss" class="profit {% if total_changes > 0 %}profit{% else %}loss{% endif %}">Rs. {{ total_changes }}</p>
                     </div>
                 </div>
                 <table id="transactions-table">
