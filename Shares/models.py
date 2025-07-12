@@ -33,11 +33,8 @@ class ShareHoldings(models.Model):
     user_id = models.ForeignKey(to='Users.CustomUser', on_delete=models.CASCADE)
     company_id = models.ForeignKey(to="ListedCompanies", on_delete=models.CASCADE)
 
-    quantity = models.IntegerField(blank=True, null=True)
-    price_per_share = models.FloatField(blank=True, null=True)
-    bonus_quantity = models.IntegerField(blank=True, null=True, default=0)
-
-    purchased_date = models.DateTimeField(editable=False, default=now)
+    total_cost = models.FloatField(blank=True, null=True)
+    number_of_shares = models.IntegerField(blank=True, null=True, default=0)
 
 
 class WishLists(models.Model):
