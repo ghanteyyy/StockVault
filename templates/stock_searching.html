@@ -7,21 +7,16 @@
 </script>
 
 <div class="input-wrapper">
-    <form class="wishlist_form" onsubmit="return validateForm()" action="" method="POST">
-        {% csrf_token %}
-        <div class="input-group">
-            <input type="text" id="stock-input" name="company" class="autocomplete-input" placeholder="Search stocks...">
+    <div class="input-group">
+        <input type="text" id="stock-input" name="company" class="autocomplete-input" placeholder="Search stocks...">
 
-            {% if request.resolver_match.url_name == 'portfolio' %}
-                <input type="text" placeholder="Number of stocks" class="share_quantity share_numbering" name="share_quantity">
-                <input type="text" placeholder="Buying Rate" class="buying_rate share_numbering" name="buying_rate">
-            {% endif %}
+        {% if request.resolver_match.url_name == 'portfolio' or request.resolver_match.url_name == 'buy-sell' %}
+            <input type="text" placeholder="Number of stocks" class="share_quantity share_numbering" name="share_quantity">
+            <input type="text" placeholder="Buying Rate" class="buying_rate share_numbering" name="buying_rate">
+        {% endif %}
 
-            <button type="submit" id="add-btn" class="add-btn">Add</button>
-            <div id="suggestions" class="suggestions"></div>
-        </div>
-        <p class="error-searching-stocks"></p>
-    </form>
+        <button type="submit" id="add-btn" class="add-btn">Add</button>
+        <div id="suggestions" class="suggestions"></div>
+    </div>
+    <p class="error-searching-stocks"></p>
 </div>
-
-<script src="{% static 'js/stock_searching.js' %}"></script>

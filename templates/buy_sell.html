@@ -41,16 +41,8 @@
                         </div>
                     </div>
 
-                    <div class="input-group">
-                        <input type="text" id="stock-input" name="company" class="autocomplete-input" placeholder="Search stocks...">
+                    {% include 'stock_searching.html' %}
 
-                        <input type="text" placeholder="Number of stocks" class="share_quantity share_numbering" name="share_quantity">
-                        <input type="text" placeholder="Buying Rate" class="buying_rate share_numbering" name="buying_rate">
-
-                        <button type="submit" id="add-btn" class="add-btn">Add</button>
-                        <div id="suggestions" class="suggestions" style="width:46.8%;"></div>
-                    </div>
-                    <p class="error-searching-stocks"></p>
                 </form>
             </div>
         </div>

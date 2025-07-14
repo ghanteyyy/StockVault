@@ -8,7 +8,7 @@ const companiesElement = document.querySelector('#companies');
 const stockData = JSON.parse(companiesElement.textContent);
 
 
-function validateForm(){
+function validateStockSearchingForm(){
     input_value = input.value;
 
     if(!input_value){
@@ -90,3 +90,6 @@ document.addEventListener('click', (event) => {
         suggestions.style.display = 'none';
     }
 });
+
+
+window.validateStockSearchingForm = validateStockSearchingForm;

@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script defer src="{% static 'js/portfolio.js' %}"></script>
-
+<script src="{% static 'js/stock_searching.js' %}" defer></script>
 
 <div class="container">
     {% include 'sidebar.html' %}
@@ -16,7 +16,11 @@
     <div class="main-content">
         <div class="content">
             <div class="card">
-                {% include 'stock_searching.html' %}
+                <form onsubmit="return validateStockSearchingForm()" action="" method="POST">
+                    {% csrf_token %}
+                    {% include 'stock_searching.html' %}
+                </form>
+
                 {% include 'backend_error.html' %}
             </div>
 
