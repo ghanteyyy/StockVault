@@ -304,9 +304,9 @@ def ProfitLossPage(request):
         purchase_price = share_holding['total_cost']
         current_price = share_holding['number_of_shares'] * share_models.HistoricalPrices.objects.filter(company_id__name__iexact=company).order_by('-recorded_at').first().opening_price
 
-        summary[company]['purchased_price'] += share_holding['total_cost']
+        summary[company]['purchased_price'] += round(share_holding['total_cost'], 2)
         summary[company]['current_price'] += current_price
-        summary[company]['changes'] = current_price - purchase_price
+        summary[company]['changes'] = round(current_price - purchase_price, 2)
 
         total_investment += purchase_price
         total_current_value += current_price
@@ -321,9 +321,9 @@ def ProfitLossPage(request):
         'page_title': 'Profit-Loss | StockVault',
         'companies': share_holdings,
         'profit_loss_data': data,
-        'total_investment': total_investment,
         'total_current_value': total_current_value,
-        'total_changes': float(total_current_value - total_investment)
+        'total_investment': round(total_investment, 2),
+        'total_changes': round((total_current_value - total_investment), 2)
     }
 
     return render(request, 'profit_loss.html', context)
