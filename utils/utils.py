@@ -7,11 +7,7 @@ def generate_uuid_hex():
     Generates a unique value (e.g., for filenames, IDs)
     '''
 
-    random_values = list(f'{uuid.uuid4().hex}{uuid.uuid4()}')
-    random.shuffle(random_values)
-
-    return ''.join(random_values)
-
+    return uuid.uuid4().hex
 
 def user_profile_path(instance, filename):
     '''
