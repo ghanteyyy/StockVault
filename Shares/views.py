@@ -3,6 +3,18 @@ from . import models as share_models
 
 
 def AddToRecentActivities(user, company_id, activity_message):
+    """
+    Records a new RecentActivities entry for the given user and company.
+
+    Args:
+        user (User): The user performing the activity.
+        company_id (int): The id of the company whose activity is being recorded.
+        activity_message (str): The message to record in the RecentActivities table.
+
+    Example:
+        AddToRecentActivities(request.user, 1, "Bought 10 shares of Apple")
+    """
+
     new_activity = share_models.RecentActivities(user_id=user, company_id=company_id, activity=activity_message)
 
     new_activity.save()

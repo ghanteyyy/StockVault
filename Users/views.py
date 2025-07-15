@@ -17,6 +17,13 @@ import Shares.serializers as share_serializers
 
 
 def HomePage(request):
+    """
+    Displays the homepage of Stock Vault.
+
+    If the user is logged in, it redirects to the dashboard page.
+    Otherwise, it renders the index.html template with the page title.
+    """
+
     if request.user.is_authenticated:
         return redirect('dashboard')
 
@@ -24,6 +31,20 @@ def HomePage(request):
 
 
 def LoginPage(request):
+    """
+    Handles login functionality for the website.
+
+    The function first looks for a POST request. If the method is POST,
+    it extracts the email and password from the request, validates
+    the email, and then authenticates the user. If the user is
+    authenticated, it logs the user in and redirects them to the page
+    specified by the 'next' parameter in the request, or to the
+    dashboard page if no 'next' parameter is provided.
+
+    If the method is not POST, it renders the login template with
+    the page title and the value of the 'next' parameter.
+    """
+
     next_url = request.POST.get('next', request.GET.get('next', 'dashboard'))
 
     if request.method.lower() == 'post':
@@ -49,6 +70,19 @@ def LoginPage(request):
 
 
 def SignupPage(request):
+    """
+    Handles signup functionality for the website.
+
+    The function first looks for a POST request. If the method is POST,
+    it extracts the email, gender, name, password, profile picture, and
+    date of birth from the request, validates the email, gender, name,
+    password, profile picture, and date of birth, and then creates a
+    new user if there are no errors.
+
+    If the method is not POST, it renders the signup template with
+    the page title and the list of errors.
+    """
+
     errors = []
 
     if request.method == 'POST':
@@ -130,6 +164,10 @@ def SignupPage(request):
 
 
 def Logout(request):
+    """
+    Logs out the current user and redirects them to the homepage
+    """
+
     logout(request)
 
     return redirect('index')
@@ -137,6 +175,15 @@ def Logout(request):
 
 @login_required(login_url='login')
 def Dashboard(request):
+    """
+    Provides a dashboard with a portfolio overview
+
+    This view displays a user's portfolio, including the total number
+    of stocks they own, the current value of their portfolio, and the
+    percentage change in the value of their portfolio over the last day.
+    It also displays the five most recent activities a user has performed.
+    """
+
     total_stocks = 0
     portfolio_data = []
     portfolio_values = 0
@@ -187,6 +234,14 @@ def Dashboard(request):
 
 @login_required(login_url='login')
 def Portfolio(request):
+    """
+    Provides a portfolio page where users can see their current portfolio and add new shares
+
+    This view displays a user's portfolio, including the shares they own,
+    the number of shares, and the total value of their portfolio. It also
+    displays an input form where users can add new shares to their portfolio.
+    """
+
     errors = []
 
     if request.method.lower() == 'post':
@@ -228,6 +283,15 @@ def Portfolio(request):
 
 @login_required(login_url='login')
 def Timeline(request):
+    """
+    Render the timeline page showing a user's share holdings and recent activities for a specific company.
+
+    The function retrieves the company name from the GET request,
+    fetches the user's share holdings and recent activities associated
+    with that company, and renders the 'timeline.html' template with
+    the appropriate context.
+    """
+
     company_name = request.GET.get('company_name', '').strip()
     company_name = unquote(company_name)
 
@@ -249,6 +313,14 @@ def Timeline(request):
 
 @login_required(login_url='login')
 def WishListPage(request):
+    """
+    Render the wishlist page showing a user's wishlist.
+
+    The function retrieves the wishlist items associated with the user,
+    fetches the list of companies that are not in the user's wishlist, and
+    renders the 'wishlist.html' template with the appropriate context.
+    """
+
     errors = []
 
     if request.method.lower() == 'post':
@@ -284,6 +356,14 @@ def WishListPage(request):
 
 @login_required(login_url='login')
 def ProfitLossPage(request):
+    """
+    Renders the profit-loss page for a user.
+
+    The function retrieves the user's share holdings, calculates
+    the profit-loss for each company, and renders the
+    'profit_loss.html' template with the appropriate context.
+    """
+
     share_holdings_objs = share_models.ShareHoldings.objects.filter(user_id=request.user)
     share_holdings = share_serializers.ShareHoldingsSerializer(share_holdings_objs, many=True).data
 
@@ -331,6 +411,12 @@ def ProfitLossPage(request):
 
 @login_required(login_url='login')
 def SettingsPage(request, errors=None):
+    """
+    Handles requests for the settings page. If the request is a POST, it validates
+    the data and if the data is valid, it changes the user's profile or password.
+    If the request is a GET, it renders the settings page.
+    """
+
     errors = []
 
     if request.method.lower() == 'post':
@@ -351,6 +437,14 @@ def SettingsPage(request, errors=None):
 
 
 def ChangeProfile(request):
+    """
+    Handles a request to update a user's profile image.
+
+    It validates the uploaded file to ensure it is a valid image
+    file and has a size less than or equal to 5MB. If the file is
+    valid, it updates the user's profile image.
+    """
+
     errors = []
 
     if request.method.lower() == 'post':
@@ -376,6 +470,15 @@ def ChangeProfile(request):
 
 
 def ChangePassword(request):
+    """
+    Handles a request to change a user's password.
+
+    The function validates the current password and ensures that
+    the new password and confirm password match. If the current
+    password is correct and the passwords match, it updates the
+    user's password.
+    """
+
     errors = []
 
     if request.method.lower() == 'post':
@@ -404,6 +507,16 @@ def ChangePassword(request):
 
 @login_required(login_url='login')
 def BuySell(request):
+    """
+    Handles a request to buy or sell shares.
+
+    The function validates the user input (company name, quantity,
+    buying/selling rate, and action) and ensures that the user has
+    enough shares of the specified company to sell. If the input
+    is valid and the user has enough shares, it updates the user's
+    portfolio.
+    """
+
     if request.method.lower() == 'post':
         company_name = request.POST.get('company').split('(')[0].strip()
         quantity = request.POST.get('share_quantity').strip()
