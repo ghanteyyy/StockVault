@@ -9,6 +9,7 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
+from urllib.parse import unquote
 import Shares.views as share_views
 import Users.models as user_models
 import Shares.models as share_models
@@ -226,7 +227,10 @@ def Portfolio(request):
 
 
 @login_required(login_url='login')
-def Timeline(request, company_name):
+def Timeline(request):
+    company_name = request.GET.get('company_name', '').strip()
+    company_name = unquote(company_name)
+
     share_holdings = share_models.ShareHoldings.objects.filter(user_id=request.user, company_id__name__iexact=company_name)
     share_holdings = share_serializers.ShareHoldingsSerializer(share_holdings, many=True).data
 
