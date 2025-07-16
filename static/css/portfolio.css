@@ -29,8 +29,8 @@ input[type="text"]{
     padding: 0;
 }
 
-.content{
-    gap: 0;
+.card:first-child{
+    padding: 30px 30px 0 30px;
 }
 
 .company_name{

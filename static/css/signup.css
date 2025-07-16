@@ -1,5 +1,8 @@
-.body-container{
-    padding: 30px;
+.container{
+    height: auto;
+}
+
+.main-content{
     display: flex;
     justify-content: center;
 }

@@ -1,75 +1,72 @@
 {% extends 'root.html' %}
 {% load static %}
 
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/settings.css' %}">
+    <link rel="stylesheet" href="{% static 'css/backend_error.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
-<meta name="csrf-token" content="{{ csrf_token }}">
-<link rel="stylesheet" href="{% static 'css/settings.css' %}">
-<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-<link rel="stylesheet" href="{% static 'css/backend_error.css' %}">
-<script src="{% static 'js/settings.js' %}" defer></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token }}">
 
-<div class="container">
-    {% include 'sidebar.html' %}
-
-    <div class="main-content">
-        <div class="content">
-            <div class="profile-section">
-                <div class="profile-image-container">
-                    <img id="image-preview" class="profile-image" src="{{request.user.profile_image.url}}" alt="Profile Image" onclick="document.getElementById('profile_image').click()">
-                    <p>Profile picture PNG, JPEG under 15MB</p>
-                </div>
-
-                <input type="file" id="profile_image" accept="image/png, image/jpeg" onchange="previewImage()">
+    <div class="content">
+        <div class="profile-section">
+            <div class="profile-image-container">
+                <img id="image-preview" class="profile-image" src="{{request.user.profile_image.url}}" alt="Profile Image" onclick="document.getElementById('profile_image').click()">
+                <p>Profile picture PNG, JPEG under 15MB</p>
             </div>
 
-            <div class="form-group-container">
-                <div class="form-group">
-                    <label>Full name</label>
+            <input type="file" id="profile_image" accept="image/png, image/jpeg" onchange="previewImage()">
+        </div>
 
-                    <div class="name-group">
-                        <div class="form-group">
-                            <p class="no_form_type">{{request.user.name}}</p>
-                        </div>
+        <div class="form-group-container">
+            <div class="form-group">
+                <label>Full name</label>
+
+                <div class="name-group">
+                    <div class="form-group">
+                        <p class="no_form_type">{{request.user.name}}</p>
                     </div>
                 </div>
-
-                <div class="form-group">
-                    <label>Contact email</label>
-                    <p class="no_form_type">{{request.user.email}}</p>
-                </div>
-
-                <div class="form-group change-password">
-                    <label>Password</label>
-                    <p>Change your current password.</p>
-
-                    <div class="password-group">
-                        <div class="form-group">
-                            <label for="current-password">Current Password</label>
-                            <input type="password" id="current-password">
-                            <div id="current-password-error" class="error">Current password is required</div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="new-password">New Password</label>
-                            <input type="password" id="new-password">
-                            <div id="new-password-error" class="error">Password must be at least 8 characters with 1 capital, 1 symbol, and 1 number.b </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="confirm-password">Confirm New Password</label>
-                            <input type="password" id="confirm-password">
-                            <div id="confirm-password-error" class="error">Passwords do not match</div>
-                        </div>
-                    </div>
-                </div>
-
-                <button class="save-button">Save Changes</button>
             </div>
+
+            <div class="form-group">
+                <label>Contact email</label>
+                <p class="no_form_type">{{request.user.email}}</p>
+            </div>
+
+            <div class="form-group change-password">
+                <label>Password</label>
+                <p>Change your current password.</p>
+
+                <div class="password-group">
+                    <div class="form-group">
+                        <label for="current-password">Current Password</label>
+                        <input type="password" id="current-password">
+                        <div id="current-password-error" class="error">Current password is required</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new-password">New Password</label>
+                        <input type="password" id="new-password">
+                        <div id="new-password-error" class="error">Password must be at least 8 characters with 1 capital, 1 symbol, and 1 number.b </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm New Password</label>
+                        <input type="password" id="confirm-password">
+                        <div id="confirm-password-error" class="error">Passwords do not match</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="save-button">Save Changes</button>
         </div>
     </div>
-</div>
+{% endblock %}
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+{% block js %}
+    <script src="{% static 'js/settings.js' %}" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}

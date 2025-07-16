@@ -1,46 +1,41 @@
 {% extends 'root.html' %}
 {% load static %}
 
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/wishlist.css' %}">
+    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-<link rel="stylesheet" href="{% static 'css/wishlist.css' %}">
-<link rel="stylesheet" href="{% static 'css/error-message.css' %}">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<script src="{% static 'js/stock_searching.js' %}" defer></script>
+    <div class="content">
+        <div class="card">
+            <form onsubmit="return validateStockSearchingForm()" action="" method="POST">
+                {% csrf_token %}
+                {% include 'stock_searching.html' %}
+            </form>
 
-<script id="companies" type="application/json">
-    {{ companies|safe }}
-</script>
+            {% include 'backend_error.html' %}
+        </div>
 
-
-<div class="container">
-    {% include 'sidebar.html' %}
-
-    <div class="main-content">
-        <div class="content">
-            <div class="card">
-                <form onsubmit="return validateStockSearchingForm()" action="" method="POST">
-                    {% csrf_token %}
-                    {% include 'stock_searching.html' %}
-                </form>
-
-                {% include 'backend_error.html' %}
-            </div>
-
-            <h2>Your wishlists</h2>
-            <div class="card company-list">
-                {% for data in saved_companies %}
-                    <div class="company">
-                        <p>{{ data.company_name }}</p>
-                    </div>
-                {% empty %}
-                    <p class="error-message">No wishlist</p>
-                {% endfor %}
-            </div>
+        <h2>Your wishlists</h2>
+        <div class="card company-list">
+            {% for data in saved_companies %}
+                <div class="company">
+                    <p>{{ data.company_name }}</p>
+                </div>
+            {% empty %}
+                <p class="error-message">No wishlist</p>
+            {% endfor %}
         </div>
     </div>
-</div>
+{% endblock %}
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% block js %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/stock_searching.js' %}" defer></script>
 
+    <script id="companies" type="application/json">
+        {{ companies|safe }}
+    </script>
 {% endblock %}

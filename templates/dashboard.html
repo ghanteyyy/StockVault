@@ -10,77 +10,71 @@
         {{ portfolio_datasets|safe }}
     </script>
 
-    <div class="container">
-        {% include 'sidebar.html' %}
-
-        <div class="main-content">
-            <div class="content">
-                <div class="card">
-                    <h2>📊 Stocks Overview</h2>
-                    <div class="dashboard-stats">
-                        <div class="stat-card">
-                            <h3>Portfolio Value</h3>
-                            <p>{{ portfolio_value|default:"Rs. 0.00" }}</p>
-                        </div>
-
-                        <div class="stat-card">
-                            <h3>Total Stocks</h3>
-                            <p>{{ total_stocks|default:"0" }}</p>
-                        </div>
-
-                        <div class="stat-card">
-                            <h3>Overall Gain/Loss</h3>
-                            <p class="{% if overall_gain_loss >= 0 %}positive{% else %}negative{% endif %}">
-                                {{ overall_gain_loss|default:"0.00" }}%
-                            </p>
-                        </div>
-
-                    </div>
+    <div class="content">
+        <div class="card">
+            <h2>📊 Stocks Overview</h2>
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3>Portfolio Value</h3>
+                    <p>{{ portfolio_value|default:"Rs. 0.00" }}</p>
                 </div>
 
-                <div class="card">
-                    <h2>📈 Portfolio Performance</h2>
-
-                    {% if not portfolio_datasets %}
-                        <p class="error-message">The dataset is currently empty or incomplete.</p>
-
-                    {% else %}
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>SN</th>
-                                    <th>Company Name</th>
-                                    <th>Opening Price</th>
-                                    <th>Closing Price</th>
-                                    <th>Change (%)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for data in portfolio_datasets %}
-                                    <tr>
-                                        <td>{{ forloop.counter }}</td>
-                                        <td>{{ data.company_name }}</td>
-                                        <td>{{ data.today_opening_price }}</td>
-                                        <td>{{ data.today_closing_price }}</td>
-                                        <td class="{% if data.percentage_change|slice:':1' == '-' %}negative{% else %}positive{% endif %}">{{ data.percentage_change }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    {% endif %}
+                <div class="stat-card">
+                    <h3>Total Stocks</h3>
+                    <p>{{ total_stocks|default:"0" }}</p>
                 </div>
 
-                <div class="card">
-                    <h2>🔔 Recent Activity</h2>
-                    <ul>
-                        {% for activity in recent_activities %}
-                            <li>{{ activity.activity }} at {{ activity.recorded_at }}</li>
-                        {% empty %}
-                            <li class="error-message">No recent activity</li>
-                        {% endfor %}
-                    </ul>
+                <div class="stat-card">
+                    <h3>Overall Gain/Loss</h3>
+                    <p class="{% if overall_gain_loss >= 0 %}positive{% else %}negative{% endif %}">
+                        {{ overall_gain_loss|default:"0.00" }}%
+                    </p>
                 </div>
+
             </div>
+        </div>
+
+        <div class="card">
+            <h2>📈 Portfolio Performance</h2>
+
+            {% if not portfolio_datasets %}
+                <p class="error-message">The dataset is currently empty or incomplete.</p>
+
+            {% else %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>SN</th>
+                            <th>Company Name</th>
+                            <th>Opening Price</th>
+                            <th>Closing Price</th>
+                            <th>Change (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for data in portfolio_datasets %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ data.company_name }}</td>
+                                <td>{{ data.today_opening_price }}</td>
+                                <td>{{ data.today_closing_price }}</td>
+                                <td class="{% if data.percentage_change|slice:':1' == '-' %}negative{% else %}positive{% endif %}">{{ data.percentage_change }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h2>🔔 Recent Activity</h2>
+            <ul>
+                {% for activity in recent_activities %}
+                    <li>{{ activity.activity }} at {{ activity.recorded_at }}</li>
+                {% empty %}
+                    <li class="error-message">No recent activity</li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
 

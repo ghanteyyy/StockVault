@@ -22,16 +22,6 @@
     --footer-bg: #1e3a8a;
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-html {
-    scroll-behavior: smooth;
-}
-
 body {
     font-family: 'Poppins', sans-serif;
     line-height: 1.6;
@@ -84,10 +74,12 @@ section {
     position: relative;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
+.container{
+    height: auto;
+}
+
+.main-content{
+    padding: 0;
 }
 
 .cta-button {

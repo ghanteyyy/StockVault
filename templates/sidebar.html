@@ -1,6 +1,8 @@
 {% load static %}
 
-<link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
+{%% block css %}
+    <link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
+{% endblock %}
 
 <button class="hamburger" id="hamburger-btn">☰</button>
 
@@ -22,4 +24,6 @@
     </div>
 </div>
 
-<script src="{% static 'js/sidebar.js' %}"></script>
+{% block js %}
+    <script src="{% static 'js/sidebar.js' %}"></script>
+{% endblock %}

@@ -1,10 +1,8 @@
 {% load static %}
 
-<link rel="stylesheet" href="{% static 'css/stock_searching.css' %}">
-
-<script id="companies" type="application/json">
-    {{ companies|safe }}
-</script>
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/stock_searching.css' %}">
+{% endblock %}
 
 <div class="input-wrapper">
     <div class="input-group">
@@ -20,3 +18,9 @@
     </div>
     <p class="error-searching-stocks"></p>
 </div>
+
+{% block js %}
+    <script id="companies" type="application/json">
+        {{ companies|safe }}
+    </script>
+{% endblock %}

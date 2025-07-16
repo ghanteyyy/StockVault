@@ -1,9 +1,11 @@
 {% extends 'root.html' %}
 {% load static %}
 
-{% block content %}
+{% block css %}
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
 
+{% block content %}
     <div class="login-container">
         <!-- Left Panel: Promotional Section -->
         <div class="left-panel">
@@ -58,7 +60,8 @@
             </div>
         </div>
     </div>
+{% endblock %}
 
+{% block js %}
     <script src="{% static 'js/login.js' %}"></script>
-
 {% endblock %}

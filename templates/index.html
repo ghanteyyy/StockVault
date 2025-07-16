@@ -1,10 +1,11 @@
 {% extends 'root.html' %}
-
 {% load static %}
 
-{% block content %}
+{% block css %}
 	<link rel="stylesheet" href="{% static 'css/index.css' %}" />
+{% endblock %}
 
+{% block content %}
 	<div class="hero-content">
 		<h1>Track. Predict. Profit.</h1>
 		<p>Your smart companion for monitoring stock portfolios, analyzing trends, and making better investments.</p>
@@ -139,6 +140,8 @@
 			stock market. Simple, secure, and insightful.
 		</p>
 	</section>
+{% endblock %}
 
+{% block js %}
 	<script src="{% static 'js/index.js' %}"></script>
 {% endblock %}

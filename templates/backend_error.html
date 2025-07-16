@@ -1,7 +1,8 @@
 {% load static %}
 
-<link rel="stylesheet" href="{% static 'css/backend_error.css' %}">
-<script src="{% static 'js/backend_error.js' %}" defer></script>
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/backend_error.css' %}">
+{% endblock %}
 
 {% if errors %}
     <div class="error-container">
@@ -13,3 +14,8 @@
         </ul>
     </div>
 {% endif %}
+
+
+{% block js %}
+    <script src="{% static 'js/backend_error.js' %}" defer></script>
+{% endblock %}
