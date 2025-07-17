@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Vault - {% block title %}Admin Panel{% endblock %}</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.min.js" defer></script>
+    <link rel="stylesheet" href="{% static 'css/admin/root.css' %}">
+    {% block css %}
+    {% endblock %}
+</head>
+
+<body>
+    <div class="container">
+        {% include 'admin/sidebar.html' %}
+
+        <div class="main-content">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+	{% block js %}
+	{% endblock %}
+</body>
+
+</html>

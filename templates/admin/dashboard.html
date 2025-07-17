@@ -1,0 +1,86 @@
+{% extends 'admin/root.html' %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/admin/dashboard.css' %}">
+{% endblock %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>Admin Dashboard</h1>
+    <div class="user-profile">
+        <img src="https://via.placeholder.com/40" alt="Profile Image" onclick="triggerFileInput()">
+        <input type="file" id="profileImage" style="display: none;" accept="image/*">
+        <span>Super Admin</span>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div class="card">
+        <h2>System Statistics</h2>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <h3>1,234</h3>
+                <p>Total Users</p>
+            </div>
+            <div class="stat-item">
+                <h3>5,678</h3>
+                <p>Transactions</p>
+            </div>
+            <div class="stat-item">
+                <h3>$12M</h3>
+                <p>Total Volume</p>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <h2>Transaction Volume</h2>
+        <div class="chart-container">
+            <canvas id="transactionChart"></canvas>
+        </div>
+    </div>
+    <div class="card">
+        <h2>User Management</h2>
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>001</td>
+                    <td>john_doe</td>
+                    <td>john@example.com</td>
+                    <td>Active</td>
+                    <td><button class="action-btn" onclick="alert('Suspend user?')">Suspend</button></td>
+                </tr>
+                <tr>
+                    <td>002</td>
+                    <td>jane_smith</td>
+                    <td>jane@example.com</td>
+                    <td>Pending</td>
+                    <td><button class="action-btn" onclick="alert('Activate user?')">Activate</button></td>
+                </tr>
+                <tr>
+                    <td>003</td>
+                    <td>alice_bob</td>
+                    <td>alice@example.com</td>
+                    <td>Suspended</td>
+                    <td><button class="action-btn" onclick="alert('Reactivate user?')">Reactivate</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'js/admin/dashboard.js' %}"></script>
+{% endblock %}
