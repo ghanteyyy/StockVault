@@ -8,27 +8,21 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        {% include 'sidebar.html' %}
+    <div class="content">
+        <div class="timeline">
+            {% for history in histories %}
+                <div class="timeline-item {% if forloop.counter0|divisibleby:2 %}right{% else %}left{% endif %}">
+                    <span>{{history.recorded_at}}</span>
 
-        <div class="main-content">
-            <div class="content">
-                <div class="timeline">
-                    {% for history in histories %}
-                        <div class="timeline-item {% if forloop.counter0|divisibleby:2 %}right{% else %}left{% endif %}">
-                            <span>{{history.recorded_at}}</span>
-
-                            <div class="timeline-content">
-                                <p>{{history.activity}}</p>
-                            </div>
-                        </div>
-                    {% endfor %}
+                    <div class="timeline-content">
+                        <p>{{history.activity}}</p>
+                    </div>
                 </div>
-            </div>
+            {% endfor %}
         </div>
     </div>
 {% endblock %}
 
-{% blck js %}
+{% block js %}
     <script src="{% static 'js/timeline.js' %}"></script>
 {% endblock %}
