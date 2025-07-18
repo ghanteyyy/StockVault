@@ -3,5 +3,5 @@ from . import views
 
 
 urlpatterns = [
-    path('admin/', views.AdminPage, name='index')
+    path('admin/', views.AdminPage, name='admin-index')
 ]
