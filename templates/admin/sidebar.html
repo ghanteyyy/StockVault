@@ -18,7 +18,7 @@
         <a href="#" class="{% if request.path == '/admin/analytics/' %}active{% endif %}"><i class='bx bx-line-chart'></i><span>System Analytics</span></a>
         <a href="#" class="{% if request.path == '/admin/transactions/' %}active{% endif %}"><i class='bx bx-cart'></i><span>Transactions</span></a>
         <a href="#" class="{% if request.path == '/admin/settings/' %}active{% endif %}"><i class='bx bx-cog'></i><span>Settings</span></a>
-        <a href="#"><i class='bx bx-log-out'></i><span>Logout</span></a>
+        <a href="{% url 'logout' %}"><i class='bx bx-log-out'></i><span>Logout</span></a>
     </div>
 </div>
 
