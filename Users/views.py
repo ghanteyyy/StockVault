@@ -561,3 +561,8 @@ def BuySell(request):
     }
 
     return render(request, 'buy_sell.html', context)
+
+
+@login_required(login_url='login')
+def TradeCalculator(request):
+    return render(request, 'calculator.html', {'page_title': 'Calculator | Stock Vault'})

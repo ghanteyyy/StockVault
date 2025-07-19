@@ -11,6 +11,7 @@ urlpatterns = [
     path('portfolio/', views.Portfolio, name='portfolio'),
     path('wishlist/', views.WishListPage, name='wishlist'),
     path('settings/', views.SettingsPage, name='settings'),
-    path('profit-loss/', views.ProfitLossPage, name='profit-loss'),
     path('portfolio/timeline', views.Timeline, name='timeline'),
+    path('profit-loss/', views.ProfitLossPage, name='profit-loss'),
+    path('trade-calculator/', views.TradeCalculator, name='trade-calculator'),
 ]
