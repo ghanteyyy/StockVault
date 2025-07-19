@@ -1,5 +1,4 @@
 .sidebar {
-    width: 250px;
     background: linear-gradient(to bottom right, #1e1e2f, #2d2d44);
     color: white;
     padding: 20px;
@@ -11,14 +10,14 @@
 .logo {
     font-size: 1.5em;
     font-weight: 600;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .sidebar div ul {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 18px;
 }
 
 .sidebar div ul li {
