@@ -4,6 +4,7 @@
 
 .wrapper{
     display: none;
+    align-items: self-start;
 }
 
 .options {
@@ -166,6 +167,9 @@ input{
     background-size: 16px;
 }
 
-.separate-div{
-    border-bottom: 2px solid rgb(192, 191, 191);
+.answer-div{
+    padding: 20px;
+    font-weight: bolder;
+    border-top: 2px solid rgb(221, 221, 221);
+    border-bottom: 2px solid rgb(221, 221, 221);
 }
