@@ -87,6 +87,90 @@ function formatPrice(num) {
 }
 
 
+function buy_shares_calculation(share_quantity, price_per_share){
+    total_purchase_amount = share_quantity * price_per_share;
+
+    // Borkerage Commission Calculation
+    brokerage_rate = charges.broker.slabs.find(s=>total_purchase_amount<=s.upTo).rate;
+    brokerage_commission = total_purchase_amount * brokerage_rate;
+    brokerage_commission = Math.max(brokerage_commission, charges.broker.minBrokerage);    // Minimum brokerage commission is 10
+
+    // SEBON Commission
+    sebon_commission = total_purchase_amount * charges.sebonFeeRate;
+
+    // DP Charge
+    dp_charge = charges.dpCharge;
+
+    // Total Amount
+    total_amount = total_purchase_amount + brokerage_commission + sebon_commission + dp_charge
+
+    return {
+        'total_purchase_amount': formatPrice(total_purchase_amount),
+        'bokerage_commission': formatPrice(brokerage_commission),
+        'sebon_commission': formatPrice(sebon_commission),
+        'dp_charge': formatPrice(dp_charge),
+        'total_amount': formatPrice(total_amount)
+    }
+}
+
+
+function sell_share_calculation(buy_type, share_quantity, purchase_value, selling_price, cgt_value){
+    secondary = null;
+    total_purchase_amount = share_quantity * purchase_value;
+
+    if(buy_type == 'secondary'){
+        brokerage_rate = charges.broker.slabs.find(s=>total_purchase_amount<=s.upTo).rate;
+        brokerage_commission = total_purchase_amount * brokerage_rate;
+        brokerage_commission = Math.max(brokerage_commission, charges.broker.minBrokerage);    // Minimum brokerage commission is 10
+
+        sebon_commission = total_purchase_amount * charges.sebonFeeRate;
+        dp_charge = charges.dpCharge;
+
+        total_payable_amount = total_purchase_amount + brokerage_commission + sebon_commission + dp_charge
+
+        secondary = {
+            "secondary": {
+                "total_payable_amount": formatPrice(total_payable_amount),
+                "total_purchased_amount": formatPrice(total_purchase_amount),
+                "brokerage_commission": formatPrice(brokerage_commission),
+                "sebon_commission": formatPrice(sebon_commission),
+                "dp_charge": formatPrice(dp_charge)
+            }
+        }
+
+        total_purchase_amount = total_payable_amount;
+    }
+
+    total_selling_amount = share_quantity * selling_price;
+
+    brokerage_rate = charges.broker.slabs.find(s=>total_selling_amount<=s.upTo).rate;
+    brokerage_commission = total_selling_amount * brokerage_rate;
+
+    sebon_commission = total_selling_amount * charges.sebonFeeRate;
+    dp_charge = charges.dpCharge;
+
+    net_amount_before_CGT = total_selling_amount - brokerage_commission - sebon_commission - dp_charge;
+
+    capital_gain = net_amount_before_CGT - total_purchase_amount;
+    capital_gain_tax = charges.capitalGainsTax[cgt_value] * capital_gain;
+
+    profit_amount = capital_gain - capital_gain_tax
+    final_receivable_amount = net_amount_before_CGT - capital_gain_tax
+
+    return {
+        ...secondary,
+        "total_purchased_amount": formatPrice(total_purchase_amount),
+        "total_selling_amount": formatPrice(total_selling_amount),
+        "brokerage_commission": formatPrice(brokerage_commission),
+        "sebon_commission": formatPrice(sebon_commission),
+        "dp_charge": formatPrice(dp_charge),
+        "profit_amount": formatPrice(profit_amount),
+        "capital_gain_tax": formatPrice(capital_gain_tax),
+        "final_receivable_amount": formatPrice(final_receivable_amount)
+    }
+}
+
+
 function buy_share() {
     number_regex = /^-?\d+$/;
     float_regex = /^-?\d+(\.\d+)?$/;
@@ -105,27 +189,14 @@ function buy_share() {
         error.classList.remove('show');
     }
 
-    total_purchase_amount = shareQuantity * sharePrice;
+    calculated_values = buy_shares_calculation(shareQuantity, sharePrice);
+    document.querySelector('.output-wrapper').replaceChildren(); // removes all children
 
-    // Borkerage Commission Calculation
-    brokerage_rate = charges.broker.slabs.find(s=>total_purchase_amount<=s.upTo).rate;
-    brokerage_commission = total_purchase_amount * brokerage_rate;
-    brokerage_commission = Math.max(brokerage_commission, charges.broker.minBrokerage);    // Minimum brokerage commission is 10
-
-    // SEBON Commission
-    sebon_commission = total_purchase_amount * charges.sebonFeeRate;
-
-    // DP Charge
-    dp_charge = charges.dpCharge;
-
-    // Total Amount
-    total_amount = total_purchase_amount + brokerage_commission + sebon_commission + dp_charge
-
-    makeOutputInnerDivs("Total Purchase Amount", formatPrice(total_purchase_amount));
-    makeOutputInnerDivs(`Broker Commission (${brokerage_rate * 100}%)`, formatPrice(brokerage_commission));
-    makeOutputInnerDivs(`SEBON Commission (${charges.sebonFeeRate * 100}%)`, formatPrice(sebon_commission));
-    makeOutputInnerDivs("DP Charge", formatPrice(dp_charge));
-    makeOutputInnerDivs("Total Payable Amount", formatPrice(total_amount));
+    makeOutputInnerDivs("Total Purchase Amount", calculated_values.total_purchase_amount);
+    makeOutputInnerDivs(`Broker Commission (${brokerage_rate * 100}%)`, calculated_values.bokerage_commission);
+    makeOutputInnerDivs(`SEBON Commission (${charges.sebonFeeRate * 100}%)`, calculated_values.sebon_commission);
+    makeOutputInnerDivs("DP Charge", calculated_values.dp_charge);
+    makeOutputInnerDivs("Total Payable Amount", calculated_values.total_amount, '.output-wrapper', 'answer-div');
 }
 
 
@@ -150,154 +221,25 @@ function sell_share() {
         error.classList.remove('show');
     }
 
-    /*
-        We have two cases for selling shares: IPO and Secondary.
-
-        For IPO Example:
-            Number of Shares = 24
-            Purchase Price Per Share = 50
-            Selling Price Per Share = 1200
-
-            Total Purchase Amount = Number of Shares * Purchase Price Per Share
-                                  = 24 * 50
-                                  = 1,200
-
-            Total Selling Amount = Number of Shares * Selling Price Per Share
-                                 = 24 * 1200
-                                 = 28,800
-
-            Broker Commission = 0.36% of Total Selling Amount
-                              = 0.0036 * 28,800
-                              = 103.68
-
-            SEBON Commission = 0.015% of Total Selling Amount
-                             = 0.00015 * 28,800
-                             = 4.32
-
-            DP Charge = 25
-
-            Net Amount Before CGT = Total Selling Amount - Broker Commission - SEBON Commission - DP Charge
-                                  = 28,800 - 103.68 - 4.32 - 25
-                                  = 28,667
-
-            Capital Gain (Profit) = Net Amount Before CGT - Total Purchase Amount
-                                  = 28,667 - 1,200
-                                  = 27,467
-
-            Capital Gain Tax (CGT) = 7.5% of Capital Gain
-                                   = 0.075 * 27,467
-                                   = 2,060.03
-
-            Final Receivable Amount = Net Amount Before CGT - CGT
-                                    = 28,667 - 2,060.03
-                                    = 26,606.97
-
-
-        For Secondary Example:
-            Number of Shares = 24
-            Purchase Price Per Share = 50
-            Selling Price Per Share = 1200
-
-            Total Purchase Amount = Number of Shares * Purchase Price Per Share
-                                  = 24 * 50
-                                  = 1,200
-
-            Broker Commission for Purchase Amount = 0.36% * 1200
-                                                  = 4.32
-
-            SEBON Commission = 0.015% * Total Purchase Amount
-                             = 0.00015 * 1,200
-                             = 0.18
-
-            DP Charge for Purchase = 25
-
-            Total Payable Amount = Total Purchase Amount + Broker Commission for Purchase Amount + SEBON Commission + DP Charge for Purchase
-                                  = 1,200 + 4.32 + 0.18 + 25
-                                  = 1,229.5
-
-            = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-            = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-
-            Total Selling Amount = Number of Shares * Selling Price Per Share
-                                 = 24 * 1200
-                                 = 28,800
-
-            Broker Commission = 0.36% of Total Selling Amount
-                              = 0.0036 * 28,800
-                              = 103.68
-
-            SEBON Commission = 0.015% of Total Selling Amount
-                             = 0.00015 * 28,800
-                             = 4.32
-
-            DP Charge = 25
-
-            Net Amount Before CGT = Total Selling Amount - Broker Commission - SEBON Commission - DP Charge
-                                  = 28,800 - 103.68 - 4.32 - 25
-                                  = 28,667
-
-            Capital Gain (Profit) = Net Amount Before CGT - Total Purchase Amount
-                                  = 28,667 - 1,200
-                                  = 27,467
-
-            Capital Gain Tax (CGT) = 7.5% of Capital Gain
-                                   = 0.075 * 27,467
-                                   = 2,060.03
-
-            Final Receivable Amount = Net Amount Before CGT - CGT
-                                    = 28,667 - 2,060.03
-                                    = 26,606.97
-    */
+    calculated_values = sell_share_calculation(buy_type, share_quantity, purchase_value, selling_price, cgt_value);
 
     document.querySelector('.output-wrapper').replaceChildren(); // removes all children
 
-    total_purchase_amount = share_quantity * purchase_value;
-
     if(buy_type == 'secondary'){
-        brokerage_rate = charges.broker.slabs.find(s=>total_purchase_amount<=s.upTo).rate;
-        console.log(brokerage_rate * 100);
-        brokerage_commission = total_purchase_amount * brokerage_rate;
-
-        sebon_commission = total_purchase_amount * charges.sebonFeeRate;
-        dp_charge = charges.dpCharge;
-
-        total_payable_amount = total_purchase_amount + brokerage_commission + sebon_commission + dp_charge
-
-        total_purchase_amount = total_payable_amount;
-
-        makeOutputInnerDivs("Total Purchase Amount", formatPrice(total_purchase_amount));
-        makeOutputInnerDivs(`Broker Commission (${brokerage_rate * 100}%)`, formatPrice(brokerage_commission));
-        makeOutputInnerDivs(`SEBON Commission (${charges.sebonFeeRate * 100}%)`, formatPrice(sebon_commission));
-        makeOutputInnerDivs("DP Charge", formatPrice(dp_charge), '.output-wrapper', 'separate-div');
-
+        makeOutputInnerDivs(`Total Purchased Amount`, calculated_values.secondary.total_purchased_amount);
+        makeOutputInnerDivs(`Broker Commission (${brokerage_rate * 100}%)`, calculated_values.secondary.brokerage_commission);
+        makeOutputInnerDivs(`SEBON Commission (${charges.sebonFeeRate * 100}%)`, calculated_values.secondary.sebon_commission);
+        makeOutputInnerDivs("DP Charge", formatPrice(dp_charge));
+        makeOutputInnerDivs("Total Payable Amount", calculated_values.secondary.total_payable_amount, '.output-wrapper', 'answer-div');
     }
 
-    total_selling_amount = share_quantity * selling_price;
-
-    brokerage_rate = charges.broker.slabs.find(s=>total_selling_amount<=s.upTo).rate;
-    brokerage_commission = total_selling_amount * brokerage_rate;
-
-    sebon_commission = total_selling_amount * charges.sebonFeeRate;
-    dp_charge = charges.dpCharge;
-
-    net_amount_before_CGT = total_selling_amount - brokerage_commission - sebon_commission - dp_charge;
-
-    capital_gain = net_amount_before_CGT - total_purchase_amount;
-    capital_gain_tax = charges.capitalGainsTax[cgt_value] * capital_gain;
-
-    final_receivable_amount = net_amount_before_CGT - capital_gain_tax
-
-    if(buy_type == 'ipo'){
-        makeOutputInnerDivs("Total Purchase Amount", formatPrice(total_purchase_amount));
-    }
-
-    makeOutputInnerDivs("Total Selling Amount", formatPrice(total_selling_amount));
-    makeOutputInnerDivs(`Broker Commission (${brokerage_rate * 100}%)`, formatPrice(brokerage_commission));
-    makeOutputInnerDivs(`SEBON Commission (${charges.sebonFeeRate * 100}%)`, formatPrice(sebon_commission));
-    makeOutputInnerDivs("DP Charge", formatPrice(dp_charge));
-    makeOutputInnerDivs("Profit Amount", formatPrice(capital_gain));
-    makeOutputInnerDivs(`Capital Gain Tax (${charges.capitalGainsTax[cgt_value] * 100}%)`, formatPrice(capital_gain_tax));
-    makeOutputInnerDivs("Final Receivable Amount", formatPrice(final_receivable_amount));
+    makeOutputInnerDivs("Total Selling Amount", calculated_values.total_selling_amount);
+    makeOutputInnerDivs(`Broker Commission (${brokerage_rate * 100}%)`, calculated_values.brokerage_commission);
+    makeOutputInnerDivs(`SEBON Commission (${charges.sebonFeeRate * 100}%)`, calculated_values.sebon_commission);
+    makeOutputInnerDivs("DP Charge", calculated_values.dp_charge);
+    makeOutputInnerDivs(`Capital Gain Tax (${charges.capitalGainsTax[cgt_value] * 100}%)`, calculated_values.capital_gain_tax);
+    makeOutputInnerDivs("Final Receivable Amount", calculated_values.final_receivable_amount);
+    makeOutputInnerDivs("Profit Amount", calculated_values.profit_amount, '.output-wrapper', 'answer-div');
 }
 
 
