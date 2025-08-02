@@ -70,7 +70,7 @@
             <h2>🔔 Recent Activity</h2>
             <ul>
                 {% for activity in recent_activities %}
-                    <li>{{ activity.activity }} at {{ activity.recorded_at }}</li>
+                    <li><p>{{ activity.activity }} at {{ activity.recorded_at }}</p></li>
                 {% empty %}
                     <li class="error-message">No recent activity</li>
                 {% endfor %}
