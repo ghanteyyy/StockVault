@@ -37,6 +37,25 @@ class ShareHoldings(models.Model):
     number_of_shares = models.IntegerField(blank=True, null=True, default=0)
 
 
+class Transactions(models.Model):
+    class Meta:
+        verbose_name = _("Transactions")
+        verbose_name_plural = _("Transactions")
+
+    def __str__(self):
+        return self.company_id.name
+
+    id = models.CharField(primary_key=True, default=utils.generate_uuid_hex, max_length=255)
+
+    user_id = models.ForeignKey(to='Users.CustomUser', on_delete=models.CASCADE)
+    company_id = models.ForeignKey(to="ListedCompanies", on_delete=models.CASCADE)
+
+    number_of_shares = models.IntegerField(blank=True, null=True)
+    transacted_price = models.FloatField(blank=True, null=True)
+    transaction_date = models.DateField(editable=False, default=now)
+    transaction_type = models.CharField(max_length=255, blank=True, null=True)
+
+
 class WishLists(models.Model):
     class Meta:
         verbose_name = _("Wish Lists")
