@@ -136,7 +136,7 @@ def SignupPage(request):
 
         # Validating date of birth
         try:
-            dob_obj = dt.datetime.strptime(dob, '%Y/%m/%d')
+            dob_obj = dt.datetime.strptime(dob, '%Y-%m-%d')
 
             today = dt.datetime.today()
 
@@ -189,7 +189,7 @@ def Dashboard(request):
     portfolio_values = 0
     previous_portfolio_values = 0
 
-    share_holdings = share_models.ShareHoldings.objects.filter(user_id=request.user).order_by('company_id__name').distinct('company_id__name')
+    share_holdings = share_models.Portfolios.objects.filter(user_id=request.user).order_by('company_id__name').distinct('company_id__name')
 
     for index, share_holding in enumerate(share_holdings):
         total_stocks += share_holding.number_of_shares
@@ -217,8 +217,8 @@ def Dashboard(request):
     else:
         overall_gain_loss = round(((portfolio_values - previous_portfolio_values) / portfolio_values) * 100, 2)
 
-    recent_activites = share_models.RecentActivities.objects.filter(user_id=request.user).order_by('-recorded_at')
-    recent_activites = share_serializers.RecentActivitiesSerializer(recent_activites, many=True).data[:5]
+    recent_activites = share_models.Transactions.objects.filter(user_id=request.user).order_by('-transaction_date')[:5]
+    recent_activites = share_serializers.TransactionsSerializer(recent_activites, many=True).data[:5]
 
     context = {
             'page_title': 'Dashboard | Stock Vault',
@@ -262,14 +262,14 @@ def Portfolio(request):
             share_views.modify_shares(request.user, company, quantity, buying_rate, 'buy')
 
     # Getting share names along with its abbreviation. Eg: Green Venture Limited (GVL)
-    user_companies = share_models.ShareHoldings.objects.filter(user_id=request.user).values_list('company_id', flat=True)
+    user_companies = share_models.Portfolios.objects.filter(user_id=request.user).values_list('company_id', flat=True)
 
     companies = share_models.ListedCompanies.objects.exclude(id__in=user_companies)
     serialized_companies = share_serializers.CompaniesSerializer(companies, many=True).data
     companies = [f"{company['name']} ({company['abbreviation']})" for company in serialized_companies]
 
-    share_holdings = share_models.ShareHoldings.objects.filter(user_id=request.user).order_by('company_id__name').distinct('company_id__name')
-    share_holdings = share_serializers.ShareHoldingsSerializer(share_holdings, many=True).data
+    share_holdings = share_models.Portfolios.objects.filter(user_id=request.user).order_by('company_id__name').distinct('company_id__name')
+    share_holdings = share_serializers.PortfoliosSerializer(share_holdings, many=True).data
 
     context = {
             'page_title': 'Portfolio | Stock Vault',
@@ -295,11 +295,11 @@ def Timeline(request):
     company_name = request.GET.get('company_name', '').strip()
     company_name = unquote(company_name)
 
-    share_holdings = share_models.ShareHoldings.objects.filter(user_id=request.user, company_id__name__iexact=company_name)
-    share_holdings = share_serializers.ShareHoldingsSerializer(share_holdings, many=True).data
+    share_holdings = share_models.Portfolios.objects.filter(user_id=request.user, company_id__name__iexact=company_name)
+    share_holdings = share_serializers.PortfoliosSerializer(share_holdings, many=True).data
 
-    histories = share_models.RecentActivities.objects.filter(user_id=request.user, company_id__name=company_name)
-    histories = share_serializers.RecentActivitiesSerializer(histories, many=True).data
+    histories = share_models.Transactions.objects.filter(user_id=request.user, company_id__name=company_name)
+    histories = share_serializers.TransactionsSerializer(histories, many=True).data
 
     context = {
         'page_title': 'Portfolio | Stock Vault',
@@ -364,8 +364,8 @@ def ProfitLossPage(request):
     'profit_loss.html' template with the appropriate context.
     """
 
-    share_holdings_objs = share_models.ShareHoldings.objects.filter(user_id=request.user)
-    share_holdings = share_serializers.ShareHoldingsSerializer(share_holdings_objs, many=True).data
+    share_holdings_objs = share_models.Portfolios.objects.filter(user_id=request.user)
+    share_holdings = share_serializers.PortfoliosSerializer(share_holdings_objs, many=True).data
 
     summary = collections.defaultdict(lambda: {
         'total_quantity': 0,
@@ -539,11 +539,11 @@ def BuySell(request):
             share_views.modify_shares(request.user, company_name, quantity, buying_selling_rate, mode='buy')
 
         elif action == 'sell':
-            if share_models.ShareHoldings.objects.filter(user_id=request.user, company_id__name=company_name).exists() is False:
+            if share_models.Portfolios.objects.filter(user_id=request.user, company_id__name=company_name).exists() is False:
                 messages.error(request, f'You do not own any shares of {company_name} to sell')
                 return redirect('buy_sell')
 
-            if share_models.ShareHoldings.objects.get(user_id=request.user, company_id__name=company_name).number_of_shares < int(quantity):
+            if share_models.Portfolios.objects.get(user_id=request.user, company_id__name=company_name).number_of_shares < int(quantity):
                 messages.error(request, f'You do not own enough shares of {company_name} to sell {quantity} shares')
                 return redirect('buy_sell')
 
