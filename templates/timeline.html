@@ -12,10 +12,10 @@
         <div class="timeline">
             {% for history in histories %}
                 <div class="timeline-item {% if forloop.counter0|divisibleby:2 %}right{% else %}left{% endif %}">
-                    <span>{{history.recorded_at}}</span>
+                    <span>{{history.transaction_date}}</span>
 
                     <div class="timeline-content">
-                        <p>{{history.activity}}</p>
+                        <p>{% if history.transaction_type == "buy" %}Bought{% else %}Sold{% endif %} {{history.number_of_shares}} shares of {{history.company_name}} at Rs. {{history.transacted_price}} on {{history.transaction_date}}</p>
                     </div>
                 </div>
             {% endfor %}
