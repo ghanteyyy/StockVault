@@ -83,3 +83,7 @@ tbody tr:nth-child(even) {
 tbody tr:hover {
     background-color: #c9caca;
 }
+
+.activity_company{
+	font-weight: bolder;
+}
