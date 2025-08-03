@@ -2,6 +2,7 @@ import random
 import datetime
 import Users.models as user_models
 import Shares.models as share_models
+from Shares import share_trading_calculator
 from django.core.management.base import BaseCommand
 
 
@@ -10,7 +11,10 @@ class Command(BaseCommand):
         start_date = datetime.date(2020, 1, 1)
         end_date = datetime.date.today()
 
-        return start_date + (end_date - start_date) * random.random()
+        delta = end_date - start_date
+        random_days = random.randint(0, delta.days)
+
+        return start_date + datetime.timedelta(days=random_days)
 
     def _create_tags(self):
         companies = share_models.ListedCompanies.objects.all()
@@ -36,10 +40,16 @@ class Command(BaseCommand):
 
                 number_of_shares = random.randint(100, 300)
                 rate = round(random.uniform(150.0, 700.0), 2)
-                total_cost = number_of_shares * rate
+
+                transaction_type = 'buy'
+                buy_type = random.choice(['ipo', 'secondary'])
+
+                total_cost = share_trading_calculator.buy_shares_calculation(number_of_shares, rate, buy_type)
+                total_cost = float(total_cost['total_amount'])
 
                 if portfolio.exists():
                     portfolio = portfolio.first()
+
                     portfolio.number_of_shares += number_of_shares
                     portfolio.total_cost += total_cost
 
@@ -48,27 +58,24 @@ class Command(BaseCommand):
 
                 portfolio.save()
 
-                # Create PortfolioLots
-                portfolio_lot = share_models.PortfolioLots(
+                purchased_date = self.generate_random_date()
+
+                share_models.PortfolioLots.objects.create(
                     portfolio_id=portfolio,
                     total_cost=total_cost,
                     number_of_shares=number_of_shares,
-                    purchased_date=self.generate_random_date()
+                    purchased_date=purchased_date
                 )
-                portfolio_lot.save()
 
-                # Create Transactions
-                transaction = share_models.Transactions(
+                share_models.Transactions.objects.create(
                     user_id=user,
                     company_id=company,
+
                     number_of_shares=number_of_shares,
                     transacted_price=total_cost,
-                    transaction_type='buy',
-                    transaction_date=self.generate_random_date()
+                    transaction_date=purchased_date,
+                    transaction_type=transaction_type
                 )
-
-                transaction.save()
-
 
     def handle(self, *args, **options):
         self._create_tags()
