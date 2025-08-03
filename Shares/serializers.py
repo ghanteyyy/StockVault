@@ -25,12 +25,12 @@ class WishlistsSerializer(serializers.ModelSerializer):
         return obj.company_id.name
 
 
-class ShareHoldingsSerializer(serializers.ModelSerializer):
+class PortfoliosSerializer(serializers.ModelSerializer):
     company_name = serializers.SerializerMethodField()
     abbreviation = serializers.SerializerMethodField()
 
     class Meta:
-        model = models.ShareHoldings
+        model = models.Portfolios
         fields = ['id', 'company_name', 'abbreviation', 'number_of_shares', 'total_cost']
 
     def get_company_name(self, obj):
@@ -46,15 +46,16 @@ class HistoricalPricesSerializer(serializers.ModelSerializer):
         model = models.HistoricalPrices
 
 
-class RecentActivitiesSerializer(serializers.ModelSerializer):
-    recorded_at = serializers.SerializerMethodField()
+class TransactionsSerializer(serializers.ModelSerializer):
+    company_name = serializers.SerializerMethodField()
+    transacted_price = serializers.SerializerMethodField()
 
     class Meta:
-        model = models.RecentActivities
-        fields = ['id', 'activity', 'recorded_at']
+        model = models.Transactions
+        fields = ['id', 'company_name', 'number_of_shares', 'transacted_price', 'transaction_type', 'transaction_date']
 
+    def get_company_name(self, obj):
+        return obj.company_id.name
 
-    def get_recorded_at(self, obj):
-        formatted_dt = obj.recorded_at.strftime("%Y-%m-%d")
-
-        return str(formatted_dt)
+    def get_transacted_price(self, obj):
+        return round(obj.transacted_price, 2)
