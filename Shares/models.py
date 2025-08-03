@@ -20,7 +20,7 @@ class ListedCompanies(models.Model):
     created_at = models.DateTimeField(editable=False, default=now)
 
 
-class ShareHoldings(models.Model):
+class Portfolios(models.Model):
     class Meta:
         verbose_name = _("Share Holdings")
         verbose_name_plural = _("Share Holdings")
@@ -35,6 +35,23 @@ class ShareHoldings(models.Model):
 
     total_cost = models.FloatField(blank=True, null=True)
     number_of_shares = models.IntegerField(blank=True, null=True, default=0)
+
+
+class PortfolioLots(models.Model):
+    class Meta:
+        verbose_name = _("Share Holdings")
+        verbose_name_plural = _("Share Holdings")
+
+    def __str__(self):
+        return self.company_id.name
+
+    id = models.CharField(primary_key=True, default=utils.generate_uuid_hex, max_length=255)
+
+    portfolio_id = models.ForeignKey(to="Portfolios", on_delete=models.CASCADE)
+
+    total_cost = models.FloatField(blank=True, null=True)
+    number_of_shares = models.IntegerField(blank=True, null=True, default=0)
+    purchased_date = models.DateField(editable=False, default=now)
 
 
 class Transactions(models.Model):
@@ -84,13 +101,4 @@ class HistoricalPrices(models.Model):
     opening_price = models.IntegerField(blank=True, null=True)
     closing_price = models.IntegerField(blank=True, null=True)
 
-    recorded_at = models.DateTimeField(editable=False, default=now)
-
-
-class RecentActivities(models.Model):
-    id = models.CharField(primary_key=True, editable=False, default=utils.generate_uuid_hex, max_length=255)
-    user_id = models.ForeignKey('Users.CustomUser', on_delete=models.CASCADE)
-    company_id = models.ForeignKey('Shares.ListedCompanies', on_delete=models.CASCADE)
-
-    activity = models.TextField(editable=False)
     recorded_at = models.DateTimeField(editable=False, default=now)
