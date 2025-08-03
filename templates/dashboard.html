@@ -70,9 +70,9 @@
             <h2>🔔 Recent Activity</h2>
             <ul>
                 {% for activity in recent_activities %}
-                    <li><p>{{ activity.activity }} at {{ activity.recorded_at }}</p></li>
+                    <li><p><span class='{% if activity.transaction_type == "buy" %}positive{% else %}negative{% endif %}'>{% if activity.transaction_type == "buy" %}Bought{% else %}Sold{% endif %}</span> {{activity.number_of_shares}} shares of <span class="activity_company">{{activity.company_name}}</span> at Rs. {{activity.transacted_price}} on {{activity.transaction_date}}</p></li>
                 {% empty %}
-                    <li class="error-message">No recent activity</li>
+                    <p class="error-message">No recent activity</p>
                 {% endfor %}
             </ul>
         </div>
