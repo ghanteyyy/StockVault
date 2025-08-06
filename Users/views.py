@@ -333,7 +333,6 @@ def WishListPage(request):
 
         else:
             share_models.WishLists.objects.create(user_id=request.user, company_id=company)
-            share_views.AddToRecentActivities(request.user, company, f'{company_name} added to wishlist')
 
     user_companies = share_models.WishLists.objects.filter(user_id=request.user).values_list('company_id', flat=True)
     companies = share_models.ListedCompanies.objects.exclude(id__in=user_companies)
