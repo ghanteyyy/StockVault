@@ -1,10 +1,11 @@
 .error-container {
-    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     background: #ffebee;
     border: 1px solid #ef9a9a;
     padding: 15px;
     margin-bottom: 20px;
-    position: relative;
 }
 
 .error-list {
@@ -23,9 +24,6 @@
 }
 
 .close {
-    position: absolute;
-    top: 5px;
-    right: 5px;
     cursor: pointer;
-    margin: 0;
+    font-weight: bolder;
 }

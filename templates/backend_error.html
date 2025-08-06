@@ -6,12 +6,13 @@
 
 {% if errors %}
     <div class="error-container">
-        <p class="close">✕</p>
         <ul class="error-list">
             {% for error in errors %}
             <li class="error-item">{{ error }}</li>
             {% endfor %}
         </ul>
+
+        <p class="close">✕</p>
     </div>
 {% endif %}
 
