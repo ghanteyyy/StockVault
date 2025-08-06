@@ -51,6 +51,11 @@ td {
     border-bottom: 1px solid #ddd;
 }
 
+td:not(:nth-child(2)) {
+    text-align: center;
+}
+
+
 th {
     background-color: #007bff;
     color: #fff;
