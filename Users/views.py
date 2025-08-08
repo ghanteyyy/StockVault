@@ -13,6 +13,7 @@ from urllib.parse import unquote
 import Shares.views as share_views
 import Users.models as user_models
 import Shares.models as share_models
+import Users.serializers as user_serializers
 import Shares.serializers as share_serializers
 
 
@@ -406,6 +407,71 @@ def ProfitLossPage(request):
     }
 
     return render(request, 'profit_loss.html', context)
+
+
+@login_required(login_url='login')
+def TargetPage(request):
+    """
+    Handles the logic for adding a target to buy/sell a share
+    at a specific price when it reaches a certain price.
+    """
+
+    errors = []
+
+    if request.method.lower() == 'post':
+        company_name = request.POST.get('company').strip()
+        low_target = request.POST.get('low_target').strip()
+        high_target = request.POST.get('high_target').strip()
+        target_type = request.POST.get('target_type').strip()
+
+        if not any([company_name, low_target, high_target, target_type]):
+            errors.append('All fields are required')
+
+        try:
+            float(low_target)
+            float(high_target)
+
+        except ValueError:
+            errors.append('Low and high targets must be valid numbers')
+
+        if float(low_target) >= float(high_target):
+            errors.append('Low target must be less than high target')
+
+        if target_type not in ['buy', 'sell']:
+            errors.append('Invalid target type selected')
+
+        company_name = company_name.split('(')[0].strip()
+        company = share_models.ListedCompanies.objects.get(name__iexact=company_name)
+
+        if user_models.Targets.objects.filter(user_id=request.user, company_id=company).exists():
+            errors.append(f'Target for {company_name} already exists')
+
+        if not errors:
+            user_models.Targets.objects.create(
+                user_id=request.user,
+                company_id=company,
+                low_target=float(low_target),
+                high_target=float(high_target),
+                target_type=target_type
+            )
+
+    # Getting share names along with its abbreviation. Eg: Green Venture Limited (GVL)
+    companies = share_models.ListedCompanies.objects.all()
+
+    serialized_companies = share_serializers.CompaniesSerializer(companies, many=True).data
+    companies = [f"{company['name']} ({company['abbreviation']})" for company in serialized_companies]
+
+    targets = user_models.Targets.objects.filter(user_id=request.user)
+    targets = user_serializers.TargetsSerializer(targets, many=True).data
+
+    context = {
+        'errors': errors,
+        'targets': targets,
+        'page_title': 'Target | Stock Vault',
+        'companies': json.dumps(companies),
+    }
+
+    return render(request, 'target.html', context)
 
 
 @login_required(login_url='login')
