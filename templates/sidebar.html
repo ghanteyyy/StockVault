@@ -19,6 +19,7 @@
             <li class="{% if request.resolver_match.url_name == 'trade-calculator' %}active{% endif %}"><a class="sidebar-links" href="{% url 'trade-calculator' %}">🧮 Calculator</a></li>
             <li class="{% if request.resolver_match.url_name == 'buy-sell' %}active{% endif %}"><a class='sidebar-links' href="{% url 'buy-sell' %}">💸 Buy / Sell</a></li>
             <li class="{% if request.resolver_match.url_name == 'wishlist' %}active{% endif %}"><a class='sidebar-links' href="{% url 'wishlist' %}">⭐ Wishlist</a></li>
+            <li class="{% if request.resolver_match.url_name == 'target' %}active{% endif %}"><a class='sidebar-links' href="{% url 'target' %}">🎯 Target</a></li>
             <li class="{% if request.resolver_match.url_name == 'settings' %}active{% endif %}"><a class='sidebar-links' href="{% url 'settings' %}">⚙️ Settings</a></li>
             <li><a class='sidebar-links' href="{% url 'logout' %}">🚪 Logout</a></li>
         </ul>
