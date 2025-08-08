@@ -1,0 +1,60 @@
+{% extends 'root.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/target.css' %}">
+    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div class="main-content">
+        <div class="content">
+            <div class="card">
+                <form onsubmit="return validateTargetForm()" action="" method="POST">
+                    {% include 'stock_searching.html' %}
+                    {% csrf_token %}
+                </form>
+
+                {% include 'backend_error.html' %}
+            </div>
+        </div>
+
+        <div class="card">
+            {% if targets %}
+                <table>
+                    <thead>
+                        <th>SN</th>
+                        <th>Company</th>
+                        <th>Low Target</th>
+                        <th>High Target</th>
+                        <th>Action</th>
+                    </thead>
+
+                    <tbody>
+                        {% for target in targets %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ target.company_name }} ({{ target.abbreviation }})</td>
+                                <td>{{ target.low_target }}</td>
+                                <td>{{ target.high_target }}</td>
+                                <td>
+                                    <a href="#" class="delete-btn">{{target.target_type|title}}</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            {% else %}
+                <p class="error-message">No Targets Added Yet</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block js%}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/stock_searching.js' %}" defer></script>
+    <script src="{% static 'js/target.js' %}" defer></script>
+{% endblock %}
