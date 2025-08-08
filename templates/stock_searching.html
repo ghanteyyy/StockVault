@@ -13,6 +13,17 @@
             <input type="text" placeholder="Buying Rate" class="buying_rate share_numbering" name="buying_rate">
         {% endif %}
 
+        {% if request.resolver_match.url_name == 'target' %}
+            <input type="text" placeholder="Low target amount" class="low_target" name="low_target">
+            <input type="text" placeholder="High target amount" class="high_target" name="high_target">
+
+            <select name="target_type" id="target_type">
+                <option value="" selected="selected" hidden="hidden">Target Type</option>
+                <option value="buy">Buy</option>
+                <option value="sell">Sell</option>
+            </select>
+        {% endif %}
+
         <button type="submit" id="add-btn" class="add-btn">Add</button>
         <div id="suggestions" class="suggestions"></div>
     </div>
