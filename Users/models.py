@@ -104,3 +104,34 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
+
+
+class Targets(models.Model):
+    class Meta:
+        verbose_name = _("Targets")
+        verbose_name_plural = _("Targets")
+
+    def __str__(self):
+        return self.company_id.name
+
+    id = models.CharField(primary_key=True, default=utils.generate_uuid_hex, max_length=255)
+
+    user_id = models.ForeignKey(to='Users.CustomUser', on_delete=models.CASCADE)
+    company_id = models.ForeignKey(to="Shares.ListedCompanies", on_delete=models.CASCADE)
+
+    low_target = models.FloatField(blank=True, null=True)
+    high_target = models.FloatField(blank=True, null=True)
+    target_type = models.CharField(
+        verbose_name=_('target type'),
+        max_length=50, null=False, blank=False,
+        choices=[
+            ("buy", _("Buy")),
+            ("sell", _("Sell")),
+        ]
+    )
+
+    def get_target_type(self):
+        return [
+            ("buy", _("Buy")),
+            ("sell", _("Sell")),
+        ]
