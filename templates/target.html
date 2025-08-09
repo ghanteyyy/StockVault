@@ -28,6 +28,7 @@
                         <th>Company</th>
                         <th>Low Target</th>
                         <th>High Target</th>
+                        <th>Current Market Price</th>
                         <th>Action</th>
                     </thead>
 
@@ -37,6 +38,7 @@
                                 <td>{{ forloop.counter }}</td>
                                 <td>{{ target.company_name }} ({{ target.abbreviation }})</td>
                                 <td>{{ target.low_target }}</td>
+                                <td>{{ target.market_price }}</td>
                                 <td>{{ target.high_target }}</td>
                                 <td>
                                     <a href="#" class="delete-btn">{{target.target_type|title}}</a>
