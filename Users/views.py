@@ -15,6 +15,7 @@ import Users.models as user_models
 import Shares.models as share_models
 import Users.serializers as user_serializers
 import Shares.serializers as share_serializers
+from Shares import scraper
 
 
 def HomePage(request):
@@ -463,6 +464,9 @@ def TargetPage(request):
 
     targets = user_models.Targets.objects.filter(user_id=request.user)
     targets = user_serializers.TargetsSerializer(targets, many=True).data
+
+    for target in targets:
+        target['market_price'] = scraper.get_market_data(target['abbreviation'])['market_price']
 
     context = {
         'errors': errors,
