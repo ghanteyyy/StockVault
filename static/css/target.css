@@ -57,10 +57,9 @@ td:not(:nth-child(2)) {
     text-align: center;
 }
 
-.delete-btn {
+.target_type {
     display: inline-block;
     padding: 6px 12px;
-    background-color: #d9534f;
     color: white;
     text-decoration: none;
     border-radius: 4px;
@@ -68,6 +67,119 @@ td:not(:nth-child(2)) {
     transition: background-color 0.2s ease;
 }
 
-.delete-btn:hover {
-    background-color: #c9302c;
+td.action_buttons {
+    gap: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.target_type.buy {
+    background-color: #28a745;
+}
+
+.target_type.sell {
+    background-color: #dc3545;
+}
+
+.bx{
+    cursor: pointer;
+    font-size: 15px;
+    transition: color 0.25s ease;
+}
+
+.bx-edit-alt {
+    color: #007bff;
+}
+
+.bxs-trash {
+    color: #dc3545;
+}
+
+/* Modal background */
+.edit_target {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+}
+
+/* Modal form */
+.edit_target .edit {
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 10px;
+    width: 350px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.edit_target h2 {
+    margin: 0;
+    font-size: 20px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 8px;
+}
+
+.edit_target input {
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    background: #2a2a2a;
+    color: #fff;
+    outline: none;
+}
+
+/* Submit button */
+.edit_target button {
+    padding: 10px;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.edit_target button:hover {
+    background-color: #45a049;
+}
+
+/* Close button */
+.close-btn {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 22px;
+    font-weight: bold;
+    color: #bbb;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.close-btn:hover {
+    color: #fff;
+}
+
+.edit_target .edit {
+    position: relative;
+}
+
+.edit-error-message {
+    background-color: rgba(220, 53, 69, 0.15);
+    border: 1px solid #dc3545;
+    color: #f5b5b5;
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    font-size: 12px;
 }

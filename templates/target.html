@@ -22,31 +22,63 @@
 
         <div class="card">
             {% if targets %}
-                <table>
-                    <thead>
-                        <th>SN</th>
-                        <th>Company</th>
-                        <th>Low Target</th>
-                        <th>High Target</th>
-                        <th>Current Market Price</th>
-                        <th>Action</th>
-                    </thead>
+            <table>
+                <thead>
+                    <th>SN</th>
+                    <th>Company</th>
+                    <th>Low Target</th>
+                    <th>High Target</th>
+                    <th>Current Market Price</th>
+                    <th>Action</th>
+                </thead>
 
-                    <tbody>
-                        {% for target in targets %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td>{{ target.company_name }} ({{ target.abbreviation }})</td>
-                                <td>{{ target.low_target }}</td>
-                                <td>{{ target.market_price }}</td>
-                                <td>{{ target.high_target }}</td>
-                                <td>
-                                    <a href="#" class="delete-btn">{{target.target_type|title}}</a>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <tbody>
+                    {% for target in targets %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ target.company_name }} ({{ target.abbreviation }})</td>
+                            <td>{{ target.low_target }}</td>
+                            <td>{{ target.high_target }}</td>
+                            <td>{{ target.market_price }}</td>
+                            <td class="action_buttons">
+                                {% if target.show_buy_sell %}
+                                    <a href="#" class="target_type {{target.target_type}}">{{target.target_type|title}}</a>
+                                {% endif %}
+
+                                <i class='bx bx-edit-alt'
+                                        data-company_name="{{target.company_name}}"
+                                        data-abbreviation="{{target.abbreviation}}"
+                                        data-low_target="{{target.low_target}}"
+                                        data-high_target="{{target.high_target}}"
+                                        data-target_type="{{target.target_type}}"
+                                        onclick="displayEditTargetForm(this)"
+                                    >
+                                </i>
+                                <a href="{% url 'delete-target' target.abbreviation %}">
+                                    <i class='bx bxs-trash'></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="edit_target">
+                <form action="{% url 'edit-target' %}" onsubmit="return validateEditTargetForm()" class="edit" method="POST">
+                    {% csrf_token %}
+
+                    <span class="close-btn" onclick="hideEditTargetForm()">&times;</span>
+
+                    <h2>Edit Target</h2>
+                    <p class="company_title"></p>
+                    <p class="edit-error-message" style="display:none;"></p>
+
+                    <input type="text" name="company_abbr" id="edit_company_abbr" hidden>
+                    <input type="text" id="edit_low_target" placeholder="Low Target" name="edit_low_target">
+                    <input type="text" id="edit_high_target" placeholder="High Target" name="edit_high_target">
+                    <button type="submit" class="">Update</button>
+                </form>
+            </div>
 
             {% else %}
                 <p class="error-message">No Targets Added Yet</p>
