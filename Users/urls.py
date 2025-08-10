@@ -13,6 +13,8 @@ urlpatterns = [
     path('wishlist/', views.WishListPage, name='wishlist'),
     path('settings/', views.SettingsPage, name='settings'),
     path('portfolio/timeline', views.Timeline, name='timeline'),
+    path('target/edit', views.TargetEdit, name='edit-target'),
     path('profit-loss/', views.ProfitLossPage, name='profit-loss'),
     path('trade-calculator/', views.TradeCalculator, name='trade-calculator'),
+    path('target/<str:company>/delete', views.TargetDelete, name='delete-target'),
 ]
