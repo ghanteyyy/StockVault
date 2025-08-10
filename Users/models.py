@@ -130,6 +130,24 @@ class Targets(models.Model):
         ]
     )
 
+    created_at = models.DateTimeField(
+        verbose_name=_('created at'),
+        default=now,
+        editable=False,
+    )
+
+    is_deleted = models.BooleanField(
+        verbose_name=_('is deleted'),
+        default=False,
+        help_text=_('Indicates whether the target is deleted or not.')
+    )
+
+    updated_at = models.DateTimeField(
+        verbose_name=_('updated at'),
+        default=now,
+        editable=False,
+    )
+
     def get_target_type(self):
         return [
             ("buy", _("Buy")),
