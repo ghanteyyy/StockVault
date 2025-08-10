@@ -444,7 +444,7 @@ def TargetPage(request):
         company_name = company_name.split('(')[0].strip()
         company = share_models.ListedCompanies.objects.get(name__iexact=company_name)
 
-        if user_models.Targets.objects.filter(user_id=request.user, company_id=company).exists():
+        if user_models.Targets.objects.filter(user_id=request.user, company_id=company, is_deleted=False).exists():
             errors.append(f'Target for {company_name} already exists')
 
         if not errors:
@@ -462,11 +462,18 @@ def TargetPage(request):
     serialized_companies = share_serializers.CompaniesSerializer(companies, many=True).data
     companies = [f"{company['name']} ({company['abbreviation']})" for company in serialized_companies]
 
-    targets = user_models.Targets.objects.filter(user_id=request.user)
+    targets = user_models.Targets.objects.filter(user_id=request.user, is_deleted=False)
     targets = user_serializers.TargetsSerializer(targets, many=True).data
 
     for target in targets:
-        target['market_price'] = scraper.get_market_data(target['abbreviation'])['market_price']
+        market_data = scraper.get_market_data(target['abbreviation'])
+        market_price = float(market_data['market_price'])
+
+        low_target, high_target = target['low_target'], target['high_target']
+        show_buy_sell = True if low_target <= market_price <= high_target else False
+
+        target['market_price'] = market_price
+        target['show_buy_sell'] = show_buy_sell
 
     context = {
         'errors': errors,
@@ -477,6 +484,45 @@ def TargetPage(request):
 
     return render(request, 'target.html', context)
 
+
+@login_required(login_url='login')
+def TargetDelete(request, company):
+    """
+    Deletes a target for a specific company.
+    """
+
+    target = user_models.Targets.objects.filter(user_id=request.user, company_id__abbreviation__iexact=company).first()
+
+    if target:
+        target.is_deleted = True
+        target.save()
+
+    return redirect('target')
+
+
+@login_required(login_url='login')
+def TargetEdit(request):
+    """
+    Handles the logic for editing a target for a specific company
+    """
+
+    if request.method.lower() == 'post':
+        company_abbr = request.POST.get('company_abbr').strip()
+        low_target = request.POST.get('edit_low_target').strip()
+        high_target = request.POST.get('edit_high_target').strip()
+
+        target = user_models.Targets.objects.filter(user_id=request.user, company_id__abbreviation__iexact=company_abbr, is_deleted=False).first()
+
+        if target:
+            low_target = float(low_target)
+            high_target = float(high_target)
+
+            target.low_target = low_target
+            target.high_target = high_target
+
+            target.save()
+
+        return redirect('target')
 
 @login_required(login_url='login')
 def SettingsPage(request, errors=None):
