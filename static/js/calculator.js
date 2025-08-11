@@ -30,22 +30,23 @@ const charges = {
 
 choices.forEach(choice => {
     choice.addEventListener('click', () => {
-        if (active === choice) {  // Reset widths
+        if (active === choice) {  // Reset widths and hide submit
             choices.forEach(c => c.style.flex = '1');
             active = null;
             actionInput.value = '';   // clear action
 
             wrapper.style.display = 'none';
+            submit.style.display = 'none';  // hide submit
             document.querySelector('.output-wrapper').replaceChildren(); // removes all children
         }
-
-        else {  // Expand clicked, shrink others
+        else {  // Expand clicked, shrink others and show submit
             choices.forEach(c => c.style.flex = c === choice ? '4' : '1');
             active = choice;
 
             actionInput.value = choice.classList.contains('buy') ? 'buy' : 'sell';
 
             wrapper.style.display = 'flex';
+            submit.style.display = 'block';  // show submit
 
             if(actionInput.value == 'buy'){
                 sell_wrapper.style.display = 'none';
@@ -53,9 +54,8 @@ choices.forEach(choice => {
 
                 submit.classList.remove('sell-submit');
             }
-
             else{
-                submit.classList.toggle('sell-submit');
+                submit.classList.add('sell-submit');
 
                 buy_wrapper.style.display = 'none';
                 sell_wrapper.style.display = 'flex';
@@ -63,6 +63,7 @@ choices.forEach(choice => {
         }
     });
 });
+
 
 
 submit.addEventListener("click", () => {
@@ -207,11 +208,12 @@ function sell_share() {
     const error = document.querySelectorAll('.error')[1];
 
     buy_type = document.querySelector('input[name="buy_type"]:checked')?.value || null;
-    share_quantity = document.querySelectorAll('#share_quantity')[1].value;
+    share_quantity = document.querySelector('#share_quantity_sell').value;
     purchase_value = document.querySelector('#purchase_price').value;
     selling_price = document.querySelector('#selling_price').value;
     cgt_value = document.getElementById('CGT').value;
 
+    console.log(buy_type, share_quantity, purchase_value, selling_price, cgt_value);
     if(!buy_type || !number_regex.test(share_quantity) || !float_regex.test(purchase_value) || !float_regex.test(selling_price || !cgt_value)){
         error.classList.add('show');
         return;

@@ -1,99 +1,113 @@
-.main-content{
-    padding: 10px;
-    overflow-y: visible;
+.targets-list {
+    padding: 20px 15px;
 }
 
-.input-group{
+.target-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.target-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.07);
+    padding: 15px 20px;
+    flex: 1 1 calc(50% - 20px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: box-shadow 0.2s ease;
+}
+
+.target-card:hover {
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+.target-header {
+    display: flex;
+    align-items: center;
     gap: 10px;
+    font-weight: 700;
+    font-size: 1.1em;
+    margin-bottom: 12px;
 }
 
-.low_target,
-.high_target{
-    width: 20%;
-    padding-left: 10px;
+.company-name {
+    color: #1976d2;
+    flex-grow: 1;
 }
 
-select{
-    width: 10%;
-}
-
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    color: #f1f1f1;
-    font-size: 14px;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
-}
-
-thead {
-    background-color: #272727;
-}
-
-thead th {
-    padding: 12px;
-    text-align: left;
-    font-weight: bold;
-    border-bottom: 2px solid #333;
-}
-
-th:not(:nth-child(2)) {
-    text-align: center;
-}
-
-tbody tr {
-    border-bottom: 1px solid #333;
-}
-
-td {
-    padding: 10px;
-    vertical-align: middle;
-    color: #1e1e1e;
-}
-
-td:not(:nth-child(2)) {
-    text-align: center;
-}
-
-.target_type {
-    display: inline-block;
-    padding: 6px 12px;
+.target-type {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: uppercase;
     color: white;
-    text-decoration: none;
-    border-radius: 4px;
-    font-size: 13px;
-    transition: background-color 0.2s ease;
+    user-select: none;
 }
 
-td.action_buttons {
-    gap: 10px;
+.target-type.buy {
+    background-color: #4caf50;
+}
+
+.target-type.sell {
+    background-color: #f44336;
+}
+
+.target-details p {
+    margin: 6px 0;
+    font-size: 0.95em;
+    color: #444;
+}
+
+.target-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.edit-btn, .delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #1976d2;
+    font-size: 18px;
+    padding: 6px 8px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.target_type.buy {
-    background-color: #28a745;
+.edit-btn:hover,
+.edit-btn:focus {
+    background-color: #e3f2fd;
+    outline: none;
 }
 
-.target_type.sell {
-    background-color: #dc3545;
+.delete-btn {
+    color: #f44336;
+    text-decoration: none;
 }
 
-.bx{
-    cursor: pointer;
-    font-size: 15px;
-    transition: color 0.25s ease;
+.delete-btn:hover,
+.delete-btn:focus {
+    background-color: #ffebee;
+    outline: none;
 }
 
-.bx-edit-alt {
-    color: #007bff;
+.edit-btn i,
+.delete-btn i {
+    pointer-events: none;
 }
 
-.bxs-trash {
-    color: #dc3545;
+.edit-btn:hover,
+.delete-btn:hover {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
 /* Modal background */
@@ -182,4 +196,17 @@ td.action_buttons {
     margin-bottom: 10px;
     border-radius: 4px;
     font-size: 12px;
+}
+
+
+@media (max-width: 900px) {
+    .target-card {
+        flex: 1 1 calc(50% - 20px);
+    }
+}
+
+@media (max-width: 600px) {
+    .target-card {
+        flex: 1 1 100%;
+    }
 }

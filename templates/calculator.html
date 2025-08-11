@@ -2,76 +2,84 @@
 {% load static %}
 
 {% block css %}
-<link rel="stylesheet" href="{% static 'css/calculator.css' %}">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/calculator.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-<div class="content">
-    <div class="options">
-        <p class="action" hidden></p>
+    <div class="content">
+        <div class="options">
+            <p class="action" hidden></p>
+            <p class="buy choice">Buy</p>
+            <p class="sell choice">Sell</p>
+        </div>
 
-        <p class="buy choice">Buy</p>
-        <p class="sell choice">Sell</p>
-    </div>
+        <div class="wrapper">
+            <div class="input-wrapper">
+                <div class="buy-input-wrapper">
+                    <p class="error">All fields are required and valid</p>
+                    <p class="action" hidden></p>
 
-    <div class="wrapper">
-        <div class="input-wrapper">
-            <div class="buy-input-wrapper">
-                <p class="error">All fields are required and valid</p>
-
-                <p class="action" hidden></p>
-
-                <input type="text" placeholder="Number of Shares" id="share_quantity">
-                <input type="text" placeholder="Price per share" id="share_price">
-
-            </div>
-
-            <div class="sell-input-wrapper">
-                <p class="error">All fields are required and valid</p>
-
-                <div class="buy-type">
-                    <p>Buy Type:</p>
-                    <div class="radio-buttons">
-
-                        <div class="radio-button">
-                            <input type="radio" id="ipo" name="buy_type" value="ipo">
-                            <label for="ipo">IPO</label>
-                        </div>
-
-                        <div class="radio-button">
-                            <input type="radio" id="secondary" name="buy_type" value="secondary">
-                            <label for="secondary">Secondary</label>
-                        </div>
+                    <div class="input-icon-wrapper">
+                        <i class="fas fa-layer-group"></i>
+                        <input type="text" placeholder="Number of Shares" id="share_quantity">
+                    </div>
+                    <div class="input-icon-wrapper">
+                        <i class="fas fa-dollar-sign"></i>
+                        <input type="text" placeholder="Price per share" id="share_price">
                     </div>
                 </div>
 
-                <input type="text" placeholder="Number of Shares" id="share_quantity">
-                <input type="text" placeholder="Purchase Price per share" id="purchase_price">
-                <input type="text" placeholder="Selling Price per share" id="selling_price">
+                <div class="sell-input-wrapper">
+                    <p class="error">All fields are required and valid</p>
 
-                <div class="CGT">
-                    <p>Capital Gain Tax</p>
+                    <div class="buy-type">
+                        <p>Buy Type:</p>
+                        <div class="radio-buttons">
+                            <div class="radio-button">
+                                <input type="radio" id="ipo" name="buy_type" value="ipo">
+                                <label for="ipo">IPO</label>
+                            </div>
+                            <div class="radio-button">
+                                <input type="radio" id="secondary" name="buy_type" value="secondary">
+                                <label for="secondary">Secondary</label>
+                            </div>
+                        </div>
+                    </div>
 
-                    <select id="CGT">
-                        <option value="" selected disabled>Select Capital Gain Tax</option>
-                        <option value="Less than a year (7.5%)">Less than a year (7.5%)</option>
-                        <option value="More than a year (5%)">More than a year (5%)</option>
-                        <option value="Institutional (10%)">Institutional (10%)</option>
-                    </select>
+                    <div class="input-icon-wrapper">
+                        <i class="fas fa-layer-group"></i>
+                        <input type="text" placeholder="Number of Shares" id="share_quantity_sell">
+                    </div>
+                    <div class="input-icon-wrapper">
+                        <i class="fas fa-arrow-up"></i>
+                        <input type="text" placeholder="Purchase Price per share" id="purchase_price">
+                    </div>
+                    <div class="input-icon-wrapper">
+                        <i class="fas fa-arrow-down"></i>
+                        <input type="text" placeholder="Selling Price per share" id="selling_price">
+                    </div>
+
+                    <div class="CGT">
+                        <p>Capital Gain Tax</p>
+                        <select id="CGT">
+                            <option value="" selected disabled>Select Capital Gain Tax</option>
+                            <option value="Less than a year (7.5%)">Less than a year (7.5%)</option>
+                            <option value="More than a year (5%)">More than a year (5%)</option>
+                            <option value="Institutional (10%)">Institutional (10%)</option>
+                        </select>
+                    </div>
                 </div>
+
+                <p class="submit">Calculate</p>
             </div>
 
-            <p class="submit">Calculate</p>
-
-        </div>
-
-        <div class="output-wrapper">
+            <div class="output-wrapper"></div>
         </div>
     </div>
-</div>
+
 {% endblock %}
 
 {% block js %}
-<script src="{% static 'js/calculator.js' %}" defer></script>
+    <script src="{% static 'js/calculator.js' %}" defer></script>
 {% endblock %}

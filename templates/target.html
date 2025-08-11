@@ -8,65 +8,63 @@
 {% endblock %}
 
 {% block content %}
-    <div class="main-content">
-        <div class="content">
-            <div class="card">
-                <form onsubmit="return validateTargetForm()" action="" method="POST">
-                    {% include 'stock_searching.html' %}
-                    {% csrf_token %}
-                </form>
-
-                {% include 'backend_error.html' %}
-            </div>
-        </div>
-
+    <div class="content">
         <div class="card">
-            {% if targets %}
-            <table>
-                <thead>
-                    <th>SN</th>
-                    <th>Company</th>
-                    <th>Low Target</th>
-                    <th>High Target</th>
-                    <th>Current Market Price</th>
-                    <th>Action</th>
-                </thead>
+            <form onsubmit="return validateTargetForm()" action="" method="POST">
+                {% include 'stock_searching.html' %}
+                {% csrf_token %}
+            </form>
 
-                <tbody>
-                    {% for target in targets %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ target.company_name }} ({{ target.abbreviation }})</td>
-                            <td>{{ target.low_target }}</td>
-                            <td>{{ target.high_target }}</td>
-                            <td>{{ target.market_price }}</td>
-                            <td class="action_buttons">
-                                {% if target.show_buy_sell %}
-                                    <a href="#" class="target_type {{target.target_type}}">{{target.target_type|title}}</a>
-                                {% endif %}
+            {% include 'backend_error.html' %}
+        </div>
+    </div>
 
-                                <i class='bx bx-edit-alt'
-                                        data-company_name="{{target.company_name}}"
-                                        data-abbreviation="{{target.abbreviation}}"
-                                        data-low_target="{{target.low_target}}"
-                                        data-high_target="{{target.high_target}}"
-                                        data-target_type="{{target.target_type}}"
-                                        onclick="displayEditTargetForm(this)"
-                                    >
-                                </i>
-                                <a href="{% url 'delete-target' target.abbreviation %}">
-                                    <i class='bx bxs-trash'></i>
-                                </a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="card targets-list">
+        {% if targets %}
+            <div class="target-cards">
+                {% for target in targets %}
+                    <div class="target-card">
+                        <div class="target-header">
+                            <span class="company-name">{{ target.company_name }} ({{ target.abbreviation }})</span>
+                            {% if target.show_buy_sell %}
+                                <span class="target-type {{ target.target_type }}">
+                                    {{ target.target_type|title }}
+                                </span>
+                            {% endif %}
+                        </div>
+                        <div class="target-details">
+                            <p><strong>Low Target:</strong> {{ target.low_target }}</p>
+                            <p><strong>High Target:</strong> {{ target.high_target }}</p>
+                            <p><strong>Current Market Price:</strong> {{ target.market_price }}</p>
+                        </div>
 
+                        <div class="target-actions">
+                            <button
+                                class="edit-btn"
+                                data-company_name="{{target.company_name}}"
+                                data-abbreviation="{{target.abbreviation}}"
+                                data-low_target="{{target.low_target}}"
+                                data-high_target="{{target.high_target}}"
+                                data-target_type="{{target.target_type}}"
+                                onclick="displayEditTargetForm(this)"
+                                aria-label="Edit target for {{target.company_name}}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+
+                            <a href="{% url 'delete-target' target.abbreviation %}" class="delete-btn" aria-label="Delete target for {{target.company_name}}">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                        </div>
+
+
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Edit form remains unchanged -->
             <div class="edit_target">
                 <form action="{% url 'edit-target' %}" onsubmit="return validateEditTargetForm()" class="edit" method="POST">
                     {% csrf_token %}
-
                     <span class="close-btn" onclick="hideEditTargetForm()">&times;</span>
 
                     <h2>Edit Target</h2>
@@ -76,15 +74,15 @@
                     <input type="text" name="company_abbr" id="edit_company_abbr" hidden>
                     <input type="text" id="edit_low_target" placeholder="Low Target" name="edit_low_target">
                     <input type="text" id="edit_high_target" placeholder="High Target" name="edit_high_target">
-                    <button type="submit" class="">Update</button>
+                    <button type="submit">Update</button>
                 </form>
             </div>
 
-            {% else %}
-                <p class="error-message">No Targets Added Yet</p>
-            {% endif %}
-        </div>
+        {% else %}
+            <p class="error-message">No Targets Added Yet</p>
+        {% endif %}
     </div>
+
 {% endblock %}
 
 {% block js%}

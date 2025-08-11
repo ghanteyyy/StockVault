@@ -1,151 +1,157 @@
-.main-content {
-    flex-grow: 1;
-    overflow-y: auto;
+* {
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
 }
 
 .content {
-    background-color: #fff;
-}
-
-.content h2 {
-    color: #666;
-    font-size: 18px;
-    font-weight: bolder;
-    padding-bottom: 5px;
-    margin-bottom: 15px;
-    border-bottom: 2px solid #ddd;
-}
-
-.content p {
-    font-size: 12px;
-    color: #999;
-    margin-bottom: 15px;
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 0 20px;
+    border-radius: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
 }
 
 .profile-section {
+    flex: 1 1 220px;
     text-align: center;
+    user-select: none;
+}
+
+.profile-image-container {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(255, 138, 101, 0.5);
+    cursor: pointer;
+    transition: box-shadow 0.3s ease;
+}
+
+.profile-image-container:hover {
+    box-shadow: 0 10px 30px rgba(255, 138, 101, 0.75);
 }
 
 .profile-image {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    margin-bottom: 10px;
-    cursor: pointer;
-    border: 2px solid #ddd;
+    border-radius: 50%;
+    display: block;
+    transition: transform 0.3s ease;
 }
 
-.upload-delete-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
+.profile-image-container:hover .profile-image {
+    transform: scale(1.05);
 }
 
-.upload-delete-buttons button {
-    padding: 5px 10px;
-    font-size: 12px;
-    border: 1px solid #ddd;
-    background-color: #fff;
-    border-radius: 4px;
-    cursor: pointer;
+.profile-section p {
+    font-size: 0.8rem;
+    color: #ff7043;
+    margin-top: 8px;
+    font-weight: 600;
 }
 
-.upload-delete-buttons button:hover {
-    background-color: #f5f5f5;
+#profile_image {
+    display: none;
 }
 
-.form-group-container{
+.form-group-container {
+    flex: 2 1 440px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    margin-left: 20%;
+    gap: 24px;
 }
 
-.form-group label {
-    display: block;
-    font-size: 12px;
-    color: #666;
-    margin-bottom: 5px;
-}
-
-.form-group input {
-    width: 70%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    box-sizing: border-box;
-}
-
-.form-group input[type="password"] {
-    padding-right: 30px;
-}
-
-.name-group {
+.form-group {
     display: flex;
-    gap: 10px;
+    flex-direction: column;
+    gap: 6px;
 }
 
-.name-group .form-group {
-    flex: 1;
+label {
+    font-weight: 600;
+    color: #555;
+    font-size: 1rem;
+}
+
+.no_form_type {
+    background: #f5f5f5;
+    padding: 10px 14px;
+    border-radius: 8px;
+    color: #444;
+    font-weight: 600;
+    user-select: text;
+}
+
+.change-password p {
+    color: #666;
+    font-size: 0.95rem;
+    margin-bottom: 12px;
 }
 
 .password-group {
     display: flex;
-    gap: 10px;
-    flex-direction: column
+    flex-wrap: wrap;
+    gap: 20px;
 }
 
 .password-group .form-group {
-    flex: 1;
-    position: relative;
+    flex: 1 1 200px;
 }
 
-.password-group input {
-    padding-right: 30px;
+input[type="password"] {
+    padding: 10px 14px;
+    font-size: 1rem;
+    border: 1.5px solid #ccc;
+    border-radius: 8px;
+    transition: border-color 0.25s ease;
 }
 
-.change-password > label {
-    font-weight: bold;
-    font-size: 1.25rem;
-    color: #333;
+input[type="password"]:focus {
+    border-color: #999;
+    outline: none;
+    box-shadow: 0 0 6px rgba(150,150,150, 0.3);
+}
+
+.error {
+    color: #d9534f;
+    font-size: 0.85rem;
+    margin-top: 4px;
+    display: none;
 }
 
 .save-button {
-    color: #fff;
+    align-self: flex-start;
+    padding: 12px 36px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    background: #888;
     border: none;
+    border-radius: 8px;
+    color: white;
     cursor: pointer;
-    font-size: 14px;
-    border-radius: 4px;
-    padding: 10px 20px;
-    width: max-content !important;
-    line-height: 2;
-    background-color: #007bff;
+    transition: background-color 0.3s ease;
 }
 
 .save-button:hover {
-    background-color: #0056b3;
+    background: #666;
 }
 
-input[type="file"] {
-    display: none;
-}
+@media (max-width: 720px) {
+    .content {
+        flex-direction: column;
+        max-width: 100%;
+    }
 
-.no_form_type{
-    padding: 8px;
-    cursor: default;
-    user-select: none;
-    font-weight: bolder;
-}
+    .profile-section, .form-group-container {
+        flex: 1 1 100%;
+    }
 
-.error{
-    display: none;
-    color: #ef4444;
-    font-size: 0.75rem;
-    margin-top: 4px;
+    .password-group {
+        flex-direction: column;
+    }
 }
-.error.show{
-    display: block;
-}
-

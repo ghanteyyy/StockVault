@@ -20,72 +20,49 @@ input[type="text"]{
     border: 1px solid rgb(168, 167, 167);
 }
 
-.share_numbering{
-    padding: 8px;
-    font-size: 16px;
-}
-
-.main-content{
-    padding: 0;
-}
-
-.card:first-child{
-    padding: 30px 30px 0 30px;
-}
-
-.company_name{
-    font-size: 1.5rem;
-    font-weight: bold;
-    text-decoration: underline;
-}
-
-.card.company-list {
-    width: 100%;
-    border-radius: 12px;
-    padding: 20px;
+.company-list {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     gap: 15px;
 }
 
-.inner_card {
-    display: flex;
-    border: 1px solid grey;
-    flex-direction: column;
-    padding: 15px;
-    background: rgba(255, 255, 255, 0.8);
+.company-item {
+    flex: 1 1 calc(50% - 15px);
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
     border-radius: 8px;
+    padding: 15px;
+    color: #333;
     text-decoration: none;
-    color: inherit;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
-.inner_card:hover {
+.company-item:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.562);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-.company_name {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: #1a1a1a;
+.company-title {
+    font-size: 1.05em;
+    font-weight: bold;
+    color: #1976d2;
     margin-bottom: 10px;
 }
 
-.inner_card_content {
+.company-details {
     display: flex;
     justify-content: space-between;
-    font-size: 0.95rem;
-    color: #2d3748;
-    margin: 5px 0;
+    font-size: 0.95em;
+    color: #555;
 }
 
-.inner_card_content p:first-child {
-    font-weight: 500;
-}
-
-.inner_card_content p:last-child {
-    color: #1a1a1a;
+.company-details .quantity {
+    font-weight: bold;
+    color: #2e7d32;
 }
 
 .error-message {
@@ -96,19 +73,7 @@ input[type="text"]{
 }
 
 @media (max-width: 600px) {
-    .card.company-list {
-        padding: 15px;
-    }
-
-    .inner_card {
-        padding: 10px;
-    }
-
-    .company_name {
-        font-size: 1.1rem;
-    }
-
-    .inner_card_content {
-        font-size: 0.9rem;
+    .company-item {
+        flex: 1 1 100%;
     }
 }

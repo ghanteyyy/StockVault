@@ -39,32 +39,28 @@
 
             {% if not portfolio_datasets %}
                 <p class="error-message">The dataset is currently empty or incomplete.</p>
-
             {% else %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>SN</th>
-                            <th>Company Name</th>
-                            <th>Opening Price</th>
-                            <th>Closing Price</th>
-                            <th>Change (%)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for data in portfolio_datasets %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td>{{ data.company_name }}</td>
-                                <td>{{ data.today_opening_price }}</td>
-                                <td>{{ data.today_closing_price }}</td>
-                                <td class="{% if data.percentage_change|slice:':1' == '-' %}negative{% else %}positive{% endif %}">{{ data.percentage_change }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="portfolio-list">
+                    {% for data in portfolio_datasets %}
+                        <div class="portfolio-item">
+                            <div class="portfolio-header">
+                                <span class="company-name">{{ data.company_name }}</span>
+                            </div>
+                            <div class="portfolio-details">
+                                <p><strong>Opening Price:</strong> {{ data.today_opening_price }}</p>
+                                <p><strong>Closing Price:</strong> {{ data.today_closing_price }}</p>
+                                <p><strong>Change (%):</strong>
+                                    <span class="{% if data.percentage_change|slice:':1' == '-' %}negative{% else %}positive{% endif %}">
+                                        {{ data.percentage_change }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
             {% endif %}
         </div>
+
 
         <div class="card">
             <h2>🔔 Recent Activity</h2>

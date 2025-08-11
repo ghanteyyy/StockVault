@@ -14,28 +14,50 @@
     align-content: center;
 }
 
-.company {
-    display: flex;
-    align-items: center;
-    padding: 20px;
-    border: 1px solid #003170;
-    transition: background-color 0.3s ease;
+h2 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: #2c3e50;
+    margin-bottom: 1rem;
 }
 
-.company p {
-    margin: 0;
-    font-size: 16px;
-    color: #333;
-    font-weight: 500;
-    transition: color 0.2s ease;
+.company-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 16px;
+    background-color: #f9fafb;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.company {
+    border: 1px solid #d1d1d1;
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    flex: 1 1 45%;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    color: #34495e;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
 }
 
 .company:hover {
-    background-color: #747474;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    transform: translateY(-4px);
 }
 
-.company:hover p {
-    color: white;
+.error-message {
+    color: #e53e3e;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    margin: 20px 0;
 }
 
 @media (max-width: 768px) {

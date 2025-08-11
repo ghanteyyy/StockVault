@@ -8,31 +8,30 @@
 {% endblock %}
 
 {% block content %}
-    <div class="main-content">
-        <div class="content">
-            <div class="card">
-                <form onsubmit="return validateStockSearchingForm()" action="" method="POST">
-                    {% csrf_token %}
-                    {% include 'stock_searching.html' %}
-                </form>
+    <div class="content">
+        <div class="card">
+            <form onsubmit="return validateStockSearchingForm()" action="" method="POST">
+                {% csrf_token %}
+                {% include 'stock_searching.html' %}
+            </form>
 
-                {% include 'backend_error.html' %}
-            </div>
+            {% include 'backend_error.html' %}
+        </div>
 
-            <div class="card company-list">
-                {% for share_holding in share_holdings %}
-                    <a class="inner_card" href="{% url 'timeline' %}?company_name={{ share_holding.company_name|urlencode }}">
-                        <p class="company_name">{{ share_holding.company_name }} ({{ share_holding.abbreviation }})</p>
-
-                        <div class="inner_card_content">
-                            <p>Share Quantity</p>
-                            <p>{{ share_holding.number_of_shares }}</p>
-                        </div>
-                    </a>
-                {% empty %}
-                    <p class="error-message">The dataset is currently empty or incomplete</p>
-                {% endfor %}
-            </div>
+        <div class="card company-list">
+            {% for share_holding in share_holdings %}
+                <a class="company-item" href="{% url 'timeline' %}?company_name={{ share_holding.company_name|urlencode }}">
+                    <p class="company-title">
+                        {{ share_holding.company_name }} ({{ share_holding.abbreviation }})
+                    </p>
+                    <div class="company-details">
+                        <p>Share Quantity</p>
+                        <p class="quantity">{{ share_holding.number_of_shares }}</p>
+                    </div>
+                </a>
+            {% empty %}
+                <p class="error-message">The dataset is currently empty or incomplete</p>
+            {% endfor %}
         </div>
     </div>
 {% endblock %}

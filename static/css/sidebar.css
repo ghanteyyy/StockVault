@@ -1,3 +1,7 @@
+.main-content{
+	width: 80%;
+}
+
 .sidebar {
     width: 20%;
     background: linear-gradient(to bottom right, #1e1e2f, #2d2d44);
@@ -61,6 +65,16 @@ a.sidebar-links {
     font-size: 24px;
     cursor: pointer;
     z-index: 1001;
+}
+
+/* Scrollbar customization */
+.sidebar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
 }
 
 @media (max-width: 768px) {
