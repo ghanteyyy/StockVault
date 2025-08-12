@@ -65,6 +65,7 @@
     font-size: 14px;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     cursor: pointer;
     flex-shrink: 0;
