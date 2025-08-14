@@ -10,7 +10,6 @@
 .options {
     display: flex;
     justify-content: center;
-    gap: 30px;
     margin-bottom: 25px;
     user-select: none;
 }
@@ -20,10 +19,12 @@
     font-size: 1.3rem;
     color: #4a4a4a;
     padding: 12px 30px;
-    border-radius: 40px;
     cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    border: 2px solid transparent;
+    transition: background-color 0.3s ease,
+                color 0.3s ease,
+                width 0.3s ease,
+                flex 0.3s ease;
+    border: none;
     flex: 1;
     text-align: center;
 }
