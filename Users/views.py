@@ -444,7 +444,7 @@ def TargetPage(request):
         company_name = company_name.split('(')[0].strip()
         company = share_models.ListedCompanies.objects.get(name__iexact=company_name)
 
-        if user_models.Targets.objects.filter(user_id=request.user, company_id=company, is_deleted=False).exists():
+        if user_models.Targets.objects.filter(user_id=request.user, company_id=company, target_type=target_type, is_deleted=False).exists():
             errors.append(f'Target for {company_name} already exists')
 
         if not errors:
