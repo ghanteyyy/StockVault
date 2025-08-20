@@ -2,6 +2,7 @@ import re
 import json
 import collections
 import datetime as dt
+from django.core.cache import cache
 from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
@@ -365,6 +366,14 @@ def ProfitLossPage(request):
     'profit_loss.html' template with the appropriate context.
     """
 
+    # Redis caching
+    cache_key = f'{request.user.id}-profit_loss'
+
+    cache_value = cache.get(cache_key)
+
+    if cache_value:
+        return render(request, 'profit_loss.html', cache_value)
+
     share_holdings_objs = share_models.Portfolios.objects.filter(user_id=request.user)
     share_holdings = share_serializers.PortfoliosSerializer(share_holdings_objs, many=True).data
 
@@ -407,6 +416,7 @@ def ProfitLossPage(request):
         'total_changes': round((total_current_value - total_investment), 2)
     }
 
+    cache.set(cache_key, context, 60 * 15)
     return render(request, 'profit_loss.html', context)
 
 
