@@ -501,7 +501,7 @@ def TargetDelete(request, company):
     Deletes a target for a specific company.
     """
 
-    target = user_models.Targets.objects.filter(user_id=request.user, company_id__abbreviation__iexact=company).first()
+    target = user_models.Targets.objects.filter(user_id=request.user, company_id=company, is_deleted=False).first()
 
     if target:
         target.is_deleted = True
