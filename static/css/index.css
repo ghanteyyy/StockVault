@@ -172,7 +172,6 @@ section {
 }
 
 .card,
-.company-card,
 .testimony,
 details {
     background-color: var(--card-bg);
@@ -216,79 +215,6 @@ details {
 
 .card h3 {
     color: var(--dark);
-}
-
-.companies {
-    background-color: var(--section-bg-2);
-    background-image:
-        radial-gradient(circle at 25% 75%, rgba(76, 201, 240, 0.08) 0%, transparent 30%);
-}
-
-.company-carousel {
-    display: flex;
-    gap: 2rem;
-    overflow-x: auto;
-    padding: 2rem 0;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-}
-
-.company-carousel::-webkit-scrollbar {
-    height: 8px;
-}
-
-.company-carousel::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-.company-carousel::-webkit-scrollbar-thumb {
-    background: var(--primary);
-    border-radius: 10px;
-}
-
-.company-card {
-    border-radius: 15px;
-    padding: 2rem;
-    text-align: center;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    transition: var(--transition);
-    border: 1px solid rgba(0, 0, 0, 0.03);
-    position: relative;
-    overflow: hidden;
-}
-
-.company-card::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: linear-gradient(to right, var(--primary), var(--secondary));
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: var(--transition);
-}
-
-.company-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
-
-.company-card:hover::after {
-    transform: scaleX(1);
-}
-
-.company-card img {
-    width: 100px;
-    height: 100px;
-    object-fit: contain;
-    margin: 0 auto 1rem;
-    border-radius: 50%;
-    background: white;
-    padding: 0.5rem;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
 }
 
 .why {
@@ -575,7 +501,6 @@ h2::after {
 }
 
 .card:hover,
-.company-card:hover,
 .why-grid>div:hover {
     background-color: #ffffff;
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
