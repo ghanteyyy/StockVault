@@ -59,3 +59,9 @@ class TransactionsSerializer(serializers.ModelSerializer):
 
     def get_transacted_price(self, obj):
         return round(obj.transacted_price, 2)
+
+
+class FaqSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = models.FAQs
+        fields = '__all__'
