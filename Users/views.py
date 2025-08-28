@@ -1,5 +1,6 @@
 import re
 import json
+import random
 import collections
 import datetime as dt
 from django.core.cache import cache
@@ -30,7 +31,21 @@ def HomePage(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
 
-    return render(request, 'index.html', {'page_title': 'Stock Vault – Smarter Stock Tracking'})
+    testonomials = user_models.Testonomials.objects.all()
+    testonomials = user_serializers.TestonomialsSerializer(testonomials, many=True).data
+    random.shuffle(testonomials)
+
+    faqs = share_models.FAQs.objects.all()
+    faqs = share_serializers.FaqSerializers(faqs, many=True).data
+    random.shuffle(faqs)
+
+    context = {
+        'page_title': 'Stock Vault – Smarter Stock Tracking',
+        'testonomials': testonomials[:2],
+        'faqs': faqs[:5]
+    }
+
+    return render(request, 'index.html', context)
 
 
 def LoginPage(request):
