@@ -33,37 +33,6 @@
 		</div>
 	</section>
 
-	<section class="companies">
-		<h2>Featured Listed Companies</h2>
-		<div class="company-carousel">
-			<div class="company-card">
-				<img src="https://via.placeholder.com/100?text=NABIL" alt="NABIL Bank">
-				<h4>NABIL Bank</h4>
-				<p>Symbol: NABIL</p>
-			</div>
-			<div class="company-card">
-				<img src="https://via.placeholder.com/100?text=NTC" alt="Nepal Telecom">
-				<h4>Nepal Telecom</h4>
-				<p>Symbol: NTC</p>
-			</div>
-			<div class="company-card">
-				<img src="https://via.placeholder.com/100?text=NICA" alt="NIC Asia Bank">
-				<h4>NIC Asia Bank</h4>
-				<p>Symbol: NICA</p>
-			</div>
-			<div class="company-card">
-				<img src="https://via.placeholder.com/100?text=EBL" alt="Everest Bank">
-				<h4>Everest Bank</h4>
-				<p>Symbol: EBL</p>
-			</div>
-			<div class="company-card">
-				<img src="https://via.placeholder.com/100?text=SCB" alt="Standard Chartered">
-				<h4>Standard Chartered</h4>
-				<p>Symbol: SCB</p>
-			</div>
-		</div>
-	</section>
-
 	<section class="why">
 		<h2>Why Choose Stock Vault?</h2>
 		<div class="why-grid">
@@ -105,31 +74,24 @@
 
 	<section class="testimonials">
 		<h2>What Users Say</h2>
-		<div class="testimony">
-			<p>"Stock Vault simplified my investment tracking. I love the historical charts!"</p>
-			<strong>– Aayush Shrestha, Investor</strong>
-		</div>
-		<div class="testimony">
-			<p>"As a BCA student, I built this to help others and it's now used by 100+ users!"</p>
-			<strong>– You (Creator)</strong>
-		</div>
+
+		{% for testimonial in testonomials %}
+			<div class="testimony">
+				<p>{{testimonial.message}}</p>
+				<strong>{{testimonial.user_name}}</strong>
+			</div>
+		{% endfor %}
 	</section>
 
 	<section class="faq" id="faq">
 		<h2>Frequently Asked Questions</h2>
 		<div class="faq-list">
-			<details>
-				<summary>Is Stock Vault free to use?</summary>
-				<p>Yes, it's 100% free and open for all Nepali investors.</p>
-			</details>
-			<details>
-				<summary>Where does price data come from?</summary>
-				<p>We update prices manually or via scraping from NEPSE portals.</p>
-			</details>
-			<details>
-				<summary>Can I export my portfolio?</summary>
-				<p>This feature is under development for the next release.</p>
-			</details>
+			{% for faq in faqs %}
+				<details>
+					<summary>{{faq.question}}</summary>
+					<p>{{faq.answer}}</p>
+				</details>
+			{% endfor %}
 		</div>
 	</section>
 
