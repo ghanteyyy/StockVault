@@ -153,3 +153,20 @@ class Targets(models.Model):
             ("buy", _("Buy")),
             ("sell", _("Sell")),
         ]
+
+
+class Testonomials(models.Model):
+    class Meta:
+        verbose_name = _("Testonomials")
+        verbose_name_plural = _("Testonomials")
+
+    id = models.CharField(primary_key=True, default=utils.generate_uuid_hex, max_length=255)
+    user_id = models.ForeignKey(to='Users.CustomUser', on_delete=models.CASCADE)
+
+    message = models.TextField(blank=True, null=True)
+
+    created_at = models.DateTimeField(
+        verbose_name=_('created at'),
+        default=now,
+        editable=False,
+    )

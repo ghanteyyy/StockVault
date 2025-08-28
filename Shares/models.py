@@ -102,3 +102,20 @@ class HistoricalPrices(models.Model):
     closing_price = models.IntegerField(blank=True, null=True)
 
     recorded_at = models.DateTimeField(editable=False, default=now)
+
+
+class FAQs(models.Model):
+    class Meta:
+        verbose_name = _("FAQs")
+        verbose_name_plural = _("FAQs")
+
+    id = models.CharField(primary_key=True, default=utils.generate_uuid_hex, max_length=255)
+
+    question = models.CharField(max_length=255, blank=True, null=True)
+    answer = models.CharField(max_length=255, blank=True, null=True)
+
+    created_at = models.DateTimeField(
+        verbose_name=_('created at'),
+        default=now,
+        editable=False,
+    )
