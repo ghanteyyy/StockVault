@@ -50,3 +50,5 @@ def modify_shares(user, company_name, quantity, rate, mode):
     else:
         # Create a new share holding if it doesn't exist
         share_models.Portfolios.objects.create(user_id=user, company_id=company, number_of_shares=quantity, total_cost=quantity * rate)
+
+    share_models.Transactions.objects.create(user_id=user, company_id=company, number_of_shares=abs(quantity), transacted_price=abs(cost), transaction_type=mode)
