@@ -4,10 +4,10 @@
     <link rel="stylesheet" href="{% static 'css/footer.css' %}" />
 
     <script>
-        window.onload = function(){
-            var date = new Date();
-            document.getElementById('footer-text').innerHTML = '&copy ' + date.getFullYear() + ' Stock Vault';
-        }
+        window.addEventListener("load", function() {
+            const year = new Date().getFullYear();
+            document.getElementById("footer-text").innerHTML = `&copy; ${year} Stock Vault`;
+        });
     </script>
 
     <footer>
@@ -19,8 +19,8 @@
             <div class="footer-section footer-links">
                 <h4>Explore</h4>
                 <a href="{% url 'index' %}">Home</a>
-                <a href="#features">Features</a>
-                <a href="#faq">FAQ</a>
+                <a href="{% url 'index' %}#features">Features</a>
+                <a href="{% url 'index' %}#faq">FAQ</a>
 
                 {% if not user.is_authenticated %}
                     <a href="/login">Login</a>
