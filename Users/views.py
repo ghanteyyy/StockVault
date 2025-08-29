@@ -286,7 +286,7 @@ def Portfolio(request):
     serialized_companies = share_serializers.CompaniesSerializer(companies, many=True).data
     companies = [f"{company['name']} ({company['abbreviation']})" for company in serialized_companies]
 
-    share_holdings = share_models.Portfolios.objects.filter(user_id=request.user).order_by('company_id__name').distinct('company_id__name')
+    share_holdings = share_models.Portfolios.objects.filter(user_id=request.user).order_by('-created_at')
     share_holdings = share_serializers.PortfoliosSerializer(share_holdings, many=True).data
 
     context = {
