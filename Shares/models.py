@@ -35,6 +35,7 @@ class Portfolios(models.Model):
 
     total_cost = models.FloatField(blank=True, null=True)
     number_of_shares = models.IntegerField(blank=True, null=True, default=0)
+    created_at = models.DateTimeField(verbose_name=_('created at'), default=now, editable=False)
 
 
 class PortfolioLots(models.Model):
