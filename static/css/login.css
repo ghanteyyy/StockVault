@@ -5,75 +5,31 @@
 .main-content{
     display: flex;
     justify-content: center;
+    width: 100%;
+    background: url('../images/login_background.jpg') no-repeat center;
+    background-size: cover;
 }
 
 .login-container {
     display: flex;
-    width: 80%;
+    width: 50%;
+    padding: 40px;
     border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.left-panel {
-    flex: 1;
-    background-color: #a7f3d0;
-    padding: 40px;
-    display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    color: #1e293b;
+    backdrop-filter: blur(50px);
+    box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;
 }
 
-.left-panel h1 {
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin-bottom: 20px;
-}
-
-.rocket {
-    width: 80px;
-    height: 80px;
-    margin-bottom: 20px;
-}
-
-.dots {
-    display: flex;
-    gap: 10px;
-}
-
-.dot {
-    width: 10px;
-    height: 10px;
-    background-color: #fff;
-    border-radius: 50%;
-}
-
-.dot.inactive {
-    background-color: #9ca3af;
-}
-
-.right-panel {
-    flex: 1;
-    background-color: #1e293b;
-    padding: 40px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.right-panel a {
-    color: #14b8a6;
+.login-container a {
+    color: #00ff68;
     text-decoration: none;
 }
 
-.right-panel a:hover {
+.login-container a:hover {
     text-decoration: underline;
 }
 
-.right-panel h2 {
+.login-container h2 {
     color: #fff;
     font-size: 1.25rem;
     font-weight: bold;
@@ -86,7 +42,7 @@
 
 .form-group label {
     display: block;
-    color: #9ca3af;
+    color: #ffffff;
     margin-bottom: 4px;
 }
 
@@ -94,10 +50,11 @@
     width: 100%;
     padding: 10px;
     border: none;
-    color: #fff;
+    outline: none;
+    color: black;
     font-size: 1rem;
     border-radius: 4px;
-    background-color: #374151;
+    background-color: #ffffff;
 }
 
 .error-message {
@@ -114,7 +71,7 @@
 
 button {
     width: 100%;
-    padding: 24px;
+    padding: 18px;
     background-color: #14b8a6;
     color: #1e293b;
     font-weight: bold;

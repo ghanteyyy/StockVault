@@ -7,85 +7,65 @@
 
 {% block content %}
     <div class="signup-container">
-        <!-- Left Panel: Promotional Section -->
-        <div class="left-panel">
-            <h1>Plan your activities and control your progress online</h1>
-            <svg class="rocket" viewBox="0 0 100 100" fill="none" stroke="#fff" stroke-width="2">
-                <path d="M50 10 L30 90 H40 L50 70 L60 90 H70 L50 10 Z" />
-                <path d="M40 90 Q50 100 60 90" />
-                <circle cx="50" cy="40" r="5" fill="#fff" />
-            </svg>
-            <div class="dots">
-                <span class="dot"></span>
-                <span class="dot inactive"></span>
-                <span class="dot inactive"></span>
-            </div>
+        {% include 'backend_error.html' %}
+
+        <div style="text-align: right; margin-bottom: 16px;">
+            <a href="{% url 'login' %}">Sign In</a>
         </div>
 
-        <!-- Right Panel: Signup Form -->
-        <div class="right-panel">
-            {% include 'backend_error.html' %}
+        <form action="{% url 'signup' %}" method="POST" onsubmit="validateForm(event)" novalidate enctype="multipart/form-data">
+            {% csrf_token %}
 
-            <div style="text-align: right; margin-bottom: 16px;">
-                <a href="{% url 'login' %}">Sign In</a>
+            <div class="form-group">
+                <label for="fullName">FULL NAME</label>
+                <input type="text" id="fullName" name="fullName" placeholder="Enter your full name">
+                <div id="name-error" class="error-message">Please enter your full name.</div>
             </div>
 
-            <h2>Sign Up</h2>
+            <div class="form-group">
+                <label for="email">E MAIL</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email here">
 
-            <form action="{% url 'signup' %}" method="POST" onsubmit="validateForm(event)" novalidate enctype="multipart/form-data">
-                {% csrf_token %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div id="email-error" class="error-message backend-error">{{message}}</div>
+                    {% endfor %}
+                {% else %}
+                    <div id="email-error" class="error-message">Please enter a valid email (e.g., user@example.com).</div>
+                {% endif %}
+            </div>
 
-                <div class="form-group">
-                    <label for="fullName">FULL NAME</label>
-                    <input type="text" id="fullName" name="fullName" placeholder="Enter your full name">
-                    <div id="name-error" class="error-message">Please enter your full name.</div>
-                </div>
+            <div class="form-group">
+                <label for="password">PASSWORD</label>
+                <input type="password" id="password" name="password" placeholder="••••••••">
+                <div id="password-error" class="error-message">Password must be at least 8 characters with 1 capital, 1 symbol, and 1 number.</div>
+            </div>
 
-                <div class="form-group">
-                    <label for="email">E MAIL</label>
-                    <input type="email" id="email" name="email" placeholder="Enter your email here">
+            <div class="form-group">
+                <label for="dob">DATE OF BIRTH</label>
+                <input type="date" id="dob" name="dob" placeholder="YYYY/MM/DD">
+                <div id="dob-error" class="error-message">Please enter a valid date in YYYY/MM/DD format (e.g., 2025/05/25) and ensure you are not older than 110 years.</div>
+            </div>
 
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div id="email-error" class="error-message backend-error">{{message}}</div>
-                        {% endfor %}
-                    {% else %}
-                        <div id="email-error" class="error-message">Please enter a valid email (e.g., user@example.com).</div>
-                    {% endif %}
-                </div>
+            <div class="form-group">
+                <label for="gender">GENDER</label>
+                <select id="gender" name="gender">
+                    <option value="" disabled selected>Select your gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                    <option value="prefer_not_to_say">Prefer not to say</option>
+                </select>
+                <div id="gender-error" class="error-message">Please select a gender.</div>
+            </div>
 
-                <div class="form-group">
-                    <label for="password">PASSWORD</label>
-                    <input type="password" id="password" name="password" placeholder="••••••••">
-                    <div id="password-error" class="error-message">Password must be at least 8 characters with 1 capital, 1 symbol, and 1 number.</div>
-                </div>
-
-                <div class="form-group">
-                    <label for="dob">DATE OF BIRTH</label>
-                    <input type="date" id="dob" name="dob" placeholder="YYYY/MM/DD">
-                    <div id="dob-error" class="error-message">Please enter a valid date in YYYY/MM/DD format (e.g., 2025/05/25) and ensure you are not older than 110 years.</div>
-                </div>
-
-                <div class="form-group">
-                    <label for="gender">GENDER</label>
-                    <select id="gender" name="gender">
-                        <option value="" disabled selected>Select your gender</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                        <option value="prefer_not_to_say">Prefer not to say</option>
-                    </select>
-                    <div id="gender-error" class="error-message">Please select a gender.</div>
-                </div>
-
-                <div class="form-group">
-                    <label for="profilePicture">PROFILE PICTURE</label>
-                    <input type="file" id="profilePicture" name="profilePicture" accept="image/*">
-                    <div id="profile-error" class="error-message">Please upload a profile image.</div>
-                </div>
-                <button type="submit">SIGN UP</button>
-            </form>
-        </div>
+            <div class="form-group">
+                <label for="profilePicture">PROFILE PICTURE</label>
+                <input type="file" id="profilePicture" name="profilePicture" accept="image/*">
+                <div id="profile-error" class="error-message">Please upload a profile image.</div>
+            </div>
+            <button type="submit">SIGN UP</button>
+        </form>
     </div>
 {% endblock %}
 
