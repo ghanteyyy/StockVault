@@ -1,4 +1,3 @@
-// Restrict user to input non-numeric values
 share_numberings = document.querySelectorAll('.share_numbering');
 
 share_numberings.forEach(share_numbering => {

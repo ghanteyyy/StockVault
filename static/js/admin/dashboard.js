@@ -1,8 +1,6 @@
-// Fallback for Chart.js if CDN fails
 window.Chart || document.write('<script src="/path/to/local/chart.min.js"><\/script>');
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Trigger File Input
     function triggerFileInput() {
         const fileInput = document.getElementById('profileImage');
         if (fileInput) {
@@ -10,10 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Expose triggerFileInput to global scope for onclick
     window.triggerFileInput = triggerFileInput;
 
-    // Handle Profile Image Upload
     const profileImageInput = document.getElementById('profileImage');
     if (profileImageInput) {
         profileImageInput.addEventListener('change', function(e) {
@@ -38,7 +34,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Initialize Transaction Volume Chart
     try {
         const transactionCanvas = document.getElementById('transactionChart');
         if (!transactionCanvas) {

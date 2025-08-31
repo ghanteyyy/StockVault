@@ -110,7 +110,6 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-/* Modal background */
 .edit_target {
     display: none;
     position: fixed;
@@ -124,7 +123,6 @@
     align-items: center;
 }
 
-/* Modal form */
 .edit_target .edit {
     background: #1e1e1e;
     padding: 20px;
@@ -153,7 +151,6 @@
     outline: none;
 }
 
-/* Submit button */
 .edit_target button {
     padding: 10px;
     background-color: #4CAF50;
@@ -168,7 +165,6 @@
     background-color: #45a049;
 }
 
-/* Close button */
 .close-btn {
     position: absolute;
     top: 8px;

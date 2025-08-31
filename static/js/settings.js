@@ -19,7 +19,7 @@ function previewImage() {
         fetch('/settings/', {
             method: 'POST',
             headers: {
-                'X-CSRFToken': getCSRFToken() // For Django CSRF protection
+                'X-CSRFToken': getCSRFToken()
             },
             body: formData
         });

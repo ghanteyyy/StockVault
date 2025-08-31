@@ -67,7 +67,6 @@ a.sidebar-links {
     z-index: 1001;
 }
 
-/* Scrollbar customization */
 .sidebar::-webkit-scrollbar {
     width: 8px;
 }

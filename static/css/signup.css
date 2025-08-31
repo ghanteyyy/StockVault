@@ -58,7 +58,6 @@
     font-size: 1rem;
 }
 
-/* Gender dropdown specific styling */
 .form-group label[for="gender"] {
     display: block;
     font-size: 14px;
@@ -67,28 +66,26 @@
     text-transform: uppercase;
 }
 
-/* Gender select styling */
 .form-group select#gender {
     width: 100%;
-    padding: 10px 30px 10px 10px; /* Extra padding-right for arrow */
+    padding: 10px 30px 10px 10px;
     font-size: 16px;
     color: black;
     background-color: #fff;
     border: 1px solid #ccc;
     border-radius: 4px;
     outline: none;
-    appearance: none; /* Remove default browser styling */
+    appearance: none;
     background-size: 16px;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
 }
 
 .form-group select#gender option {
-    color: black; /* Text color for dropdown menu options */
-    background-color: #fff; /* Background for dropdown menu */
+    color: black;
+    background-color: #fff;
 }
 
-/* Focus and hover states */
 .form-group select#gender:focus {
     border-color: #0066cc;
     box-shadow: 0 0 5px rgba(0, 102, 204, 0.2);
@@ -98,12 +95,10 @@
     border-color: #999;
 }
 
-/* Disabled or placeholder option */
 .form-group select#gender option[disabled][selected] {
     color: #999;
 }
 
-/* Error message styling */
 .form-group #gender-error {
     display: none;
     color: #d32f2f;

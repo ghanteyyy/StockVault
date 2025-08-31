@@ -19,7 +19,7 @@
 }
 
 .card ul li::before {
-    content: "🔹"; /* Unicode or custom character */
+    content: "🔹";
     margin-right: 4px;
     font-size: 1.5rem;
 }

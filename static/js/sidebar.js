@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
         mainContent.classList.toggle('shifted');
     });
 
-    // Close sidebar if clicked outside on mobile
     document.addEventListener('click', (event) => {
         if (window.innerWidth <= 768) {
             if (!sidebar.contains(event.target) && !hamburgerBtn.contains(event.target)) {

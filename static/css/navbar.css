@@ -79,9 +79,9 @@
     width: 100%;
 }
 .btn {
-    background-color: #111827; /* dark slate */
-    color: #facc15; /* golden yellow text */
-    padding: 0.85rem 2.2rem; /* more vertical & horizontal padding */
+    background-color: #111827;
+    color: #facc15;
+    padding: 0.85rem 2.2rem;
     border: 2px solid #facc15;
     border-radius: 8px;
     font-size: 1rem;
@@ -121,7 +121,6 @@ a.btn{
     padding: 10px;
 }
 
-/* Hamburger menu styles */
 .hamburger {
     display: none;
     cursor: pointer;
@@ -161,7 +160,6 @@ i.iconoir-menu {
     bottom: -0.5rem;
 }
 
-/* Active state for hamburger */
 .hamburger[aria-expanded="true"] .iconoir-menu {
     background-color: transparent;
 }
@@ -174,7 +172,6 @@ i.iconoir-menu {
     transform: translateY(-0.5rem) rotate(-45deg);
 }
 
-/* Mobile styles */
 @media (max-width: 768px) {
     .nav-bar {
         padding: 1rem 1.5rem;
@@ -215,7 +212,6 @@ i.iconoir-menu {
     }
 }
 
-/* Overlay for mobile menu */
 .overlay {
     position: fixed;
     top: 0;

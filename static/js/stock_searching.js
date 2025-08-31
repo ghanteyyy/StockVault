@@ -27,7 +27,6 @@ function validateStockSearchingForm(){
 }
 
 
-// Check if the input value exactly matches with the listed companies
 function checkValidCompany(query){
     return stockData.filter(stock =>
         stock.toLowerCase() == query.toLowerCase()
@@ -35,7 +34,6 @@ function checkValidCompany(query){
 }
 
 
-// Filter suggestions based on input
 function filterSuggestions(query) {
     return stockData.filter(stock =>
         stock.toLowerCase().includes(query.toLowerCase())
@@ -43,7 +41,6 @@ function filterSuggestions(query) {
 }
 
 
-// Display suggestions
 function showSuggestions(suggestionList) {
     suggestions.innerHTML = '';
     const wrapperRect = inputWrapper.getBoundingClientRect();
@@ -72,7 +69,6 @@ function showSuggestions(suggestionList) {
 }
 
 
-// Handle input changes
 input.addEventListener('input', () => {
     const query = input.value.trim();
     if (query) {
@@ -84,7 +80,6 @@ input.addEventListener('input', () => {
 });
 
 
-// Hide suggestions when clicking outside
 document.addEventListener('click', (event) => {
     if (!inputWrapper.contains(event.target)) {
         suggestions.style.display = 'none';

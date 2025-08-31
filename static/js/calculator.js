@@ -18,8 +18,8 @@ const charges = {
             { upTo: Infinity, rate: 0.0024 },
         ],
     },
-    sebonFeeRate: 0.00015,   // 0.015%
-    dpCharge: 25,            // per scrip per settlement
+    sebonFeeRate: 0.00015,
+    dpCharge: 25,
     capitalGainsTax: {
         "Less than a year (7.5%)": 0.075,
         "More than a year (5%)": 0.05,
@@ -30,23 +30,23 @@ const charges = {
 
 choices.forEach(choice => {
     choice.addEventListener('click', () => {
-        if (active === choice) {  // Reset widths and hide submit
+        if (active === choice) {
             choices.forEach(c => c.style.flex = '1');
             active = null;
-            actionInput.value = '';   // clear action
+            actionInput.value = '';
 
             wrapper.style.display = 'none';
-            submit.style.display = 'none';  // hide submit
-            document.querySelector('.output-wrapper').replaceChildren(); // removes all children
+            submit.style.display = 'none';
+            document.querySelector('.output-wrapper').replaceChildren();
         }
-        else {  // Expand clicked, shrink others and show submit
+        else {
             choices.forEach(c => c.style.flex = c === choice ? '4' : '1');
             active = choice;
 
             actionInput.value = choice.classList.contains('buy') ? 'buy' : 'sell';
 
             wrapper.style.display = 'flex';
-            submit.style.display = 'block';  // show submit
+            submit.style.display = 'block';
 
             if(actionInput.value == 'buy'){
                 sell_wrapper.style.display = 'none';
@@ -80,7 +80,6 @@ submit.addEventListener("click", () => {
 function formatPrice(num) {
     const rounded = parseFloat(num.toFixed(2));
 
-    // Add commas (locale formatting)
     return rounded.toLocaleString('en-US', {
         minimumFractionDigits: 0,
         maximumFractionDigits: 2
@@ -91,18 +90,14 @@ function formatPrice(num) {
 function buy_shares_calculation(share_quantity, price_per_share){
     total_purchase_amount = share_quantity * price_per_share;
 
-    // Borkerage Commission Calculation
     brokerage_rate = charges.broker.slabs.find(s=>total_purchase_amount<=s.upTo).rate;
     brokerage_commission = total_purchase_amount * brokerage_rate;
-    brokerage_commission = Math.max(brokerage_commission, charges.broker.minBrokerage);    // Minimum brokerage commission is 10
+    brokerage_commission = Math.max(brokerage_commission, charges.broker.minBrokerage);
 
-    // SEBON Commission
     sebon_commission = total_purchase_amount * charges.sebonFeeRate;
 
-    // DP Charge
     dp_charge = charges.dpCharge;
 
-    // Total Amount
     total_amount = total_purchase_amount + brokerage_commission + sebon_commission + dp_charge
 
     return {
@@ -122,7 +117,7 @@ function sell_share_calculation(buy_type, share_quantity, purchase_value, sellin
     if(buy_type == 'secondary'){
         brokerage_rate = charges.broker.slabs.find(s=>total_purchase_amount<=s.upTo).rate;
         brokerage_commission = total_purchase_amount * brokerage_rate;
-        brokerage_commission = Math.max(brokerage_commission, charges.broker.minBrokerage);    // Minimum brokerage commission is 10
+        brokerage_commission = Math.max(brokerage_commission, charges.broker.minBrokerage);
 
         sebon_commission = total_purchase_amount * charges.sebonFeeRate;
         dp_charge = charges.dpCharge;
@@ -191,7 +186,7 @@ function buy_share() {
     }
 
     calculated_values = buy_shares_calculation(shareQuantity, sharePrice);
-    document.querySelector('.output-wrapper').replaceChildren(); // removes all children
+    document.querySelector('.output-wrapper').replaceChildren();
 
     makeOutputInnerDivs("Total Purchase Amount", calculated_values.total_purchase_amount);
     makeOutputInnerDivs(`Broker Commission (${brokerage_rate * 100}%)`, calculated_values.bokerage_commission);
@@ -225,7 +220,7 @@ function sell_share() {
 
     calculated_values = sell_share_calculation(buy_type, share_quantity, purchase_value, selling_price, cgt_value);
 
-    document.querySelector('.output-wrapper').replaceChildren(); // removes all children
+    document.querySelector('.output-wrapper').replaceChildren();
 
     if(buy_type == 'secondary'){
         makeOutputInnerDivs(`Total Purchased Amount`, calculated_values.secondary.total_purchased_amount);
