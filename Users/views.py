@@ -372,70 +372,6 @@ def WishListPage(request):
 
 
 @login_required(login_url='login')
-def ProfitLossPage(request):
-    """
-    Renders the profit-loss page for a user.
-
-    The function retrieves the user's share holdings, calculates
-    the profit-loss for each company, and renders the
-    'profit_loss.html' template with the appropriate context.
-    """
-
-    # Redis caching
-    cache_key = f'{request.user.id}-profit_loss'
-
-    cache_value = cache.get(cache_key)
-
-    if cache_value:
-        return render(request, 'profit_loss.html', cache_value)
-
-    share_holdings_objs = share_models.Portfolios.objects.filter(user_id=request.user)
-    share_holdings = share_serializers.PortfoliosSerializer(share_holdings_objs, many=True).data
-
-    summary = collections.defaultdict(lambda: {
-        'total_quantity': 0,
-        'purchased_price': 0,
-        'current_price': 0,
-        'changes': 0
-    })
-
-    total_investment = 0
-    total_current_value = 0
-
-    for share_holding in share_holdings:
-        company = share_holding['company_name']
-        summary[company]['total_quantity'] += share_holding['number_of_shares']
-
-        purchase_price = share_holding['total_cost']
-        current_price = share_holding['number_of_shares'] * share_models.HistoricalPrices.objects.filter(company_id__name__iexact=company).order_by('-recorded_at').first().opening_price
-
-        summary[company]['purchased_price'] += round(share_holding['total_cost'], 2)
-        summary[company]['current_price'] += current_price
-        summary[company]['changes'] = round(current_price - purchase_price, 2)
-
-        total_investment += purchase_price
-        total_current_value += current_price
-
-    data = []
-
-    for key, value in dict(summary).items():
-        value.update({'company_name': key})
-        data.append(value)
-
-    context = {
-        'page_title': 'Profit-Loss | StockVault',
-        'companies': share_holdings,
-        'profit_loss_data': data,
-        'total_current_value': total_current_value,
-        'total_investment': round(total_investment, 2),
-        'total_changes': round((total_current_value - total_investment), 2)
-    }
-
-    cache.set(cache_key, context, 60 * 15)
-    return render(request, 'profit_loss.html', context)
-
-
-@login_required(login_url='login')
 def TargetPage(request):
     """
     Handles the logic for adding a target to buy/sell a share
@@ -643,64 +579,6 @@ def ChangePassword(request):
             user = authenticate(request, email=request.user.email, password=new_password)
 
     return errors
-
-
-@login_required(login_url='login')
-def BuySell(request):
-    """
-    Handles a request to buy or sell shares.
-
-    The function validates the user input (company name, quantity,
-    buying/selling rate, and action) and ensures that the user has
-    enough shares of the specified company to sell. If the input
-    is valid and the user has enough shares, it updates the user's
-    portfolio.
-    """
-
-    if request.method.lower() == 'post':
-        company_name = request.POST.get('company').split('(')[0].strip()
-        quantity = request.POST.get('share_quantity').strip()
-        buying_selling_rate = request.POST.get('buying_rate').strip()
-        action = request.POST.get('action').strip()
-
-        if not any([company_name, quantity, action]):
-            messages.error(request, 'All fields are required')
-            return redirect('buy_sell')
-
-        if not quantity.isdigit():
-            messages.error(request, 'Quantity must be a valid number')
-            return redirect('buy_sell')
-
-        if int(quantity) <= 0:
-            messages.error(request, 'Quantity must be greater than 0 for selling shares')
-            return redirect('buy_sell')
-
-        if action == 'buy':
-            share_views.modify_shares(request.user, company_name, quantity, buying_selling_rate, mode='buy')
-
-        elif action == 'sell':
-            if share_models.Portfolios.objects.filter(user_id=request.user, company_id__name=company_name).exists() is False:
-                messages.error(request, f'You do not own any shares of {company_name} to sell')
-                return redirect('buy_sell')
-
-            if share_models.Portfolios.objects.get(user_id=request.user, company_id__name=company_name).number_of_shares < int(quantity):
-                messages.error(request, f'You do not own enough shares of {company_name} to sell {quantity} shares')
-                return redirect('buy_sell')
-
-            share_views.modify_shares(request.user, company_name, quantity, buying_selling_rate, mode='sell')
-
-        return redirect('dashboard')
-
-    companies = share_models.ListedCompanies.objects.all().order_by('name')
-    serialized_companies = share_serializers.CompaniesSerializer(companies, many=True).data
-    companies = [f"{company['name']} ({company['abbreviation']})" for company in serialized_companies]
-
-    context = {
-        'companies': json.dumps(companies),
-        'page_title': 'Buy/Sell | Stock Vault',
-    }
-
-    return render(request, 'buy_sell.html', context)
 
 
 @login_required(login_url='login')
