@@ -21,9 +21,10 @@ input[type="text"]{
 }
 
 .company-list {
+    gap: 15px;
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
+    margin-top: 20px;
 }
 
 .company-item {

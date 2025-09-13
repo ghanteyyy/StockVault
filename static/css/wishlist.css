@@ -1,11 +1,9 @@
 .card {
     background: #fff;
-    padding: 20px;
 }
 
 .card.company-list {
     background: #ffffff;
-    padding: 20px;
     overflow: hidden;
     display: flex;
     flex-wrap: wrap;
@@ -18,7 +16,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
-    padding: 16px;
+    padding: 16px 0 16px 0;
     background-color: #f9fafb;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
@@ -45,12 +43,6 @@
     transform: translateY(-4px);
 }
 
-.error-message {
-    color: #e53e3e;
-    font-weight: 600;
-    font-family: 'Inter', sans-serif;
-    margin: 20px 0;
-}
 
 @media (max-width: 768px) {
     .container {

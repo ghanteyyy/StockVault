@@ -4,8 +4,8 @@
     display: none;
     font-size: 14px;
     color: #b91c1c;
-    margin-left: 15px;
     border-radius: 6px;
+    font-weight: normal;
     background: #fee2e2;
     border: 1px solid #fca5a5;
 }
