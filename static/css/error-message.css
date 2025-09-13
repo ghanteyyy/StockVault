@@ -1,7 +1,11 @@
 .error-message{
+    width: 100%;
     padding: 20px;
-    color: #e53e3e;
-    font-size: 1.25rem;
-    font-weight: bold;
-    font-family: inherit;
+    display: none;
+    font-size: 14px;
+    color: #b91c1c;
+    margin-left: 15px;
+    border-radius: 6px;
+    background: #fee2e2;
+    border: 1px solid #fca5a5;
 }

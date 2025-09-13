@@ -38,7 +38,7 @@
             <h2>📈 Portfolio Performance</h2>
 
             {% if not portfolio_datasets %}
-                <p class="error-message">The dataset is currently empty or incomplete.</p>
+                <p class="error-message" style="display: block;">The dataset is currently empty or incomplete.</p>
             {% else %}
                 <div class="portfolio-list">
                     {% for data in portfolio_datasets %}
@@ -68,7 +68,7 @@
                 {% for activity in recent_activities %}
                     <li><p><span class='{% if activity.transaction_type == "buy" %}positive{% else %}negative{% endif %}'>{% if activity.transaction_type == "buy" %}Bought{% else %}Sold{% endif %}</span> {{activity.number_of_shares}} shares of <span class="activity_company">{{activity.company_name}}</span> at Rs. {{activity.transacted_price}} on {{activity.transaction_date}}</p></li>
                 {% empty %}
-                    <p class="error-message">No recent activity</p>
+                    <p class="error-message"  style="display: block;">No recent activity</p>
                 {% endfor %}
             </ul>
         </div>

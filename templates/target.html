@@ -10,7 +10,7 @@
 {% block content %}
     <div class="content">
         <div class="card">
-            <form onsubmit="return validateTargetForm()" action="" method="POST">
+            <form onsubmit="return validateStockSearchingForm()" action="" method="POST">
                 {% include 'stock_searching.html' %}
                 {% csrf_token %}
             </form>
@@ -79,14 +79,13 @@
             </div>
 
         {% else %}
-            <p class="error-message">No Targets Added Yet</p>
+            <p class="error-message" style="display: block;">No Targets Added Yet</p>
         {% endif %}
     </div>
 
 {% endblock %}
 
 {% block js%}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{% static 'js/stock_searching.js' %}" defer></script>
     <script src="{% static 'js/target.js' %}" defer></script>
+    <script src="{% static 'js/stock_searching.js' %}" defer></script>
 {% endblock %}

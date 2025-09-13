@@ -171,18 +171,18 @@ function buy_share() {
     number_regex = /^-?\d+$/;
     float_regex = /^-?\d+(\.\d+)?$/;
 
-    const error = document.querySelector('.error');
+    const error = document.querySelector('.submit-error-message');
 
     const shareQuantity = document.querySelector('#share_quantity').value;
     const sharePrice = document.querySelector('#share_price').value;
 
     if(!number_regex.test(shareQuantity) || !float_regex.test(sharePrice)){
-        error.classList.add('show');
+        error.style.display = 'block';
         return;
     }
 
     else{
-        error.classList.remove('show');
+        error.style.display = 'none';
     }
 
     calculated_values = buy_shares_calculation(shareQuantity, sharePrice);
@@ -200,7 +200,7 @@ function sell_share() {
     number_regex = /^-?\d+$/;
     float_regex = /^-?\d+(\.\d+)?$/;
 
-    const error = document.querySelectorAll('.error')[1];
+    const error = document.getElementsByClassName('submit-error-message')[1];
 
     buy_type = document.querySelector('input[name="buy_type"]:checked')?.value || null;
     share_quantity = document.querySelector('#share_quantity_sell').value;
@@ -208,14 +208,14 @@ function sell_share() {
     selling_price = document.querySelector('#selling_price').value;
     cgt_value = document.getElementById('CGT').value;
 
-    console.log(buy_type, share_quantity, purchase_value, selling_price, cgt_value);
     if(!buy_type || !number_regex.test(share_quantity) || !float_regex.test(purchase_value) || !float_regex.test(selling_price || !cgt_value)){
-        error.classList.add('show');
+
+        error.style.display = 'block';
         return;
     }
 
     else{
-        error.classList.remove('show');
+        error.style.display = 'none';
     }
 
     calculated_values = sell_share_calculation(buy_type, share_quantity, purchase_value, selling_price, cgt_value);

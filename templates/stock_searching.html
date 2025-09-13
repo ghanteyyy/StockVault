@@ -2,6 +2,7 @@
 
 {% block css %}
     <link rel="stylesheet" href="{% static 'css/stock_searching.css' %}">
+    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 {% endblock %}
 
@@ -50,10 +51,14 @@
 
         <div id="suggestions" class="suggestions"></div>
     </div>
-    <p class="error-searching-stocks"></p>
+    <p class="error-message"> </p>
 </div>
 
 {% block js %}
+    <script id="url_resolver">
+        const urlName = "{{ request.resolver_match.url_name }}";
+    </script>
+
     <script id="companies" type="application/json">
         {{ companies|safe }}
     </script>

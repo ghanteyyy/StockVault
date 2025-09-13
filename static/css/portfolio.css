@@ -65,13 +65,6 @@ input[type="text"]{
     color: #2e7d32;
 }
 
-.error-message {
-    font-size: 1rem;
-    color: #e53e3e;
-    text-align: center;
-    padding: 20px;
-}
-
 @media (max-width: 600px) {
     .company-item {
         flex: 1 1 100%;

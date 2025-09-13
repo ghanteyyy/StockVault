@@ -3,7 +3,7 @@
 
 {% block css %}
     <link rel="stylesheet" href="{% static 'css/calculator.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -17,7 +17,7 @@
         <div class="wrapper">
             <div class="input-wrapper">
                 <div class="buy-input-wrapper">
-                    <p class="error">All fields are required and valid</p>
+                    <p class="error-message">All fields are required and valid</p>
                     <p class="action" hidden></p>
 
                     <div class="input-icon-wrapper">
@@ -31,7 +31,7 @@
                 </div>
 
                 <div class="sell-input-wrapper">
-                    <p class="error">All fields are required and valid</p>
+                    <p class="error-message">All fields are required and valid</p>
 
                     <div class="buy-type">
                         <p>Buy Type:</p>

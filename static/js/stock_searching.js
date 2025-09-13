@@ -2,7 +2,7 @@ const input = document.getElementById('stock-input');
 const suggestions = document.getElementById('suggestions');
 const addBtn = document.getElementById('add-btn');
 const inputWrapper = input.closest('.input-wrapper');
-const error_searching_stocks = document.querySelector('.error-searching-stocks');
+const error_searching_stocks = document.querySelector('.error-message');
 
 const companiesElement = document.querySelector('#companies');
 const stockData = JSON.parse(companiesElement.textContent);
@@ -10,20 +10,36 @@ const stockData = JSON.parse(companiesElement.textContent);
 
 function validateStockSearchingForm(){
     input_value = input.value;
+    result = {"message": '', 'success': false}
 
     if(!input_value){
-        suggestions.style.display = 'none';
-        error_searching_stocks.innerHTML = 'Please complete all required fields before submitting';
-        return false;
+        result.message = 'Please complete all required fields before submitting'
     }
 
     else if(!checkValidCompany(input_value).length){
-        suggestions.style.display = 'none';
-        error_searching_stocks.innerHTML = 'The selected category is not recognized. It may have been removed or is no longer available. Please choose from the current list.'
-        return false;
+        result.message = 'The selected category is not recognized. It may have been removed or is no longer available. Please choose from the current list.'
     }
 
-    return true;
+    else if(urlName.toLowerCase() == 'portfolio'){
+        result = validatePortfolioForm();
+    }
+
+    else if(urlName.toLowerCase() == 'target'){
+        result = validateTargetForm();
+        console.log(result);
+    }
+
+    else{
+        result.success = true;
+    }
+
+    if(!result.success){
+        suggestions.style.display = 'none';
+        error_searching_stocks.style.display = 'block';
+        error_searching_stocks.innerHTML = result.message;
+    }
+
+    return result.success;
 }
 
 
@@ -60,7 +76,6 @@ function showSuggestions(suggestionList) {
             suggestions.appendChild(div);
         });
 
-        error_searching_stocks.innerHTML = ''
         suggestions.style.display = 'block';
 
     } else {
