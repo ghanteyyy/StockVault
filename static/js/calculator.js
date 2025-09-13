@@ -171,7 +171,7 @@ function buy_share() {
     number_regex = /^-?\d+$/;
     float_regex = /^-?\d+(\.\d+)?$/;
 
-    const error = document.querySelector('.submit-error-message');
+    const error = document.querySelector('.error-message');
 
     const shareQuantity = document.querySelector('#share_quantity').value;
     const sharePrice = document.querySelector('#share_price').value;
@@ -200,7 +200,7 @@ function sell_share() {
     number_regex = /^-?\d+$/;
     float_regex = /^-?\d+(\.\d+)?$/;
 
-    const error = document.getElementsByClassName('submit-error-message')[1];
+    const error = document.getElementsByClassName('error-message')[1];
 
     buy_type = document.querySelector('input[name="buy_type"]:checked')?.value || null;
     share_quantity = document.querySelector('#share_quantity_sell').value;
