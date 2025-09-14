@@ -120,3 +120,22 @@ class FAQs(models.Model):
         default=now,
         editable=False,
     )
+
+
+class StockMarketData(models.Model):
+    id = models.CharField(primary_key=True, default=utils.generate_uuid_hex, max_length=255)
+
+    trade_date   = models.DateField()
+    ltp          = models.CharField(max_length=255)
+    pct_change   = models.CharField(max_length=255)
+    high         = models.CharField(max_length=255)
+    low          = models.CharField(max_length=255)
+    open_price   = models.CharField(max_length=255)
+    qty          = models.CharField(max_length=255)
+    turnover     = models.CharField(max_length=255)
+    company_name = models.CharField(max_length=255)
+    sector       = models.CharField(max_length=255)
+
+    class Meta:
+        db_table = "MarketData"
+        managed = False
