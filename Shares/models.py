@@ -88,23 +88,6 @@ class WishLists(models.Model):
     company_id = models.ForeignKey(to="ListedCompanies", on_delete=models.CASCADE)
 
 
-class HistoricalPrices(models.Model):
-    class Meta:
-        verbose_name = _("Historical Prices")
-        verbose_name_plural = _("Historical Prices")
-
-    def __str__(self):
-        return self.company_id.name
-
-    id = models.CharField(primary_key=True, default=utils.generate_uuid_hex, max_length=255)
-    company_id = models.ForeignKey(to='ListedCompanies', on_delete=models.CASCADE)
-
-    opening_price = models.IntegerField(blank=True, null=True)
-    closing_price = models.IntegerField(blank=True, null=True)
-
-    recorded_at = models.DateTimeField(editable=False, default=now)
-
-
 class FAQs(models.Model):
     class Meta:
         verbose_name = _("FAQs")

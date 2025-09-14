@@ -40,12 +40,6 @@ class PortfoliosSerializer(serializers.ModelSerializer):
         return obj.company_id.abbreviation
 
 
-class HistoricalPricesSerializer(serializers.ModelSerializer):
-    class Meta:
-        exclude = ['id']
-        model = models.HistoricalPrices
-
-
 class TransactionsSerializer(serializers.ModelSerializer):
     company_name = serializers.SerializerMethodField()
     transacted_price = serializers.SerializerMethodField()

@@ -210,12 +210,15 @@ def Dashboard(request):
     share_holdings = share_models.Portfolios.objects.filter(user_id=request.user).order_by('company_id__name').distinct('company_id__name')
 
     for index, share_holding in enumerate(share_holdings):
+        qs = (share_models.StockMarketData.objects
+            .using("stockmarketdata")
+            .filter(company_name__icontains=share_holding.company_id.name)
+            .order_by("-trade_date"))[:2]
+
         total_stocks += share_holding.number_of_shares
 
-        historical_prices = share_models.HistoricalPrices.objects.filter(company_id=share_holding.company_id)
-
-        previous_closing_price = historical_prices.last().closing_price
-        previous_opening_price = historical_prices.order_by('-recorded_at')[1].closing_price
+        previous_closing_price = float(qs[1].ltp)
+        previous_opening_price = float(qs[0].open_price)
 
         previous_portfolio_values += share_holding.number_of_shares * previous_opening_price
         portfolio_values += share_holding.number_of_shares * previous_closing_price
