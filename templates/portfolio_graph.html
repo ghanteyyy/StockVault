@@ -3,7 +3,7 @@
 
 {% block css %}
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-    <link rel="stylesheet" href="{% static 'css/timeline.css' %}">
+    <link rel="stylesheet" href="{% static 'css/portfolio_graph.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 {% endblock %}
 
@@ -27,6 +27,6 @@
         const data = {{graph_data|safe}};
     </script>
 
-    <script src="{% static 'js/timeline.js' %}" defer></script>
+    <script src="{% static 'js/portfolio_graph.js' %}" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}

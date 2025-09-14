@@ -20,7 +20,7 @@
 
         <div class="card company-list">
             {% for share_holding in share_holdings %}
-                <a class="company-item" href="{% url 'timeline' %}?company_name={{ share_holding.company_name|urlencode }}">
+                <a class="company-item" href="{% url 'portfolio-graph' %}?company_name={{ share_holding.company_name|urlencode }}">
                     <p class="company-title">
                         {{ share_holding.company_name }} ({{ share_holding.abbreviation }})
                     </p>

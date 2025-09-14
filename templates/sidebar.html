@@ -14,7 +14,7 @@
     <div>
         <ul>
             <li class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><a class="sidebar-links" href="{% url 'dashboard' %}">📊 Dashboard</a></li>
-            <li class="{% if request.resolver_match.url_name == 'portfolio' or request.resolver_match.url_name == 'timeline' %}active{% endif %}"><a class='sidebar-links' href="{% url 'portfolio' %}">💹 Portfolio</a></li>
+            <li class="{% if request.resolver_match.url_name == 'portfolio' or request.resolver_match.url_name == 'portfolio-graph' %}active{% endif %}"><a class='sidebar-links' href="{% url 'portfolio' %}">💹 Portfolio</a></li>
             <li class="{% if request.resolver_match.url_name == 'trade-calculator' %}active{% endif %}"><a class="sidebar-links" href="{% url 'trade-calculator' %}">🧮 Calculator</a></li>
             <li class="{% if request.resolver_match.url_name == 'wishlist' %}active{% endif %}"><a class='sidebar-links' href="{% url 'wishlist' %}">⭐ Wishlist</a></li>
             <li class="{% if request.resolver_match.url_name == 'target' %}active{% endif %}"><a class='sidebar-links' href="{% url 'target' %}">🎯 Target</a></li>

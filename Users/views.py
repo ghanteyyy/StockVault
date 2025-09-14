@@ -300,7 +300,7 @@ def Portfolio(request):
 
 
 @login_required(login_url='login')
-def Timeline(request):
+def PortfolioGraph(request):
     """
     Render the timeline page showing a user's share holdings and recent activities for a specific company.
 
@@ -342,7 +342,7 @@ def Timeline(request):
         'graph_options': graph_options,
     }
 
-    return render(request, 'timeline.html', context)
+    return render(request, 'portfolio_graph.html', context)
 
 
 @login_required(login_url='login')
