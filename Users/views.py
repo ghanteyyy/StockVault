@@ -313,17 +313,33 @@ def Timeline(request):
     company_name = request.GET.get('company_name', '').strip()
     company_name = unquote(company_name)
 
+    column_type = request.GET.get('column_type', 'ltp').strip()
+    column_type = unquote(column_type)
+
     share_holdings = share_models.Portfolios.objects.filter(user_id=request.user, company_id__name__iexact=company_name)
     share_holdings = share_serializers.PortfoliosSerializer(share_holdings, many=True).data
 
     histories = share_models.Transactions.objects.filter(user_id=request.user, company_id__name=company_name)
     histories = share_serializers.TransactionsSerializer(histories, many=True).data
 
+    qs = (share_models.StockMarketData.objects
+        .using("stockmarketdata")
+        .filter(company_name__icontains=company_name)
+        .order_by("trade_date")
+        .values_list("trade_date", column_type))
+
+    graph_data = [float(v) for _, v in qs]
+    graph_labels = [d.strftime("%Y-%m-%d") for d, _ in qs]
+    graph_options = ['ltp', 'pct_change', 'high', 'low', 'open_price', 'qty', 'turnover']
+
     context = {
         'page_title': 'Portfolio | Stock Vault',
         'share_holdings': share_holdings,
         'histories': histories,
         'page_title': f'{company_name} | Stock Vault',
+        'graph_labels': graph_labels,
+        'graph_data': graph_data,
+        'graph_options': graph_options,
     }
 
     return render(request, 'timeline.html', context)

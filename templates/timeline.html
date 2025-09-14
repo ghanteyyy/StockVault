@@ -8,21 +8,25 @@
 {% endblock %}
 
 {% block content %}
-    <div class="content">
-        <div class="timeline">
-            {% for history in histories %}
-                <div class="timeline-item {% if forloop.counter0|divisibleby:2 %}right{% else %}left{% endif %}">
-                    <span>{{history.transaction_date}}</span>
+    <div class="graph_options_container">
+        <select name="graph_options" id="graph_options">
+            <option selected disabled hidden>Graph Data Type</option>
 
-                    <div class="timeline-content">
-                        <p>{% if history.transaction_type == "buy" %}Bought{% else %}Sold{% endif %} {{history.number_of_shares}} shares of {{history.company_name}} at Rs. {{history.transacted_price}} on {{history.transaction_date}}</p>
-                    </div>
-                </div>
+            {% for graph_option in graph_options %}
+                <option value="{{graph_option}}">{{graph_option}}</option>
             {% endfor %}
-        </div>
+        </select>
     </div>
+
+    <canvas id="graph1"></canvas>
 {% endblock %}
 
 {% block js %}
-    <script src="{% static 'js/timeline.js' %}"></script>
+    <script id="graphs">
+        const labels = {{graph_labels|safe}};
+        const data = {{graph_data|safe}};
+    </script>
+
+    <script src="{% static 'js/timeline.js' %}" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
