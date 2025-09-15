@@ -1,5 +1,4 @@
 .content {
-    font-family: 'Inter', sans-serif;
     max-width: 100%;
     margin: 30px auto;
     padding: 15px;
@@ -147,7 +146,6 @@
     gap: 6px;
     font-weight: 600;
     color: #2c3e50;
-    font-family: 'Inter', sans-serif;
 }
 
 .CGT p {
@@ -166,7 +164,6 @@
     cursor: pointer;
     transition: border-color 0.25s ease, box-shadow 0.25s ease;
     outline: none;
-    font-family: 'Inter', sans-serif;
 }
 
 .CGT select:focus {

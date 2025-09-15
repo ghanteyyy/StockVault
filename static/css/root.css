@@ -2,6 +2,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: 'Ubuntu';
 }
 
 html {
@@ -9,7 +10,6 @@ html {
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
     line-height: 1.6;
     color: var(--dark);
     background-color: var(--body-bg);

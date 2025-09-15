@@ -16,7 +16,6 @@
     align-items: center;
     gap: 8px;
     cursor: pointer;
-    font-family: 'Arial', sans-serif;
     color: #333;
     transition: all 0.2s ease;
 }
