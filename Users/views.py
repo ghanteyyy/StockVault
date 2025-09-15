@@ -210,22 +210,21 @@ def Dashboard(request):
     total_stocks = 0
     portfolio_data = []
     portfolio_values = 0
-    previous_portfolio_values = 0
+    overall_gain_loss = 0
 
     share_holdings = share_models.Portfolios.objects.filter(user_id=request.user).order_by('company_id__name').distinct('company_id__name')
 
-    for index, share_holding in enumerate(share_holdings):
+    for share_holding in share_holdings:
         qs = (share_models.StockMarketData.objects
             .using("stockmarketdata")
             .filter(company_name__icontains=share_holding.company_id.name)
-            .order_by("-trade_date"))[:2]
+            .order_by("-trade_date"))[:2]     # Getting first two latest data
 
         total_stocks += share_holding.number_of_shares
 
+        percentage_change = qs[1].pct_change
         previous_closing_price = float(qs[1].ltp)
         previous_opening_price = float(qs[0].open_price)
-
-        previous_portfolio_values += share_holding.number_of_shares * previous_opening_price
         portfolio_values += share_holding.number_of_shares * previous_closing_price
 
         portfolio_data.append(
@@ -233,15 +232,11 @@ def Dashboard(request):
                 'company_name': f'{share_holding.company_id.name} ({share_holding.company_id.abbreviation})',
                 'today_opening_price': previous_opening_price,
                 'today_closing_price': previous_closing_price,
-                'percentage_change': f"{round(((previous_closing_price - previous_opening_price) / previous_closing_price) * 100, 2)}%"
+                'percentage_change': f"{percentage_change}%"
             }
         )
 
-    if portfolio_values == 0:
-        overall_gain_loss = 0
-
-    else:
-        overall_gain_loss = round(((portfolio_values - previous_portfolio_values) / portfolio_values) * 100, 2)
+        overall_gain_loss += float(percentage_change)
 
     recent_activites = share_models.Transactions.objects.filter(user_id=request.user).order_by('-transaction_date')[:5]
     recent_activites = share_serializers.TransactionsSerializer(recent_activites, many=True).data[:5]
@@ -250,9 +245,9 @@ def Dashboard(request):
             'page_title': 'Dashboard | Stock Vault',
             'portfolio_value': portfolio_values,
             'total_stocks': total_stocks,
-            'overall_gain_loss': overall_gain_loss,
             'portfolio_datasets': portfolio_data,
             'recent_activities': recent_activites,
+            'overall_gain_loss': round(overall_gain_loss, 2),
         }
 
     cache.set(cache_key, context, 60 * 5)
