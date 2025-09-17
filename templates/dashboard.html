@@ -45,15 +45,21 @@
                             <div class="portfolio-header">
                                 <span class="company-name">{{ data.company_name }}</span>
                             </div>
-                            <div class="portfolio-details">
-                                <p><strong>Opening Price:</strong> {{ data.today_opening_price }}</p>
-                                <p><strong>Closing Price:</strong> {{ data.today_closing_price }}</p>
-                                <p><strong>Change (%):</strong>
-                                    <span class="{% if data.percentage_change|slice:':1' == '-' %}negative{% else %}positive{% endif %}">
-                                        {{ data.percentage_change }}
-                                    </span>
-                                </p>
-                            </div>
+
+                            {% if data.error %}
+                                <p class="error-message" style="display: block; background-color: white; border: none; padding: 10px; font-weight: 900;">{{data.error}}</p>
+
+                            {% else %}
+                                <div class="portfolio-details">
+                                    <p><strong>Opening Price:</strong> {{ data.today_opening_price }}</p>
+                                    <p><strong>Closing Price:</strong> {{ data.today_closing_price }}</p>
+                                    <p><strong>Change (%):</strong>
+                                        <span class="{% if data.percentage_change|slice:':1' == '-' %}negative{% else %}positive{% endif %}">
+                                            {{ data.percentage_change }}
+                                        </span>
+                                    </p>
+                                </div>
+                            {% endif %}
                         </div>
                     {% endfor %}
                 </div>
