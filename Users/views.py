@@ -2,7 +2,6 @@ import re
 import json
 import random
 import datetime as dt
-from django.core.cache import cache
 from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
@@ -201,12 +200,6 @@ def Dashboard(request):
     It also displays the five most recent activities a user has performed.
     """
 
-    cache_key = f'{request.user.id}-dashboard'
-    cache_value = cache.get(cache_key)
-
-    if cache_value:
-        return render(request, 'dashboard.html', cache_value)
-
     total_stocks = 0
     portfolio_data = []
     portfolio_values = 0
@@ -215,10 +208,23 @@ def Dashboard(request):
     share_holdings = share_models.Portfolios.objects.filter(user_id=request.user).order_by('company_id__name').distinct('company_id__name')
 
     for share_holding in share_holdings:
+        company_name = f'{share_holding.company_id.abbreviation} ({share_holding.company_id.name})'
+
         qs = (share_models.StockMarketData.objects
             .using("stockmarketdata")
-            .filter(company_name__icontains=share_holding.company_id.name)
+            .filter(company_name=company_name)
+            .only("trade_date", "ltp", "pct_change", "open_price")
             .order_by("-trade_date"))[:2]     # Getting first two latest data
+
+        if len(qs) < 2:
+            portfolio_data.append(
+                {
+                    'error': 'No market value yet.',
+                    'company_name': f'{share_holding.company_id.name} ({share_holding.company_id.abbreviation})',
+                }
+            )
+
+            continue
 
         total_stocks += share_holding.number_of_shares
 
@@ -249,8 +255,6 @@ def Dashboard(request):
             'recent_activities': recent_activites,
             'overall_gain_loss': round(overall_gain_loss, 2),
         }
-
-    cache.set(cache_key, context, 60 * 5)
 
     return render(request, 'dashboard.html', context)
 
@@ -321,12 +325,6 @@ def PortfolioGraph(request):
     column_type = request.GET.get('column_type', 'ltp').strip()
     column_type = unquote(column_type)
 
-    cache_key = f'{request.user.id}-{company_name}-{column_type}'
-    cache_value = cache.get(cache_key, None)
-
-    if cache_value:
-        return render(request, 'portfolio_graph.html', cache_value)
-
     share_holdings = share_models.Portfolios.objects.filter(user_id=request.user, company_id__name__iexact=company_name)
     share_holdings = share_serializers.PortfoliosSerializer(share_holdings, many=True).data
 
@@ -335,7 +333,7 @@ def PortfolioGraph(request):
 
     qs = (share_models.StockMarketData.objects
         .using("stockmarketdata")
-        .filter(company_name__icontains=company_name)
+        .filter(company_name=company_name)
         .order_by("trade_date")
         .values_list("trade_date", column_type))
 
@@ -352,8 +350,6 @@ def PortfolioGraph(request):
         'graph_data': graph_data,
         'graph_options': graph_options,
     }
-
-    cache.set(cache_key, context, 60 * 5)
 
     return render(request, 'portfolio_graph.html', context)
 
