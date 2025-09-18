@@ -26,6 +26,21 @@
         const data = {{graph_data|safe}};
     </script>
 
-    <script src="{% static 'js/portfolio_graph.js' %}" defer></script>
+    <script src="{% static 'js/chart.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        params = new URLSearchParams(window.location.search);
+        column_type = params.get("column_type") || "LTP";
+
+        renderLineChart('graph1', column_type, labels, data);
+
+        document.getElementById('graph_options').addEventListener('change', function() {
+            const params = new URLSearchParams(window.location.search);
+            params.set('column_type', this.value);
+
+            const url = window.location.origin + window.location.pathname + '?' + params.toString();
+            window.location.href = url;
+        });
+    </script>
 {% endblock %}
