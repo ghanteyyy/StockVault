@@ -3,6 +3,14 @@
 	flex-direction: column;
 }
 
+#nepse_indices_graph {
+    margin: 0;
+    padding: 0;
+    width: 100% !important;
+    height: 93% !important;
+}
+
+
 .card {
 	background: white;
 	padding: 20px;

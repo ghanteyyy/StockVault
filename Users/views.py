@@ -205,6 +205,13 @@ def Dashboard(request):
     portfolio_values = 0
     overall_gain_loss = 0
 
+    NepseIndices = (share_models.NepseIndices.objects
+                    .using('stockmarketdata')
+                    .order_by('date')).values_list('date', 'index_value', 'percentage_change')
+
+    nepse_change = 'negative' if NepseIndices.last()[-1].startswith('-') else 'positive'
+    NepseIndices = json.dumps(list(NepseIndices), default=str)
+
     share_holdings = share_models.Portfolios.objects.filter(user_id=request.user).order_by('company_id__name').distinct('company_id__name')
 
     for share_holding in share_holdings:
@@ -250,9 +257,11 @@ def Dashboard(request):
     context = {
             'page_title': 'Dashboard | Stock Vault',
             'portfolio_value': portfolio_values,
+            'nepse_indices': NepseIndices,
             'total_stocks': total_stocks,
             'portfolio_datasets': portfolio_data,
             'recent_activities': recent_activites,
+            'nepse_change': nepse_change,
             'overall_gain_loss': round(overall_gain_loss, 2),
         }
 
