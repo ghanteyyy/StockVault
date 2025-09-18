@@ -122,3 +122,16 @@ class StockMarketData(models.Model):
     class Meta:
         db_table = "MarketData"
         managed = False
+
+
+class NepseIndices(models.Model):
+    id = models.CharField(primary_key=True, default=utils.generate_uuid_hex, max_length=255)
+
+    date                = models.DateField()
+    index_value         = models.CharField(max_length=255)
+    absolute_change     = models.CharField(max_length=255)
+    percentage_change   = models.CharField(max_length=255)
+
+    class Meta:
+        db_table = "NepseIndices"
+        managed = False
