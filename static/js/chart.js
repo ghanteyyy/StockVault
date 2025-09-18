@@ -1,7 +1,9 @@
 let chartInstance = null;
 
 
-function renderLineChart(id, title, labels, data) {
+function renderLineChart(id, title, labels, data, border_color="rgba(30,144,255,1)", bg_color="rgba(30,144,255,0.4)") {
+    console.log(id, title, labels, data)
+
     const ctx = document.getElementById(id);
 
     if(chartInstance) {
@@ -16,8 +18,8 @@ function renderLineChart(id, title, labels, data) {
                 label: 'LTP',
                 data: data,
                 fill: true,
-                borderColor: "rgba(30,144,255,1)",
-                backgroundColor: "rgba(30,144,255,0.4)",
+                borderColor: border_color,
+                backgroundColor: bg_color,
                 tension: 0.3,
                 pointRadius: 0,
                 pointHoverRadius: 4,
@@ -39,7 +41,7 @@ function renderLineChart(id, title, labels, data) {
                 tooltip: {
                     enabled: true,
                     callbacks: {
-                        label: (ctx) => `Date: ${ctx.label} | ${column_type}: ${ctx.parsed.y}`
+                        label: (ctx) => `${ctx.parsed.y}`
                     }
                 }
             },
@@ -58,19 +60,5 @@ function renderLineChart(id, title, labels, data) {
     });
 }
 
-
-params = new URLSearchParams(window.location.search);
-column_type = params.get("column_type") || "LTP";
-
-
-renderLineChart('graph1', column_type, labels, data);
-
-
-document.getElementById('graph_options').addEventListener('change', function() {
-    const params = new URLSearchParams(window.location.search);
-    params.set('column_type', this.value);
-
-    const url = window.location.origin + window.location.pathname + '?' + params.toString();
-    window.location.href = url;
-});
+window.renderLineChart = renderLineChart;
 
