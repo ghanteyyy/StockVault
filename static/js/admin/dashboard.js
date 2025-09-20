@@ -1,6 +1,7 @@
 const form = document.querySelector('.modal__content');
 const buttons = document.querySelectorAll('.btn-edit');
 const add_user_button = document.querySelector('.add-user');
+const cancel_buttons = document.querySelectorAll('.btn-cancel');
 
 
 add_user_button.addEventListener('click', (e) => {
@@ -11,6 +12,27 @@ add_user_button.addEventListener('click', (e) => {
     openModal();
 });
 
+
+cancel_buttons.forEach((cancel_button) => {
+    cancel_button.addEventListener('click', async (e) => {
+        const email = e.currentTarget.dataset.email;
+
+        const url = new URL('/admin/user/delete', location.origin);
+        url.searchParams.set('email', email);
+
+        // ajax request
+        const res = await fetch(url, {
+            method: 'GET',
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        });
+
+        response = await (res.headers.get('content-type')?.includes('json') ? res.json() : res.text());
+
+        alert(response.message);
+        window.location.reload();
+
+    });
+})
 
 buttons.forEach((button, index) => {
     button.addEventListener('click', () => {
