@@ -2,85 +2,111 @@
 {% load static %}
 
 {% block css %}
-<link rel="stylesheet" href="{% static 'css/admin/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/modal.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/dashboard.css' %}">
 {% endblock %}
 
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-<div class="header">
-    <h1>Admin Dashboard</h1>
-    <div class="user-profile">
-        <img src="https://via.placeholder.com/40" alt="Profile Image" onclick="triggerFileInput()">
-        <input type="file" id="profileImage" style="display: none;" accept="image/*">
-        <span>Super Admin</span>
-    </div>
-</div>
 
-<div class="dashboard-grid">
-    <div class="card">
-        <h2>System Statistics</h2>
-        <div class="stats-grid">
-            <div class="stat-item">
-                <h3>{{total_users}}</h3>
-                <p>Total Users</p>
-            </div>
-            <div class="stat-item">
-                <h3>{{total_transactions}}</h3>
-                <p>Transactions of this month</p>
-            </div>
-            <div class="stat-item">
-                <h3>{{total_transacted_price}}</h3>
-                <p>Total Transacted Price</p>
-            </div>
+    <div class="header">
+        <h2>Users</h2>
+
+        <button class="add-user"
+            data-name=""
+            data-gender=""
+            data-dob=""
+            data-email=""
+            data-submit_href="user/add">
+        <i class='bx bx-plus'></i> Add</button>
+    </div>
+
+    <table id="data_table" class="display">
+        <thead>
+            <tr>
+                {% for table_head in table_heads %}
+                <th>{{table_head}}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{user.0}}</td>
+                <td>{{user.1|upper}}</td>
+                <td>{{user.2}}</td>
+                <td>{{user.3}}</td>
+                <td>{{user.4}}</td>
+                <td>
+                    <button type="button" class="btn btn-edit"
+                            data-name="{{ user.0 }}"
+                            data-gender="{{ user.1 }}"
+                            data-dob="{{ user.2 }}"
+                            data-email="{{ user.3 }}"
+                             data-submit_href="user/edit">
+                        <i class='bx bx-edit'></i>
+                    </button>
+                    <button type="button" id="cancel" class="btn"><i class="bx bx-trash"></i></button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="modal" class="modal is-hidden" aria-hidden="true">
+        <div class="modal__overlay" id="overlay"></div>
+
+        <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <header class="modal__header">
+                <h2 id="modalTitle">User Details</h2>
+                <button class="modal__close" id="closeBtn" aria-label="Close">×</button>
+            </header>
+
+            <form class="modal__content" method="POST" action="#">
+                {% csrf_token %}
+
+                <p class="error-message">Please all</p>
+                <div class="field email-field" style="display: none;">
+                    <label for="email">Email</label>
+                    <input type="email" name="email" id="email">
+                </div>
+
+                <div class="field">
+                    <label for="name">Name</label>
+                    <input id="name" name="name" type="text"/>
+                </div>
+
+                <div class="field">
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender">
+                        <option value="" selected disabled>Select gender</option>
+                        <option>Female</option>
+                        <option>Male</option>
+                        <option>Other</option>
+                        <option>Prefer not to say</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="dob">Date of Birth</label>
+                    <input id="dob" name="dob" type="date"/>
+                </div>
+
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password">
+                </div>
+                <div class="actions">
+                    <button type="submit">Submit</button>
+                </div>
+            </form>
         </div>
     </div>
-    <div class="card">
-        <h2>Transaction Volume</h2>
-        <div class="chart-container">
-            <canvas id="transactionChart"></canvas>
-        </div>
-    </div>
-    <div class="card">
-        <h2>User Management</h2>
-        <table class="user-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>001</td>
-                    <td>john_doe</td>
-                    <td>john@example.com</td>
-                    <td>Active</td>
-                    <td><button class="action-btn" onclick="alert('Suspend user?')">Suspend</button></td>
-                </tr>
-                <tr>
-                    <td>002</td>
-                    <td>jane_smith</td>
-                    <td>jane@example.com</td>
-                    <td>Pending</td>
-                    <td><button class="action-btn" onclick="alert('Activate user?')">Activate</button></td>
-                </tr>
-                <tr>
-                    <td>003</td>
-                    <td>alice_bob</td>
-                    <td>alice@example.com</td>
-                    <td>Suspended</td>
-                    <td><button class="action-btn" onclick="alert('Reactivate user?')">Reactivate</button></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
 {% endblock %}
 
 {% block js %}
-<script src="{% static 'js/admin/dashboard.js' %}"></script>
+    <script src="{% static 'js/admin/modal.js' %}"></script>
+    <script src="{% static 'js/admin/dashboard.js' %}"></script>
 {% endblock %}

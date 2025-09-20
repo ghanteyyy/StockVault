@@ -1,3 +1,28 @@
+:root {
+    --bg: #f5f7fb;
+    --surface: #ffffff;
+    --surface-2: #1e1b4bb7;
+    --text: #0f172a;
+    --muted: #64748b;
+    --ring: #dbe5ff;
+    --border: #e5e9f2;
+    --shadow: 0 10px 25px rgba(20, 20, 50, .08), 0 2px 8px rgba(16, 24, 40, .06);
+}
+
+* {
+    box-sizing: border-box
+}
+
+html,
+body {
+    height: 100%
+}
+
+
+body.modal-open {
+    overflow: hidden;
+}
+
 body {
     margin: 0;
     font-family: 'Ubuntu';
@@ -7,5 +32,10 @@ body {
 
 .container {
     display: flex;
-    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1;
+    padding: 10px 20px;
+    background-color: white;
 }
