@@ -1,0 +1,89 @@
+/* General table style */
+table.dataTable {
+    border-collapse: separate;
+    border-spacing: 0 8px;
+    width: 100% !important;
+    background-color: #fff;
+    font-family: 'Ubuntu', sans-serif;
+    font-size: 14px;
+    border: none !important;
+}
+
+/* Header styling */
+table.dataTable thead th {
+    background: #1e293b;
+    color: #f8fafc;
+    text-align: center !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 12px 16px;
+    border: none;
+}
+
+
+/* Body rows */
+table.dataTable tbody tr {
+    background: #f9fafb;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+table.dataTable tbody tr:hover {
+    background: #e2e8f0;
+}
+
+/* Table cells */
+table.dataTable tbody td {
+    padding: 12px 16px;
+    border: none;
+    color: #1e293b;
+}
+
+/* Pagination */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 6px 12px;
+    margin: 2px;
+    border-radius: 6px;
+    border: none !important;
+    background-color: #f1f5f9;
+    color: #1e293b !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+    color: #000000 !important;
+    cursor: not-allowed !important;
+    opacity: 0.6;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: #0f172a !important;
+    color: #f8fafc !important;
+    font-weight: bold;
+}
+
+/* Search box */
+.dataTables_wrapper .dataTables_filter input {
+    border: 1px solid #8f8e8e;
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin-left: 8px;
+    margin-bottom: 10px;
+    outline: none;
+    transition: 0.2s;
+}
+
+.dataTables_wrapper .dataTables_filter input:focus {
+    border-color: #1e40af;
+    box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2);
+}
+
+/* Dropdown (entries length) */
+.dataTables_wrapper .dataTables_length select {
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 4px 8px;
+    margin-left: 6px;
+    outline: none;
+}
