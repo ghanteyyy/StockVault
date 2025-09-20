@@ -12,6 +12,7 @@ def AdminPage(request):
     table_heads = ['Name', 'Gender', "Date of Birth", "Email", "Joined At", 'Action']
 
     users = (user_models.CustomUser.objects
+        .filter(is_active=True)
         .annotate(
             dob_str=Cast('date_of_birth', CharField()),
             joined_str=Cast(TruncDate('date_joined'), CharField()),
@@ -36,8 +37,6 @@ def EditUser(request):
         email = request.POST.get('email', '').strip()
         gender = request.POST.get('gender', '').strip()
         password = request.POST.get('password', '').strip()
-
-        print([email, name, dob, gender, password])
 
         user = user_models.CustomUser.objects.get(email=email)
 
@@ -79,3 +78,18 @@ def AddUser(request):
         return JsonResponse({'status': True, 'message': 'User added successfully'})
 
     return JsonResponse({'status': False, 'message': 'Something went wrong'})
+
+
+@login_required(login_url='login')
+def DeleteUser(request):
+    try:
+        email = request.GET.get('email', '')
+
+        user = user_models.CustomUser.objects.get(email=email, is_active=True)
+        user.is_active = False
+        user.save()
+
+        return JsonResponse({'status': True, 'message': 'User deleted successfully'})
+
+    except user_models.CustomUser.DoesNotExist:
+        return JsonResponse({'status': False, 'message': 'User not found'})
