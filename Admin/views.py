@@ -1,25 +1,81 @@
-from django.utils.timezone import now as timezone_now
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Value
-from django.db.models.functions import Coalesce
+import datetime
+from django.shortcuts import render
 import Users.models as user_models
-import Shares.models as share_models
+from django.http import JsonResponse
+from django.db.models import CharField
+from django.db.models.functions import Cast, TruncDate
+from django.contrib.auth.decorators import login_required
 
 
 @login_required(login_url='login')
 def AdminPage(request):
-    total_users = user_models.CustomUser.objects.count()
-    total_transactions = share_models.Transactions.objects.filter(transaction_date__month=timezone_now().month).count()
-    total_transacted_price = share_models.Transactions.objects.filter(
-                                    transaction_date__month=timezone_now().month,
-                                    transaction_date__year=timezone_now().year).aggregate(total=Coalesce(Sum('transacted_price'), Value(0.0)))['total']
+    table_heads = ['Name', 'Gender', "Date of Birth", "Email", "Joined At", 'Action']
+
+    users = (user_models.CustomUser.objects
+        .annotate(
+            dob_str=Cast('date_of_birth', CharField()),
+            joined_str=Cast(TruncDate('date_joined'), CharField()),
+        )
+        .values_list('name','gender','dob_str','email','joined_str')
+    )
 
     context = {
+        'users': users,
+        'table_heads': table_heads,
         'page_title': 'Admin | Stock Vault',
-        'total_users': format(total_users, ','),
-        'total_transactions': format(total_transactions, ','),
-        'total_transacted_price': format(total_transacted_price, ',')
     }
 
     return render(request, 'admin/dashboard.html', context)
+
+
+@login_required(login_url='login')
+def EditUser(request):
+    if request.method.lower() == 'post':
+        dob = request.POST.get('dob', '').strip()
+        name = request.POST.get('name', '').strip()
+        email = request.POST.get('email', '').strip()
+        gender = request.POST.get('gender', '').strip()
+        password = request.POST.get('password', '').strip()
+
+        print([email, name, dob, gender, password])
+
+        user = user_models.CustomUser.objects.get(email=email)
+
+        if dob:
+            user.date_of_birth = datetime.datetime.strptime(dob, '%Y-%m-%d')
+
+        if name:
+            user.name = name
+
+        if gender:
+            user.gender = gender
+
+        if password:
+            user.set_password(password)
+
+        user.save()
+
+        return JsonResponse({'status': True, 'message': 'User info edited successfully'})
+
+    return JsonResponse({'status': False, 'message': 'Something went wrong'})
+
+
+@login_required(login_url='login')
+def AddUser(request):
+    if request.method.lower() == 'post':
+        dob = request.POST.get('dob', '').strip()
+        name = request.POST.get('name', '').strip()
+        email = request.POST.get('email', '').strip()
+        gender = request.POST.get('gender', '').strip()
+        password = request.POST.get('password', '').strip()
+
+        if user_models.CustomUser.objects.filter(email=email):
+            return JsonResponse({'status': False, 'message': 'Email already exists'})
+
+        user = user_models.CustomUser(email=email, name=name, gender=gender, date_of_birth=dob)
+        user.set_password(password)
+        user.save()
+
+        return JsonResponse({'status': True, 'message': 'User added successfully'})
+
+    return JsonResponse({'status': False, 'message': 'Something went wrong'})
