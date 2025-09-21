@@ -4,7 +4,7 @@
 {% block css %}
     <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
     <link rel="stylesheet" href="{% static 'css/admin/modal.css' %}">
-    <link rel="stylesheet" href="{% static 'css/admin/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/users.css' %}">
 {% endblock %}
 
 {% block title %}Admin Dashboard{% endblock %}
@@ -26,6 +26,7 @@
     <table id="data_table" class="display">
         <thead>
             <tr>
+                <th>SN</th>
                 {% for table_head in table_heads %}
                 <th>{{table_head}}</th>
                 {% endfor %}
@@ -33,26 +34,27 @@
         </thead>
         <tbody>
             {% for user in users %}
-            <tr>
-                <td>{{user.0}}</td>
-                <td>{{user.1|upper}}</td>
-                <td>{{user.2}}</td>
-                <td>{{user.3}}</td>
-                <td>{{user.4}}</td>
-                <td>
-                    <button type="button" class="btn btn-edit"
-                            data-name="{{ user.0 }}"
-                            data-gender="{{ user.1 }}"
-                            data-dob="{{ user.2 }}"
-                            data-email="{{ user.3 }}"
-                             data-submit_href="user/edit">
-                        <i class='bx bx-edit'></i>
-                    </button>
-                    <button type="button" class="btn btn-cancel"
-                        data-email="{{ user.3 }}"><i class="bx bx-trash"></i>
-                    </button>
-                </td>
-            </tr>
+                <tr>
+                    <td class="sn">{{forloop.counter}}</td>
+                    <td>{{user.0}}</td>
+                    <td>{{user.1|upper}}</td>
+                    <td>{{user.2}}</td>
+                    <td>{{user.3}}</td>
+                    <td>{{user.4}}</td>
+                    <td>
+                        <button type="button" class="btn btn-edit"
+                                data-name="{{ user.0 }}"
+                                data-gender="{{ user.1 }}"
+                                data-dob="{{ user.2 }}"
+                                data-email="{{ user.3 }}"
+                                data-submit_href="user/edit">
+                            <i class='bx bx-edit'></i>
+                        </button>
+                        <button type="button" class="btn btn-cancel"
+                            data-email="{{ user.3 }}"><i class="bx bx-trash"></i>
+                        </button>
+                    </td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>
@@ -110,5 +112,5 @@
 
 {% block js %}
     <script src="{% static 'js/admin/modal.js' %}"></script>
-    <script src="{% static 'js/admin/dashboard.js' %}"></script>
+    <script src="{% static 'js/admin/users.js' %}"></script>
 {% endblock %}

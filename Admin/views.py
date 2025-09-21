@@ -26,7 +26,7 @@ def AdminPage(request):
         'page_title': 'Admin | Stock Vault',
     }
 
-    return render(request, 'admin/dashboard.html', context)
+    return render(request, 'admin/users.html', context)
 
 
 @login_required(login_url='login')
