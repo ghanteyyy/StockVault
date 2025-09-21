@@ -9,30 +9,8 @@
     background: linear-gradient(180deg, #ffffff 0%, #fafbff 100%);
 }
 
-.sidebar .brand {
-    gap: 10px;
-    display: flex;
-    padding: 20px;
-    color: white;
-    margin-bottom: 20px;
-    align-items: center;
-    border-radius: 12px;
-    background: black;
-    justify-content: center;
-    box-shadow: var(--shadow);
-}
-
-.sidebar .brand i {
-    font-size: 20px;
-}
-
-.sidebar .brand span {
-    font-size: 18px;
-    font-weight: 700;
-}
-
 .nav-links {
-    gap: 10px;
+    gap: 15px;
     display: flex;
     flex-direction: column;
 }
