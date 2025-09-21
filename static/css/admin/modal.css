@@ -112,3 +112,9 @@ select:focus {
 .actions button[type="submit"]:hover {
     filter: brightness(0.95);
 }
+
+td.sn{
+    font-weight: 900;
+    text-align: center;
+    font-size: 1.025rem;
+}
