@@ -8,7 +8,7 @@ add_user_button.addEventListener('click', (e) => {
     email_field = document.querySelector('.email-field');
     email_field.style.display = 'block';
 
-    form.action = `${window.location.href}user/add`;
+    form.action = `${window.location.origin}/admin/user/add`;
     openModal();
 });
 
@@ -46,10 +46,13 @@ buttons.forEach((button, index) => {
 
         const { name, gender, dob, email, submit_href } = button.dataset;
 
-        form.action += `${window.location.href}user/edit`;
+        form.action = `${window.location.origin}/admin/user/edit`;
 
         if(submit_href == 'user/edit'){
             name_field.value = name;
+
+            password_field_required = document.querySelector('.required.password');
+            password_field_required.innerHTML = '';
 
             if(gender){
                 gender_field.value = gender[0].toUpperCase() + gender.substring(1, gender.length).toLowerCase();
@@ -89,17 +92,15 @@ form.addEventListener('submit', async (e) => {
 
     form_base_url = form.action.split('/').slice(-2).join('/');
 
-    if(form_base_url == 'user/add'){
-        if(!email_field.value || !(name_field.value || !gender_field.value || !dob_field.value || !password_field.value)){
-            error.style.display = 'block';
-            error.innerHTML = 'Please complete all required fields before submitting';
+    if((form_base_url == 'user/add' && !password_field.value) || !email_field.value || !name_field.value || !gender_field.value || !dob_field.value){
+        error.style.display = 'block';
+        error.innerHTML = 'Please complete all required fields before submitting';
 
-            setTimeout(function() {
-                $(error).fadeOut('fast');
-            }, 2000);
+        setTimeout(function() {
+            $(error).fadeOut('fast');
+        }, 2000);
 
-            return false;
-        }
+        return false;
     }
 
     // ajax request
