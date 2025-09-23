@@ -1,5 +1,6 @@
 import requests
 from Shares.models import *
+from bs4 import BeautifulSoup
 from django.core.management.base import BaseCommand
 
 
@@ -10,12 +11,16 @@ class Command(BaseCommand):
 
         for content in contents:
             abbreviation = content['d']
-
             company_name = content['l']
-            company_name = ' '.join(company_name.split()[1:])[1:-1].strip()
+
+            req = requests.get(f'https://merolagani.com/CompanyDetail.aspx?symbol={abbreviation}').content
+            soup = BeautifulSoup(req, 'html.parser')
+
+            sector_th = soup.find("th", string=lambda t: t and "Sector" in t)
+            sector = sector_th.find_next("td").get_text(strip=True)
 
             if not ListedCompanies.objects.filter(name=company_name):
-                ListedCompanies.objects.create(name=company_name, abbreviation=abbreviation)
+                ListedCompanies.objects.create(name=company_name, abbreviation=abbreviation, sector=sector)
 
 
     def handle(self, *args, **options):
