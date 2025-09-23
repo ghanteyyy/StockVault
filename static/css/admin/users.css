@@ -46,3 +46,7 @@ button.add-user{
 button.add-user:hover{
     cursor: pointer;
 }
+
+span.required{
+    color: #dc2626;
+}
