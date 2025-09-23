@@ -16,6 +16,7 @@ class ListedCompanies(models.Model):
 
     name = models.CharField(max_length=255, null=False, blank=False, unique=True)
     abbreviation = models.CharField(verbose_name=_('abbreviation'), max_length=255, null=False, blank=False)
+    sector = models.CharField(verbose_name=_('sector'), max_length=255, null=False, blank=False, default='')
     logo = models.ImageField(verbose_name=('logo'), blank=True, null=True, upload_to=utils.company_logo_path)
     created_at = models.DateTimeField(editable=False, default=now)
 
