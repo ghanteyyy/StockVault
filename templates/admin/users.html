@@ -14,7 +14,7 @@
     <div class="header">
         <h2>Users</h2>
 
-        <button class="add-user"
+        <button class="btn-add"
             data-name=""
             data-gender=""
             data-dob=""
@@ -41,7 +41,7 @@
                     <td>{{user.2}}</td>
                     <td>{{user.3}}</td>
                     <td>{{user.4}}</td>
-                    <td>
+                    <td class="action-buttons">
                         <button type="button" class="btn btn-edit"
                                 data-name="{{ user.0 }}"
                                 data-gender="{{ user.1 }}"
@@ -50,7 +50,7 @@
                                 data-submit_href="user/edit">
                             <i class='bx bx-edit'></i>
                         </button>
-                        <button type="button" class="btn btn-cancel"
+                        <button type="button" class="btn btn-delete"
                             data-email="{{ user.3 }}"><i class="bx bx-trash"></i>
                         </button>
                     </td>
