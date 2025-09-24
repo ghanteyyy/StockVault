@@ -1,0 +1,101 @@
+{% extends 'admin/root.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/modal.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/users.css' %}">
+{% endblock %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+
+    <div class="header">
+        <h2>Listed Companies</h2>
+
+        <button class="btn-add"
+            data-name=""
+            data-submit_href="company/add">
+        <i class='bx bx-plus'></i> Add</button>
+    </div>
+
+    <table id="data_table" class="display">
+        <thead>
+            <tr>
+                <th>SN</th>
+                {% for table_head in table_heads %}
+                <th>{{table_head}}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for company in companies %}
+                <tr>
+                    <td class="sn">{{forloop.counter}}</td>
+                    <td>{{company.0}}</td>
+                    <td>{{company.1}}</td>
+                    <td class="action-buttons">
+                        <button type="button" class="btn btn-edit"
+                                data-name="{{ company.0 }}"
+                                data-sector="{{ company.1 }}"
+                                data-company_id="{{company.2}}"
+                                data-company_abbreviation="{{company.3}}"
+                                data-submit_href="company/edit">
+                            <i class='bx bx-edit'></i>
+                        </button>
+                        <button type="button" class="btn btn-delete"
+                            data-company_id="{{ company.2 }}"><i class="bx bx-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="modal" class="modal is-hidden" aria-hidden="true">
+        <div class="modal__overlay" id="overlay"></div>
+
+        <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <header class="modal__header">
+                <h2 id="modalTitle">Company Details</h2>
+                <button class="modal__close" id="closeBtn" aria-label="Close">×</button>
+            </header>
+
+            <form class="modal__content" method="POST" action="#">
+                {% csrf_token %}
+
+                <p class="error-message"></p>
+
+                <div class="field" style="display: none;">
+                    <label for="company_id">ID <span class="required"> *</span></label>
+                    <input type="text" name="company_id" id="company_id" readonly>
+                </div>
+
+                <div class="field">
+                    <label for="company">Company <span class="required"> *</span></label>
+                    <input type="text" name="company_name" id="company">
+                </div>
+
+                <div class="field">
+                    <label for="abbreviation">Abbreviation <span class="required"> *</span></label>
+                    <input id="abbreviation" name="company_abbreviation" type="text"/>
+                </div>
+
+                <div class="field">
+                    <label for="sector">Sector <span class="required"> *</span></label>
+                    <input id="sector" name="company_sector" type="text"/>
+                </div>
+
+                <div class="actions">
+                    <button type="submit">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/admin/modal.js' %}"></script>
+    <script src="{% static 'js/admin/companies.js' %}"></script>
+{% endblock %}
