@@ -31,7 +31,7 @@ button:hover {
     border-color: #bbb;
 }
 
-button.add-user{
+button.btn-add{
     display: flex;
     color: white;
     padding: 10px 20px;
@@ -43,7 +43,7 @@ button.add-user{
     background-color: #334155;
 }
 
-button.add-user:hover{
+button.btn-add:hover{
     cursor: pointer;
 }
 
