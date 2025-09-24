@@ -1,10 +1,10 @@
 const form = document.querySelector('.modal__content');
 const buttons = document.querySelectorAll('.btn-edit');
-const add_user_button = document.querySelector('.add-user');
-const cancel_buttons = document.querySelectorAll('.btn-cancel');
+const add_button = document.querySelector('.btn-add');
+const delete_buttons = document.querySelectorAll('.btn-delete');
 
 
-add_user_button.addEventListener('click', (e) => {
+add_button.addEventListener('click', (e) => {
     email_field = document.querySelector('.email-field');
     email_field.style.display = 'block';
 
@@ -13,8 +13,8 @@ add_user_button.addEventListener('click', (e) => {
 });
 
 
-cancel_buttons.forEach((cancel_button) => {
-    cancel_button.addEventListener('click', async (e) => {
+delete_buttons.forEach((delete_button) => {
+    delete_button.addEventListener('click', async (e) => {
         const email = e.currentTarget.dataset.email;
 
         const url = new URL('/admin/user/delete', location.origin);
