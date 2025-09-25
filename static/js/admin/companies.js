@@ -99,6 +99,12 @@ form.addEventListener('submit', async (e) => {
         error.style.cssText = 'display: block;color:#b91c1c;background:#fee2e2;border:1px solid #fca5a5;';
     }
 
+    if(form.action.split('/').slice(-2).join('/') == 'company/add'){
+        company_field.value = '';
+        sector_field.value = '';
+        abbreviation_field.value = '';
+    }
+
     setTimeout(function() {
         $(error).fadeOut('fast');
     }, 2000);
