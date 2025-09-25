@@ -75,7 +75,7 @@ function displayEditTargetForm(target) {
     const data_low_target = target.getAttribute('data-low_target');
     const data_high_target = target.getAttribute('data-high_target');
 
-    document.querySelector('.company_title').textContent = `${data_company_name} (${data_abbreviation})`;
+    document.querySelector('.company_title').textContent = data_company_name;
     document.getElementById('edit_company_abbr').value = data_abbreviation;
     document.getElementById('edit_low_target').value = data_low_target;
     document.getElementById('edit_high_target').value = data_high_target;

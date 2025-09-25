@@ -24,7 +24,7 @@
                 {% for target in targets %}
                     <div class="target-card">
                         <div class="target-header">
-                            <span class="company-name">{{ target.company_name }} ({{ target.abbreviation }})</span>
+                            <span class="company-name">{{ target.company_name }}</span>
                             {% if target.show_buy_sell %}
                                 <span class="target-type {{ target.target_type }}">
                                     {{ target.target_type|title }}

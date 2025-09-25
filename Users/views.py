@@ -215,7 +215,7 @@ def Dashboard(request):
     share_holdings = share_models.Portfolios.objects.filter(user_id=request.user).order_by('company_id__name').distinct('company_id__name')
 
     for share_holding in share_holdings:
-        company_name = f'{share_holding.company_id.abbreviation} ({share_holding.company_id.name})'
+        company_name = share_holding.company_id.name
 
         qs = (share_models.StockMarketData.objects
             .using("stockmarketdata")
@@ -227,7 +227,7 @@ def Dashboard(request):
             portfolio_data.append(
                 {
                     'error': 'No market value yet.',
-                    'company_name': f'{share_holding.company_id.name} ({share_holding.company_id.abbreviation})',
+                    'company_name': company_name,
                 }
             )
 
@@ -238,11 +238,11 @@ def Dashboard(request):
         percentage_change = qs[1].pct_change
         previous_closing_price = float(qs[1].ltp)
         previous_opening_price = float(qs[0].open_price)
-        portfolio_values += share_holding.number_of_shares * previous_closing_price
+        portfolio_values += round(share_holding.number_of_shares * previous_closing_price, 2)
 
         portfolio_data.append(
             {
-                'company_name': f'{share_holding.company_id.name} ({share_holding.company_id.abbreviation})',
+                'company_name': company_name,
                 'today_opening_price': previous_opening_price,
                 'today_closing_price': previous_closing_price,
                 'percentage_change': f"{percentage_change}%"
@@ -281,7 +281,7 @@ def Portfolio(request):
     errors = []
 
     if request.method.lower() == 'post':
-        company = request.POST.get('company').split('(')[0].strip()
+        company = request.POST.get('company').strip()
         quantity = request.POST.get('share_quantity').strip()
         buying_rate = request.POST.get('buying_rate').strip()
 
@@ -302,7 +302,7 @@ def Portfolio(request):
 
     companies = share_models.ListedCompanies.objects.exclude(id__in=user_companies)
     serialized_companies = share_serializers.CompaniesSerializer(companies, many=True).data
-    companies = [f"{company['name']} ({company['abbreviation']})" for company in serialized_companies]
+    companies = [company['name'] for company in serialized_companies]
 
     share_holdings = share_models.Portfolios.objects.filter(user_id=request.user).order_by('-created_at')
     share_holdings = share_serializers.PortfoliosSerializer(share_holdings, many=True).data
@@ -331,6 +331,7 @@ def PortfolioGraph(request):
     company_name = request.GET.get('company_name', '').strip()
     company_name = unquote(company_name)
 
+    print(f"Portfolio Graph Company Name: {company_name}")
     column_type = request.GET.get('column_type', 'ltp').strip()
     column_type = unquote(column_type)
 
@@ -376,7 +377,7 @@ def WishListPage(request):
     errors = []
 
     if request.method.lower() == 'post':
-        company_name = request.POST.get('company').split('(')[0].strip()
+        company_name = request.POST.get('company').strip()
         company = share_models.ListedCompanies.objects.get(name=company_name)
 
         if share_models.WishLists.objects.filter(company_id=company).exists():
@@ -390,7 +391,7 @@ def WishListPage(request):
     companies = share_models.ListedCompanies.objects.exclude(id__in=user_companies)
 
     serialized_companies = share_serializers.CompaniesSerializer(companies, many=True).data
-    companies = [f"{company['name']} ({company['abbreviation']})" for company in serialized_companies]
+    companies = [company['name'] for company in serialized_companies]
 
     saved_companies = share_models.WishLists.objects.filter(user_id=request.user)
     saved_companies = share_serializers.WishlistsSerializer(saved_companies, many=True).data
@@ -436,7 +437,6 @@ def TargetPage(request):
         if target_type not in ['buy', 'sell']:
             errors.append('Invalid target type selected')
 
-        company_name = company_name.split('(')[0].strip()
         company = share_models.ListedCompanies.objects.get(name__iexact=company_name)
 
         if user_models.Targets.objects.filter(user_id=request.user, company_id=company, target_type=target_type, is_deleted=False).exists():
@@ -455,7 +455,7 @@ def TargetPage(request):
     companies = share_models.ListedCompanies.objects.all()
 
     serialized_companies = share_serializers.CompaniesSerializer(companies, many=True).data
-    companies = [f"{company['name']} ({company['abbreviation']})" for company in serialized_companies]
+    companies = [company['name'] for company in serialized_companies]
 
     targets = user_models.Targets.objects.filter(user_id=request.user, is_deleted=False)
     targets = user_serializers.TargetsSerializer(targets, many=True).data
