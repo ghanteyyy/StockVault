@@ -12,4 +12,6 @@ urlpatterns = [
     path('admin/company/add', views.AdminListedCompaniesAdd, name='admin-company-add'),
     path('admin/company/edit', views.AdminListedCompaniesEdit, name='admin-company-edit'),
     path('admin/company/delete', views.AdminListedCompaniesDelete, name='admin-company-delete'),
+
+    path('admin/portfolios', views.AdminPortfolios, name='admin-portfolios'),
 ]

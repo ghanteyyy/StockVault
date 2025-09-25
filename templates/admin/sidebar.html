@@ -8,7 +8,7 @@
     <div class="nav-links">
         <a class="{% if request.resolver_match.url_name == 'admin-index' %}active{% endif %}" href="{% url 'admin-index' %}"><i class="bx bx-user"></i><span>Users</span></a>
         <a class="{% if request.resolver_match.url_name == 'admin-companies' %}active{% endif %}" href="{% url 'admin-companies' %}"><i class="bx bx-buildings"></i><span>Listed Companies</span></a>
-        <a class="" href="#"><i class="bx bx-briefcase-alt-2"></i><span>Portfolios</span></a>
+        <a class="{% if request.resolver_match.url_name == 'admin-portfolios' %}active{% endif %}" href="{% url 'admin-portfolios' %}"><i class="bx bx-briefcase-alt-2"></i><span>Portfolios</span></a>
         <a class="" href="#"><i class="bx bx-layer"></i><span>Portfolio Lots</span></a>
         <a class="" href="#"><i class="bx bx-transfer"></i><span>Transactions</span></a>
         <a class="" href="#"><i class="iconoir-target"></i><span>Targets</span></a>

@@ -4,6 +4,7 @@ import Users.models as user_models
 import Shares.models as share_models
 from django.http import JsonResponse
 from django.db.models import CharField
+import Shares.serializers as shares_serializers
 from django.db.models.functions import Cast, TruncDate
 from django.contrib.auth.decorators import login_required
 
@@ -23,8 +24,8 @@ def AdminPage(request):
 
     context = {
         'users': users,
+        'page_title': 'Users',
         'table_heads': table_heads,
-        'page_title': 'Admin | Stock Vault',
     }
 
     return render(request, 'admin/users.html', context)
@@ -105,7 +106,7 @@ def AdminListedCompanies(request):
     context = {
         'companies': companies,
         'table_heads': table_heads,
-        'page_title': 'Admin | Stock Vault',
+        'page_title': 'Listed Companies',
     }
 
     return render(request, 'admin/companies.html', context)
@@ -162,3 +163,19 @@ def AdminListedCompaniesDelete(request):
     company.delete()
 
     return JsonResponse({'status': True, 'message': 'Company deleted successfully'})
+
+
+@login_required(login_url='login')
+def AdminPortfolios(request):
+    portfolios = share_models.Portfolios.objects.all()
+    portfolios = shares_serializers.PortfoliosSerializer(portfolios, many=True).data
+
+    table_heads = ['Company', 'User', 'Number of Shares', 'Total Cost']
+
+    context = {
+        'portfolios': portfolios,
+        'table_heads': table_heads,
+        'page_title': 'Portfolios',
+    }
+
+    return render(request, 'admin/portfolios.html', context)
