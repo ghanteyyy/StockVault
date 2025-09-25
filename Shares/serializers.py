@@ -28,16 +28,20 @@ class WishlistsSerializer(serializers.ModelSerializer):
 class PortfoliosSerializer(serializers.ModelSerializer):
     company_name = serializers.SerializerMethodField()
     abbreviation = serializers.SerializerMethodField()
+    user_email = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Portfolios
-        fields = ['id', 'company_name', 'abbreviation', 'number_of_shares', 'total_cost']
+        fields = ['id', 'company_name', 'abbreviation', 'number_of_shares', 'total_cost', 'user_email']
 
     def get_company_name(self, obj):
         return obj.company_id.name
 
     def get_abbreviation(self, obj):
         return obj.company_id.abbreviation
+
+    def get_user_email(self, obj):
+        return obj.user_id.email
 
 
 class TransactionsSerializer(serializers.ModelSerializer):
