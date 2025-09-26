@@ -4,9 +4,12 @@ import Users.models as user_models
 import Shares.models as share_models
 from django.http import JsonResponse
 from django.db.models import CharField
+import Users.serializers as users_serializers
 import Shares.serializers as shares_serializers
 from django.db.models.functions import Cast, TruncDate
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from django.utils.html import escape
 
 
 @login_required(login_url='login')
@@ -179,3 +182,200 @@ def AdminPortfolios(request):
     }
 
     return render(request, 'admin/portfolios.html', context)
+
+
+@login_required(login_url='login')
+def AdminPortfoliosLots(request):
+    portfolioLots = share_models.PortfolioLots.objects.all()
+    portfolioLots = shares_serializers.PortfolioLotsSerializer(portfolioLots, many=True).data
+
+    table_heads = ['Company', 'User', 'Number of Shares', 'Total Cost', 'Purchased Date']
+
+    context = {
+        'table_heads': table_heads,
+        'portfolioLots': portfolioLots,
+        'page_title': 'Portfolio Lots',
+    }
+
+    return render(request, 'admin/portfolioLots.html', context)
+
+
+@login_required(login_url='login')
+def AdminTransactions(request):
+    transactions = share_models.Transactions.objects.all()
+    transactions = shares_serializers.TransactionsSerializer(transactions, many=True).data
+
+    table_heads = ['Company', 'User', 'Number of Shares', 'Transacted Price', 'Transaction Type', 'Transaction Date']
+
+    context = {
+        'table_heads': table_heads,
+        'transactions': transactions,
+        'page_title': 'Transactions',
+    }
+
+    return render(request, 'admin/transactions.html', context)
+
+
+@login_required(login_url='login')
+def AdminTargets(request):
+    targets = user_models.Targets.objects.all()
+    targets = users_serializers.TargetsSerializer(targets, many=True).data
+
+    table_heads = ['Company', 'User', 'Low Target', 'High Target', 'Target Type', 'Date Created']
+
+    context = {
+        'targets': targets,
+        'page_title': 'Targets',
+        'table_heads': table_heads,
+    }
+
+    return render(request, 'admin/targets.html', context)
+
+
+@login_required(login_url='login')
+def AdminWishlists(request):
+    wishlists = share_models.WishLists.objects.all()
+    wishlists = shares_serializers.WishlistsSerializer(wishlists, many=True).data
+
+    table_heads = ['User', 'Company']
+
+    context = {
+        'wishlists': wishlists,
+        'page_title': 'Targets',
+        'table_heads': table_heads,
+    }
+
+    return render(request, 'admin/wishlists.html', context)
+
+
+@login_required(login_url='login')
+def AdminFAQs(request):
+    faqs = share_models.FAQs.objects.all()
+    faqs = shares_serializers.FaqSerializers(faqs, many=True).data
+
+    table_heads = ['Question', 'Answer', 'Actions']
+
+    context = {
+        'faqs': faqs,
+        'page_title': 'FAQs',
+        'table_heads': table_heads,
+    }
+
+    return render(request, 'admin/faqs.html', context)
+
+
+@login_required(login_url='login')
+def AdminFaqAdd(request):
+    if request.method.lower() == 'post':
+        faq_question = request.POST.get('faq_question', '').strip()
+        faq_answer = request.POST.get('faq_answer', '').strip()
+
+        if share_models.FAQs.objects.filter(question__iexact=faq_question):
+            return JsonResponse({'status': False, 'message': 'Question already exists'})
+
+        faq = share_models.FAQs(question=faq_question, answer=faq_answer)
+        faq.save()
+
+        return JsonResponse({'status': True, 'message': 'Question added successfully'})
+
+    return JsonResponse({'status': False, 'message': 'Something went wrong'})
+
+
+@login_required(login_url='login')
+def AdminFaqEdit(request):
+    if request.method.lower() == 'post':
+        faq_id = request.POST.get('faq_id', '').strip()
+        faq_answer = request.POST.get('faq_answer', '').strip()
+        faq_question = request.POST.get('faq_question', '').strip()
+
+        if not share_models.FAQs.objects.filter(id=faq_id):
+            return JsonResponse({'status': False, 'message': 'Requested FAQ does not exists'})
+
+        faq = share_models.FAQs.objects.get(id=faq_id)
+        faq.question = faq_question
+        faq.answer = faq_answer
+        faq.save()
+
+        return JsonResponse({'status': True, 'message': 'FAQ information updated successfully'})
+
+    return JsonResponse({'status': False, 'message': 'Something went wrong'})
+
+
+@login_required(login_url='login')
+def AdminFaqDelete(request):
+    faq_id = request.GET.get('faq_id', '').strip()
+
+    if not share_models.FAQs.objects.filter(id=faq_id):
+        return JsonResponse({'status': False, 'message': 'Requested FAQ does not exist'})
+
+    company = share_models.FAQs.objects.get(id=faq_id)
+    company.delete()
+
+    return JsonResponse({'status': True, 'message': 'FAQ deleted successfully'})
+
+
+@login_required(login_url='login')
+def AdminMarketData(request):
+    targets = user_models.Targets.objects.all()
+    targets = users_serializers.TargetsSerializer(targets, many=True).data
+
+    table_heads = ['Company', 'Sector', 'LTP', '% Change', 'Open Price', 'Low', 'High', 'Qty', 'Turnover', 'Trade Date']
+
+    context = {
+        'page_title': 'Market Data',
+        'table_heads': table_heads,
+    }
+
+    return render(request, 'admin/market_data.html', context)
+
+
+DT_COLUMNS = [
+    "company_name", "sector", "ltp", "pct_change", "open_price",
+    "low", "high", "qty", "turnover", "trade_date"
+]
+
+
+@login_required(login_url='login')
+def stockmarketdata_dt(request):
+    draw   = int(request.GET.get("draw", 1))
+    start  = int(request.GET.get("start", 0))
+    length = int(request.GET.get("length", 25))
+    search = request.GET.get("search[value]", "")
+
+    qs = (share_models.StockMarketData.objects
+          .using("stockmarketdata")
+          .order_by("trade_date", "company_name"))
+
+    total = qs.count()
+
+    if search:
+        qs = qs.filter(
+            Q(company_name__icontains=search) |
+            Q(sector__icontains=search) |
+            Q(ltp__icontains=search)
+        )
+
+    filtered = qs.count()
+    page = qs.values(*DT_COLUMNS)[start:start+length]
+
+    data = [{
+        "sn": i+start+1,
+        "company_name": escape(r["company_name"] or ""),
+        "company_abbreviation": escape(r["company_name"].split('(')[0] or ""),
+        "sector": escape(r["sector"] or ""),
+        "ltp": r["ltp"] or "",
+        "pct_change": r["pct_change"] or "",
+        "open_price": r["open_price"] or "",
+        "low": r["low"] or "",
+        "high": r["high"] or "",
+        "qty": r["qty"] or "",
+        "turnover": r["turnover"] or "",
+        "trade_date": r["trade_date"].strftime("%b %d, %Y") if r["trade_date"] else ""
+    } for i, r in enumerate(page)]
+
+    return JsonResponse({
+        "draw": draw,
+        "recordsTotal": total,
+        "recordsFiltered": filtered,
+        "data": data
+    })
