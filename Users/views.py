@@ -331,7 +331,6 @@ def PortfolioGraph(request):
     company_name = request.GET.get('company_name', '').strip()
     company_name = unquote(company_name)
 
-    print(f"Portfolio Graph Company Name: {company_name}")
     column_type = request.GET.get('column_type', 'ltp').strip()
     column_type = unquote(column_type)
 
