@@ -44,19 +44,46 @@ class PortfoliosSerializer(serializers.ModelSerializer):
         return obj.user_id.email
 
 
+class PortfolioLotsSerializer(serializers.ModelSerializer):
+    user_email = serializers.SerializerMethodField()
+    company_name = serializers.SerializerMethodField()
+    purchased_date = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.PortfolioLots
+        fields = ['id', 'company_name', 'number_of_shares', 'total_cost', 'user_email', 'purchased_date']
+
+    def get_company_name(self, obj):
+        return obj.portfolio_id.company_id.name
+
+    def get_user_email(self, obj):
+        return obj.portfolio_id.user_id.email
+
+    def get_purchased_date(self, obj):
+        return obj.purchased_date.strftime("%b %e, %Y")
+
+
 class TransactionsSerializer(serializers.ModelSerializer):
+    user_email = serializers.SerializerMethodField()
     company_name = serializers.SerializerMethodField()
     transacted_price = serializers.SerializerMethodField()
+    transacted_date = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Transactions
-        fields = ['id', 'company_name', 'number_of_shares', 'transacted_price', 'transaction_type', 'transaction_date']
+        fields = ['id', 'company_name', 'number_of_shares', 'user_email', 'transacted_price', 'transaction_type', 'transacted_date']
+
+    def get_user_email(self, obj):
+        return obj.user_id.email
 
     def get_company_name(self, obj):
         return obj.company_id.name
 
     def get_transacted_price(self, obj):
         return round(obj.transacted_price, 2)
+
+    def get_transacted_date(self, obj):
+        return obj.transaction_date.strftime("%b %e, %Y")
 
 
 class FaqSerializers(serializers.ModelSerializer):
