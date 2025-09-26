@@ -9,12 +9,12 @@
         <a class="{% if request.resolver_match.url_name == 'admin-index' %}active{% endif %}" href="{% url 'admin-index' %}"><i class="bx bx-user"></i><span>Users</span></a>
         <a class="{% if request.resolver_match.url_name == 'admin-companies' %}active{% endif %}" href="{% url 'admin-companies' %}"><i class="bx bx-buildings"></i><span>Listed Companies</span></a>
         <a class="{% if request.resolver_match.url_name == 'admin-portfolios' %}active{% endif %}" href="{% url 'admin-portfolios' %}"><i class="bx bx-briefcase-alt-2"></i><span>Portfolios</span></a>
-        <a class="" href="#"><i class="bx bx-layer"></i><span>Portfolio Lots</span></a>
-        <a class="" href="#"><i class="bx bx-transfer"></i><span>Transactions</span></a>
-        <a class="" href="#"><i class="iconoir-target"></i><span>Targets</span></a>
-        <a class="" href="#"><i class="bx bx-star"></i><span>Wish Lists</span></a>
-        <a class="" href="#"><i class="bx bx-help-circle"></i><span>FAQs</span></a>
-        <a class="" href="#"><i class="bx bx-line-chart"></i><span>Market Data (read-only)</span></a>
+        <a class="{% if request.resolver_match.url_name == 'admin-portfolioLots' %}active{% endif %}" href="{% url 'admin-portfolioLots' %}"><i class="bx bx-layer"></i><span>Portfolio Lots</span></a>
+        <a class="{% if request.resolver_match.url_name == 'admin-transactions' %}active{% endif %}" href="{% url 'admin-transactions' %}"><i class="bx bx-transfer"></i><span>Transactions</span></a>
+        <a class="{% if request.resolver_match.url_name == 'admin-targets' %}active{% endif %}" href="{% url 'admin-targets' %}"><i class="iconoir-pin"></i><span>Targets</span></a>
+        <a class="{% if request.resolver_match.url_name == 'admin-wishlists' %}active{% endif %}" href="{% url 'admin-wishlists' %}"><i class="bx bx-star"></i><span>Wish Lists</span></a>
+        <a class="{% if request.resolver_match.url_name == 'admin-faqs' %}active{% endif %}" href="{% url 'admin-faqs' %}"><i class="bx bx-help-circle"></i><span>FAQs</span></a>
+        <a class="{% if request.resolver_match.url_name == 'admin-market-data' %}active{% endif %}" href="{% url 'admin-market-data' %}" href="#"><i class="bx bx-line-chart"></i><span>Market Data</span></a>
         <a class="" href="{% url 'logout' %}"><i class='bx bx-log-out'></i><span>Logout</span></a>
     </div>
 </div>
