@@ -1,0 +1,98 @@
+{% extends 'admin/root.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/modal.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/users.css' %}">
+{% endblock %}
+
+{% block content %}
+
+    <div class="header">
+        <h2>Listed Companies</h2>
+
+        <button class="btn-add"
+            data-name=""
+            data-submit_href="faq/add">
+        <i class='bx bx-plus'></i> Add</button>
+    </div>
+
+    <div class="header">
+        <h2>FAQs</h2>
+    </div>
+
+    <table id="data_table" class="display">
+        <thead>
+            <tr>
+                <th>SN</th>
+
+                {% for table_head in table_heads %}
+                    <th>{{table_head}}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for faq in faqs %}
+                <tr>
+                    <td class="sn">{{forloop.counter}}</td>
+                    <td>{{faq.question}}</td>
+                    <td>{{faq.answer}}</td>
+                    <td class="action-buttons">
+                        <button type="button" class="btn btn-edit"
+                                data-faq_id="{{faq.id}}"
+                                data-faq_question="{{faq.question}}"
+                                data-faq_answer="{{faq.answer}}"
+                                data-submit_href="faq/edit">
+                            <i class='bx bx-edit'></i>
+                        </button>
+                        <button type="button" class="btn btn-delete"
+                            data-faq_id="{{ faq.id }}"><i class="bx bx-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="modal" class="modal is-hidden" aria-hidden="true">
+        <div class="modal__overlay" id="overlay"></div>
+
+        <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <header class="modal__header">
+                <h2 id="modalTitle">FAQ Details</h2>
+                <button class="modal__close" id="closeBtn" aria-label="Close">×</button>
+            </header>
+
+            <form class="modal__content" method="POST" action="#">
+                {% csrf_token %}
+
+                <p class="error-message"></p>
+
+                <div class="field" style="display: none;">
+                    <label for="faq_id">ID <span class="required"> *</span></label>
+                    <input type="text" name="faq_id" id="faq_id" readonly>
+                </div>
+
+                <div class="field">
+                    <label for="question">Question <span class="required"> *</span></label>
+                    <input type="text" name="faq_question" id="question">
+                </div>
+
+                <div class="field">
+                    <label for="answer">Answer <span class="required"> *</span></label>
+                    <input id="answer" name="faq_answer" type="text"/>
+                </div>
+
+                <div class="actions">
+                    <button type="submit">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/admin/modal.js' %}"></script>
+    <script src="{% static 'js/admin/faqs.js' %}"></script>
+{% endblock %}

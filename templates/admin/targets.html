@@ -1,0 +1,40 @@
+{% extends 'admin/root.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/modal.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/users.css' %}">
+{% endblock %}
+
+{% block content %}
+
+    <div class="header">
+        <h2>Targets</h2>
+    </div>
+
+    <table id="data_table" class="display">
+        <thead>
+            <tr>
+                <th>SN</th>
+
+                {% for table_head in table_heads %}
+                    <th>{{table_head}}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for target in targets %}
+                <tr>
+                    <td class="sn">{{forloop.counter}}</td>
+                    <td>{{target.company_name}}</td>
+                    <td>{{target.user_email}}</td>
+                    <td style="text-align: center;">{{target.low_target}}</td>
+                    <td style="text-align: center;">{{target.high_target}}</td>
+                    <td style="text-align: center;">{{target.target_type | title}}</td>
+                    <td style="text-align: center;">{{target.created_date}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
