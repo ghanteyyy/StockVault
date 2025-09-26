@@ -14,4 +14,16 @@ urlpatterns = [
     path('admin/company/delete', views.AdminListedCompaniesDelete, name='admin-company-delete'),
 
     path('admin/portfolios', views.AdminPortfolios, name='admin-portfolios'),
+    path('admin/portfolioLots', views.AdminPortfoliosLots, name='admin-portfolioLots'),
+    path('admin/transactions', views.AdminTransactions, name='admin-transactions'),
+    path('admin/targets', views.AdminTargets, name='admin-targets'),
+    path('admin/wishlists', views.AdminWishlists, name='admin-wishlists'),
+
+    path('admin/faqs', views.AdminFAQs, name='admin-faqs'),
+    path('admin/faq/add', views.AdminFaqAdd, name='admin-faq-add'),
+    path('admin/faq/edit', views.AdminFaqEdit, name='admin-faq-edit'),
+    path('admin/faq/delete', views.AdminFaqDelete, name='admin-faq-delete'),
+
+    path('admin/market/data', views.AdminMarketData, name='admin-market-data'),
+    path('api/stockmarketdata/', views.stockmarketdata_dt, name='stockmarketdata_dt'),
 ]
