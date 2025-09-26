@@ -21,6 +21,10 @@
             {% for data in saved_companies %}
                 <div class="company">
                     <p>{{ data.company_name }}</p>
+
+                    <a href="{% url 'wishlist' %}?company_id={{data.id}}&action=delete" class="delete-btn">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
                 </div>
             {% empty %}
                 <p class="error-message" style="display: block;">No wishlist</p>

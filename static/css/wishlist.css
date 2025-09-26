@@ -25,21 +25,32 @@
 }
 
 .company {
-    border: 1px solid #d1d1d1;
-    background-color: white;
-    border-radius: 10px;
+    display: flex;
     padding: 20px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
     flex: 1 1 45%;
+    cursor: pointer;
     font-weight: 600;
     color: #34495e;
-    cursor: pointer;
+    border-radius: 10px;
+    background-color: white;
+    border: 1px solid #d1d1d1;
+    justify-content: space-between;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
     transition: box-shadow 0.3s ease, transform 0.2s ease;
 }
 
 .company:hover {
     box-shadow: 0 6px 15px rgba(0,0,0,0.15);
     transform: translateY(-4px);
+}
+
+.delete-btn {
+    border: none;
+    cursor: pointer;
+    background: none;
+    color: #f44336;
+    font-size: 18px;
+    text-decoration: none;
 }
 
 

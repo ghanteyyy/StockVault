@@ -280,6 +280,17 @@ def Portfolio(request):
 
     errors = []
 
+    if request.method.lower() == 'get':
+        action = request.GET.get('action', '')
+
+        if action == 'delete':
+            portfolio_id = request.GET.get('portfolio_id', '')
+
+            portfolio = share_models.Portfolios.objects.filter(id__iexact=portfolio_id, user_id=request.user)
+            portfolio.delete()
+
+            return redirect('portfolio')
+
     if request.method.lower() == 'post':
         company = request.POST.get('company').strip()
         quantity = request.POST.get('share_quantity').strip()
@@ -374,6 +385,17 @@ def WishListPage(request):
     """
 
     errors = []
+
+    if request.method.lower() == 'get':
+        action = request.GET.get('action', '')
+
+        if action == 'delete':
+            company_id = request.GET.get('company_id', '')
+
+            wishlist = share_models.WishLists.objects.filter(id__iexact=company_id, user_id=request.user)
+            wishlist.delete()
+
+            return redirect('wishlist')
 
     if request.method.lower() == 'post':
         company_name = request.POST.get('company').strip()

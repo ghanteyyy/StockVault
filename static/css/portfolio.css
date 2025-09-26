@@ -47,7 +47,13 @@ input[type="text"]{
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
+.company-item div:first-child{
+    display: flex;
+    justify-content: space-between;
+}
+
 .company-title {
+    text-decoration: none;
     font-size: 1.05em;
     font-weight: bold;
     color: #1976d2;
@@ -64,6 +70,15 @@ input[type="text"]{
 .company-details .quantity {
     font-weight: bold;
     color: #2e7d32;
+}
+
+.delete-btn {
+    border: none;
+    cursor: pointer;
+    background: none;
+    color: #f44336;
+    font-size: 18px;
+    text-decoration: none;
 }
 
 @media (max-width: 600px) {
