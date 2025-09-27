@@ -10,6 +10,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from urllib.parse import unquote
+from utils import algorithm
 import Shares.views as share_views
 import Users.models as user_models
 import Shares.models as share_models
@@ -207,9 +208,7 @@ def Dashboard(request):
 
     NepseIndices = (share_models.NepseIndices.objects
                     .using('stockmarketdata')
-                    .order_by('date')).values_list('date', 'index_value', 'percentage_change')
-
-    nepse_change = 'negative' if NepseIndices.last()[-1].startswith('-') else 'positive'
+                    .order_by('date')).values_list('date', 'index_value')
     NepseIndices = json.dumps(list(NepseIndices), default=str)
 
     share_holdings = share_models.Portfolios.objects.filter(user_id=request.user).order_by('company_id__name').distinct('company_id__name')
@@ -261,7 +260,6 @@ def Dashboard(request):
             'total_stocks': total_stocks,
             'portfolio_datasets': portfolio_data,
             'recent_activities': recent_activites,
-            'nepse_change': nepse_change,
             'overall_gain_loss': round(overall_gain_loss, 2),
         }
 
@@ -539,6 +537,56 @@ def TargetEdit(request):
             target.save()
 
         return redirect('target')
+
+@login_required(login_url='login')
+def PredictPage(request):
+    nepse_indices = (share_models.NepseIndices.objects
+                    .using('stockmarketdata')
+                    .order_by('date')).values_list('date', 'index_value')
+    nepse_indices  = [(date.strftime('%Y-%m-%d'), float(index_value.replace(',', ''))) for date, index_value in nepse_indices]
+
+    nepse_predicted_indices = [(str(d[0]), float(d[1])) for d in nepse_indices]
+    nepse_predicted_indices = algorithm.predict(nepse_predicted_indices, 100)
+
+    companies = share_models.ListedCompanies.objects.all()
+    serialized_companies = share_serializers.CompaniesSerializer(companies, many=True).data
+    companies = [company['name'] for company in serialized_companies]
+
+    graph_options = ['ltp', 'pct_change', 'high', 'low', 'open_price', 'qty', 'turnover']
+
+    context = {
+        'graph_options': graph_options,
+        'companies': json.dumps(companies),
+        "page_title": "Predict | StockVault",
+        "nepse_predicted_indices": nepse_predicted_indices,
+    }
+
+    return render(request, 'predict.html', context)
+
+
+@login_required(login_url='login')
+def FetchCompanyPredictionData(request):
+    company_name = request.GET.get('company_name', '').strip()
+    company_name = unquote(company_name)
+
+    column_type = request.GET.get('column_type', 'ltp').strip()
+    column_type = unquote(column_type)
+
+    if not share_models.ListedCompanies.objects.filter(name__iexact=company_name):
+        return JsonResponse({'status': False, 'message': 'Requested Company does not exist'})
+
+    qs = (share_models.StockMarketData.objects
+        .using('stockmarketdata')
+        .filter(company_name=company_name)
+        .order_by('trade_date')).values_list('trade_date', column_type)
+
+    qs  = [(date.strftime('%Y-%m-%d'), float(value.replace(',', ''))) for date, value in qs]
+
+    company_prediction_data = [(str(d[0]), float(d[1])) for d in qs]
+    company_prediction_data = json.dumps(algorithm.predict(company_prediction_data, 7))
+
+    return JsonResponse({'status': True, 'message': 'FAQ deleted successfully', 'data': company_prediction_data})
+
 
 @login_required(login_url='login')
 def SettingsPage(request, errors=None):
