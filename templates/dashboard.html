@@ -9,17 +9,9 @@
         {{ portfolio_datasets|safe }}
     </script>
 
-    <script id="nepse_indices" type="application/json">
-        {{ nepse_indices|safe }}
-    </script>
-
-    <script id="nepse_change" type="application/json">
-        {{ nepse_change|safe }}
-    </script>
-
     <div class="content">
         <div class="nepse_indices">
-            <canvas id="nepse_indices_graph"></canvas>
+            <canvas class="line-graph" id="nepse_indices_graph"></canvas>
         </div>
 
         <div class="card">
@@ -97,21 +89,11 @@
         <script src="{% static 'js/chart.js' %}"></script>
 
         <script>
-            const column_type = "NEPSE INDEX";
             const nepse_indices_data = {{nepse_indices|safe}}
             const dates = nepse_indices_data.map(row => row[0]);
             const indices = nepse_indices_data.map(row => parseFloat(row[1].replace(/,/g, "")));
 
-            const nepse_changes = "{{nepse_change}}";
-
-            if(nepse_changes == 'negative'){
-                renderLineChart('nepse_indices_graph', "NEPSE INDICES", dates, indices, '#b91c1c', 'rgba(185, 28, 28, 0.7)');
-            }
-
-            else{
-                renderLineChart('nepse_indices_graph', "NEPSE INDICES", dates, indices);
-            }
-
+            renderLineChart('nepse_indices_graph', "NEPSE INDICES", dates, indices);
         </script>
     {% endblock %}
 
