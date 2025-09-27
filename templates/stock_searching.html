@@ -43,6 +43,16 @@
             </div>
         {% endif %}
 
+        {% if request.resolver_match.url_name == 'predict' %}
+            <select name="graph_options" id="graph_options">
+                <option selected disabled hidden>Graph Data Type</option>
+
+                {% for graph_option in graph_options %}
+                    <option value="{{graph_option}}">{{graph_option}}</option>
+                {% endfor %}
+            </select>
+        {% endif %}
+
         <!-- Add Button -->
         <button type="submit" id="add-btn" class="add-btn">
             <i class="fas fa-plus"></i> Add
