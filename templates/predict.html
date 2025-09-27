@@ -1,0 +1,50 @@
+{% extends 'root.html' %}
+{% load static %}
+
+{% block content %}
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
+    <link rel="stylesheet" href="{% static 'css/predict.css' %}">
+
+    <script id="nepse_predicted_indices" type="application/json">
+        {{ nepse_predicted_indices|safe }}
+    </script>
+
+    <div class="content">
+        <div class="company-prediction">
+            <h2>Company Prediction</h2>
+
+            <form id="company_prediction_form" action="">
+                {% include 'stock_searching.html' %}
+
+                <p class="error-message" style="display: none;"></p>
+            </form>
+
+            <div class="company_prediction" style="display: none;">
+                <canvas class="line-graph" id="predict_company_graph"></canvas>
+            </div>
+        </div>
+
+        <div class="nepse_indices">
+            <canvas class="line-graph" id="predict_graph"></canvas>
+        </div>
+    </div>
+
+    {% block js %}
+        <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="{% static 'js/dashboard.js' %}"></script>
+        <script src="{% static 'js/chart.js' %}"></script>
+        <script src="{% static 'js/stock_searching.js' %}"></script>
+        <script src="{% static 'js/predict.js' %}" defer></script>
+
+        <script>
+            const future_nepse_indices_data = {{nepse_predicted_indices|safe}}
+            const future_dates = future_nepse_indices_data.map(row => row.date);
+            const future_indicies_data = future_nepse_indices_data.map(row => row.yhat);
+
+            renderLineChart('predict_graph', "NEPSE INDICES", future_dates, future_indicies_data);
+        </script>
+    {% endblock %}
+
+{% endblock %}
