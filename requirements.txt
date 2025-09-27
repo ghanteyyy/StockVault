@@ -1,8 +1,10 @@
 pillow
 django
+pandas
+Prophet
 requests
 psycopg2
-beautifulsoup4
 python-dotenv
+beautifulsoup4
 djangorestframework
 djangorestframework-simplejwt
