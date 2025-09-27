@@ -1,5 +1,4 @@
-import uuid
-import random
+import secrets
 
 
 def generate_uuid_hex():
@@ -7,7 +6,8 @@ def generate_uuid_hex():
     Generates a unique value (e.g., for filenames, IDs)
     '''
 
-    return uuid.uuid4().hex
+    return secrets.token_hex(32)
+
 
 def user_profile_path(instance, filename):
     '''
