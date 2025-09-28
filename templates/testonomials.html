@@ -1,0 +1,37 @@
+{% extends 'root.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/testonomial.css' %}">
+    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="content">
+        <div class="card">
+            <form action="" method="POST">
+                {% csrf_token %}
+
+                <input type="text" class="testonomial-text" name="testonomial" placeholder="Testimonial ...">
+
+                <button type="submit" id="btn-submit">Add</button>
+            </form>
+
+            {% include 'backend_error.html' %}
+        </div>
+
+        <div class="card testonomials">
+            {% for testonomial in testonomials %}
+                <div class="testonomial">
+                    <p>{{ testonomial.message }}</p>
+
+                    <a href="{% url 'testonomials' %}?testonomial_id={{testonomial.id}}&action=delete" class="delete-btn">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                </div>
+            {% empty %}
+                <p class="error-message" style="display: block;">No Testonomial</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

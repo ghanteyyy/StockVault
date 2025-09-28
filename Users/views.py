@@ -589,6 +589,34 @@ def FetchCompanyPredictionData(request):
 
 
 @login_required(login_url='login')
+def TestonomialsPage(request):
+    if request.method.lower() == 'post':
+        messaage = request.POST.get('testonomial').strip()
+
+        testonomial = user_models.Testonomials(user_id=request.user, message=messaage)
+        testonomial.save()
+
+    elif request.method.lower() == 'get':
+        action = request.GET.get('action', '').lower()
+
+        if action == 'delete':
+            testonomial_id = request.GET.get('testonomial_id').strip()
+
+            user_models.Testonomials.objects.get(id__iexact=testonomial_id).delete()
+
+            return redirect('testonomials')
+
+    testonomials = user_models.Testonomials.objects.filter(user_id=request.user)
+
+    context = {
+        'testonomials': testonomials,
+        'page_title': 'Testonomials | StockVault'
+    }
+
+    return render(request, 'testonomials.html', context)
+
+
+@login_required(login_url='login')
 def SettingsPage(request, errors=None):
     """
     Handles requests for the settings page. If the request is a POST, it validates
