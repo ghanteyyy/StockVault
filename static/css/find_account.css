@@ -1,0 +1,104 @@
+.container {
+    height: auto;
+}
+
+.main-content {
+    padding: 0;
+}
+
+.content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+        radial-gradient(1200px 800px at 10% -10%, rgba(99, 102, 241, .15), transparent 40%),
+        radial-gradient(1000px 600px at 110% 10%, rgba(56, 189, 248, .12), transparent 45%),
+        linear-gradient(180deg, #0f1730, #0b1020);
+}
+
+.card {
+    width: 50%;
+    padding: 100px;
+}
+
+form {
+    gap: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+h2 {
+    height: 30%;
+    display: flex;
+    align-items: center;
+    color: white;
+    padding: 20px 20px 20px 10px;
+}
+
+.email-field {
+    gap: 10px;
+    width: 100%;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    outline: none;
+    font-size: 17px;
+    margin-top: 10px;
+    border-radius: 10px;
+    border: 1px solid slategray;
+}
+
+input::placeholder {
+    color: #6b7280;
+    opacity: 1;
+}
+
+
+input:focus {
+    border: 1px solid slategray;
+}
+
+.buttons {
+    gap: 10px;
+    height: 20%;
+    display: flex;
+    align-items: center;
+    padding: 5px 5px 10px 5px;
+    justify-content: flex-end;
+}
+
+#cancel-button,
+#search-button {
+    border: 0;
+    outline: none;
+    cursor: pointer;
+    font-size: 15px;
+    margin-top: 10px;
+    margin-right: 10px;
+    padding: 10px 25px;
+    font-weight: bolder;
+    border-radius: 10px;
+}
+
+#cancel-button {
+    color: #4b4f56;
+    text-decoration: none;
+    background-color: #e4e6eb;
+}
+
+#search-button {
+    color: white;
+    background-color: #1877f2;
+}
+
+#search-button:hover {
+    background-color: #1876f2de;
+}

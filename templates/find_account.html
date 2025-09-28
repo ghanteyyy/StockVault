@@ -1,0 +1,27 @@
+{% extends 'root.html' %}
+{% load static %}
+
+{% block content %}
+    <script src="{% static 'js/find_account.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
+    <link rel="stylesheet" href="{% static 'css/find_account.css' %}">
+
+    <div class="content">
+        <div class="card">
+            <h2>Find Your Account</h2>
+
+            <form method="post" onsubmit="return validateFindAccountForm();">
+                {% csrf_token %}
+                <div class="email-field">
+                    <input type="text" placeholder="Enter email" name="email">
+                    <small class="error-message"></small>
+                </div>
+
+                <div class="buttons">
+                    <a id="cancel-button" href="{% url 'login' %}">Cancel</a>
+                    <button id="search-button" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

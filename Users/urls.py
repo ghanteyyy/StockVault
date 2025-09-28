@@ -1,4 +1,5 @@
 from django.urls import path
+from django.contrib.auth import views as auth_views
 from . import views
 
 urlpatterns = [
@@ -18,4 +19,39 @@ urlpatterns = [
     path('trade-calculator/', views.TradeCalculator, name='trade-calculator'),
     path('target/<str:company>/delete', views.TargetDelete, name='delete-target'),
     path('predict/company/data', views.FetchCompanyPredictionData, name='predict-company-data'),
+    path(
+        'reset_password/',
+        auth_views.PasswordResetView.as_view(
+            template_name='find_account.html',
+            extra_context={'page_title': 'Reset Password | StockVault'},
+            subject_template_name='registration/password_reset_subject.txt',
+            email_template_name='registration/password_reset_email.txt',
+            html_email_template_name='registration/password_reset_email.html'
+        ),
+        name='reset_password'
+    ),
+    path(
+        'reset_password_sent/',
+        auth_views.PasswordResetDoneView.as_view(
+            template_name='reset_password_sent.html',
+            extra_context={'page_title': 'Password Reset Sent | StockVault'}
+        ),
+        name='password_reset_done'
+    ),
+    path(
+        'reset/<uidb64>/<token>/',
+        auth_views.PasswordResetConfirmView.as_view(
+            template_name='new_password.html',
+            extra_context={'page_title': 'Enter New Password | StockVault'}
+        ),
+        name='password_reset_confirm'
+    ),
+    path(
+        'reset_password_complete/',
+        auth_views.PasswordResetCompleteView.as_view(
+            template_name='recover_password_complete.html',
+            extra_context={'page_title': 'Password Reset Complete | StockVault'}
+        ),
+        name='password_reset_complete'
+    ),
 ]
