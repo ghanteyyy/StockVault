@@ -22,7 +22,7 @@
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 10px;
 }
 
 .sidebar div ul li {
