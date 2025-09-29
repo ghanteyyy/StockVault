@@ -214,6 +214,28 @@ input[type="file"]::file-selector-button {
     display: none;
 }
 
+.captcha-inner{
+    gap: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.captcha-inner #captcha-input{
+    padding-left: 15px;
+}
+
+.captcha-img{
+    gap: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.captcha-img .fa-rotate-right{
+    color: white;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
 button {
     width: 100%;
     padding: 14px;

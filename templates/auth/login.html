@@ -11,14 +11,14 @@
             <a href="{% url 'signup' %}">Sign Up</a>
         </div>
 
-        <form action="{% url 'login' %}" method="POST" onsubmit="validateForm(event)">
+        <form id="login_form" action="{% url 'login' %}" method="POST">
             {% csrf_token %}
 
             <div class="form-group">
                 <div class="form-item">
                     <label for="email">E MAIL</label>
                     <i class="bx bx-envelope"></i>
-                    <input type="email" id="email" name="email" placeholder="Enter your email here">
+                    <input type="text" id="email" name="email" placeholder="Enter your email here">
                 </div>
 
                 {% if messages %}
@@ -39,6 +39,23 @@
                 </div>
 
                 <div id="password-error" class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-item">
+                    <label for="captcha-input">CAPTCHA</label>
+
+                    <div class="captcha-inner">
+                        <div class="captcha-img">
+                            <img id="captcha-image" src="{{ captcha_image_url }}" alt="captcha" width="150" height="50">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </div>
+
+                        <input type="hidden" name="captcha_0" value="{{ captcha_key }}">
+                        <input id="captcha-input" name="captcha_1" type="text" placeholder="Captcha text">
+                    </div>
+                </div>
+                <div id="captcha-error" class="error-message"></div>
             </div>
 
             <input type="hidden" name="next" value="{{ next }}">

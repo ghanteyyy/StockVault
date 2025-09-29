@@ -18,6 +18,7 @@ import Users.serializers as user_serializers
 from django_ratelimit.decorators import ratelimit
 import Shares.serializers as share_serializers
 from Shares import scraper
+from . import captcha as Captcha
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
@@ -86,7 +87,16 @@ def LoginPage(request):
         except ValidationError:
             messages.error(request, 'Invalid email address')
 
-    return render(request, 'auth/login.html', {'page_title': 'Stock Vault | Login', 'next': next_url})
+    new_captcha = Captcha.GenerateCaptcha().content
+    new_captcha = json.loads(new_captcha)
+
+    context = {
+        **new_captcha,
+        'next': next_url,
+        'page_title': 'Stock Vault | Login',
+    }
+
+    return render(request, 'auth/login.html', context)
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
@@ -181,7 +191,16 @@ def SignupPage(request):
 
             return LoginPage(request)
 
-    return render(request, 'auth/signup.html', {'page_title': 'Stock Vault | Register', 'errors': errors})
+    new_captcha = Captcha.GenerateCaptcha().content
+    new_captcha = json.loads(new_captcha)
+
+    context = {
+        **new_captcha,
+        'errors': errors,
+        'page_title': 'Stock Vault | Register',
+    }
+
+    return render(request, 'auth/signup.html', context)
 
 
 @ratelimit(key='ip', rate='100/m', block=True)

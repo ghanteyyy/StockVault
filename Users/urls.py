@@ -1,6 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
+from . import captcha
 
 urlpatterns = [
     path('', views.HomePage, name='index'),
@@ -16,7 +17,9 @@ urlpatterns = [
     path('target/edit', views.TargetEdit, name='edit-target'),
     path('testonomials/', views.TestonomialsPage, name='testonomials'),
     path('portfolio/graph', views.PortfolioGraph, name='portfolio-graph'),
+    path('verify-captcha/', captcha.VerifyCaptcha, name='verify-captcha'),
     path('trade-calculator/', views.TradeCalculator, name='trade-calculator'),
+    path('generate-captcha/', captcha.GenerateCaptcha, name='generate-captcha'),
     path('target/<str:company>/delete', views.TargetDelete, name='delete-target'),
     path('predict/company/data', views.FetchCompanyPredictionData, name='predict-company-data'),
     path(

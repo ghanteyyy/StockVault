@@ -13,7 +13,7 @@
             <a href="{% url 'login' %}">Sign In</a>
         </div>
 
-        <form action="{% url 'signup' %}" method="POST" onsubmit="validateForm(event)" novalidate enctype="multipart/form-data">
+        <form id="submit-form" action="{% url 'signup' %}" method="POST" novalidate enctype="multipart/form-data">
             {% csrf_token %}
 
             <div class="form-group">
@@ -82,6 +82,24 @@
 
                 <div id="profile-error" class="error-message">Please upload a profile image.</div>
             </div>
+
+            <div class="form-group">
+                <div class="form-item">
+                    <label for="captcha-input">CAPTCHA</label>
+
+                    <div class="captcha-inner">
+                        <div class="captcha-img">
+                            <img id="captcha-image" src="{{ captcha_image_url }}" alt="captcha" width="150" height="50">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </div>
+
+                        <input type="hidden" name="captcha_0" value="{{ captcha_key }}">
+                        <input id="captcha-input" name="captcha_1" type="text" placeholder="Captcha text">
+                    </div>
+                </div>
+                <div id="captcha-error" class="error-message"></div>
+            </div>
+
             <button type="submit">SIGN UP</button>
         </form>
     </div>
