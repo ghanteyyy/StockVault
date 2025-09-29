@@ -62,6 +62,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.middleware.AdminRedirectMiddleware',
+    'django_ratelimit.middleware.RatelimitMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -197,3 +198,7 @@ EMAIL_HOST_USER = os.getenv('EMAIL_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASS')
 PASSWORD_RESET_TIMEOUT = 60 * 15
 DEFAULT_FROM_EMAIL = os.getenv('EMAIL_PASS')
+
+# Django Rate Limit configuration
+RATELIMIT_ENABLE = True
+RATELIMIT_VIEW = 'core.views.ratelimit_exceeded'

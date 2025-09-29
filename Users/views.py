@@ -15,10 +15,12 @@ import Shares.views as share_views
 import Users.models as user_models
 import Shares.models as share_models
 import Users.serializers as user_serializers
+from django_ratelimit.decorators import ratelimit
 import Shares.serializers as share_serializers
 from Shares import scraper
 
 
+@ratelimit(key='ip', rate='100/m', block=True)
 def HomePage(request):
     """
     Displays the homepage of Stock Vault.
@@ -47,6 +49,7 @@ def HomePage(request):
     return render(request, 'index.html', context)
 
 
+@ratelimit(key='ip', rate='100/m', block=True)
 def LoginPage(request):
     """
     Handles login functionality for the website.
@@ -86,6 +89,7 @@ def LoginPage(request):
     return render(request, 'login.html', {'page_title': 'Stock Vault | Login', 'next': next_url})
 
 
+@ratelimit(key='ip', rate='100/m', block=True)
 def SignupPage(request):
     """
     Handles signup functionality for the website.
@@ -180,6 +184,8 @@ def SignupPage(request):
     return render(request, 'signup.html', {'page_title': 'Stock Vault | Register', 'errors': errors})
 
 
+@ratelimit(key='ip', rate='100/m', block=True)
+@login_required(login_url='login')
 def Logout(request):
     """
     Logs out the current user and redirects them to the homepage
@@ -190,6 +196,7 @@ def Logout(request):
     return redirect('index')
 
 
+@ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
 def Dashboard(request):
     """
@@ -266,6 +273,7 @@ def Dashboard(request):
     return render(request, 'dashboard.html', context)
 
 
+@ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
 def Portfolio(request):
     """
@@ -326,6 +334,7 @@ def Portfolio(request):
     return render(request, 'portfolio.html', context)
 
 
+@ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
 def PortfolioGraph(request):
     """
@@ -372,6 +381,7 @@ def PortfolioGraph(request):
     return render(request, 'portfolio_graph.html', context)
 
 
+@ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
 def WishListPage(request):
     """
@@ -425,6 +435,7 @@ def WishListPage(request):
     return render(request, 'wishlist.html', context)
 
 
+@ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
 def TargetPage(request):
     """
@@ -499,6 +510,7 @@ def TargetPage(request):
     return render(request, 'target.html', context)
 
 
+@ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
 def TargetDelete(request, company):
     """
@@ -514,6 +526,7 @@ def TargetDelete(request, company):
     return redirect('target')
 
 
+@ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
 def TargetEdit(request):
     """
@@ -538,6 +551,8 @@ def TargetEdit(request):
 
         return redirect('target')
 
+
+@ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
 def PredictPage(request):
     nepse_indices = (share_models.NepseIndices.objects
@@ -564,6 +579,7 @@ def PredictPage(request):
     return render(request, 'predict.html', context)
 
 
+@ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
 def FetchCompanyPredictionData(request):
     company_name = request.GET.get('company_name', '').strip()
@@ -588,6 +604,7 @@ def FetchCompanyPredictionData(request):
     return JsonResponse({'status': True, 'message': 'FAQ deleted successfully', 'data': company_prediction_data})
 
 
+@ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
 def TestonomialsPage(request):
     if request.method.lower() == 'post':
@@ -616,6 +633,7 @@ def TestonomialsPage(request):
     return render(request, 'testonomials.html', context)
 
 
+@ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
 def SettingsPage(request, errors=None):
     """
@@ -643,6 +661,8 @@ def SettingsPage(request, errors=None):
     return render(request, 'settings.html', context)
 
 
+@ratelimit(key='ip', rate='100/m', block=True)
+@login_required(login_url='login')
 def ChangeProfile(request):
     """
     Handles a request to update a user's profile image.
@@ -676,6 +696,8 @@ def ChangeProfile(request):
     return errors
 
 
+@ratelimit(key='ip', rate='100/m', block=True)
+@login_required(login_url='login')
 def ChangePassword(request):
     """
     Handles a request to change a user's password.
@@ -712,6 +734,7 @@ def ChangePassword(request):
     return errors
 
 
+@ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
 def TradeCalculator(request):
     return render(request, 'calculator.html', {'page_title': 'Calculator | Stock Vault'})
