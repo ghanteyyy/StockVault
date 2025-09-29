@@ -1,9 +1,8 @@
-{% extends 'root.html' %}
+{% extends 'users/root.html' %}
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/login.css' %}">
-    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
+    <link rel="stylesheet" href="{% static 'css/auth/login.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -53,5 +52,5 @@
 {% endblock %}
 
 {% block js %}
-    <script src="{% static 'js/login.js' %}"></script>
+    <script src="{% static 'js/auth/login.js' %}"></script>
 {% endblock %}

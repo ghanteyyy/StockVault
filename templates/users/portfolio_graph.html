@@ -1,9 +1,9 @@
-{% extends 'root.html' %}
+{% extends 'users/root.html' %}
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-    <link rel="stylesheet" href="{% static 'css/portfolio_graph.css' %}">
+    <link rel="stylesheet" href="{% static 'css/users/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/users/portfolio_graph.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -26,7 +26,7 @@
         const data = {{graph_data|safe}};
     </script>
 
-    <script src="{% static 'js/chart.js' %}"></script>
+    <script src="{% static 'js/users/chart.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>

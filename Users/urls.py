@@ -22,7 +22,7 @@ urlpatterns = [
     path(
         'reset_password/',
         auth_views.PasswordResetView.as_view(
-            template_name='find_account.html',
+            template_name='reset_password/find_account.html',
             extra_context={'page_title': 'Reset Password | StockVault'},
             subject_template_name='registration/password_reset_subject.txt',
             email_template_name='registration/password_reset_email.txt',
@@ -33,7 +33,7 @@ urlpatterns = [
     path(
         'reset_password_sent/',
         auth_views.PasswordResetDoneView.as_view(
-            template_name='reset_password_sent.html',
+            template_name='reset_password/reset_password_sent.html',
             extra_context={'page_title': 'Password Reset Sent | StockVault'}
         ),
         name='password_reset_done'
@@ -41,7 +41,7 @@ urlpatterns = [
     path(
         'reset/<uidb64>/<token>/',
         auth_views.PasswordResetConfirmView.as_view(
-            template_name='new_password.html',
+            template_name='reset_password/new_password.html',
             extra_context={'page_title': 'Enter New Password | StockVault'}
         ),
         name='password_reset_confirm'
@@ -49,7 +49,7 @@ urlpatterns = [
     path(
         'reset_password_complete/',
         auth_views.PasswordResetCompleteView.as_view(
-            template_name='recover_password_complete.html',
+            template_name='reset_password/recover_password_complete.html',
             extra_context={'page_title': 'Password Reset Complete | StockVault'}
         ),
         name='password_reset_complete'

@@ -1,14 +1,13 @@
-{% extends 'root.html' %}
+{% extends 'users/root.html' %}
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
-    <link rel="stylesheet" href="{% static 'css/signup.css' %}">
+    <link rel="stylesheet" href="{% static 'css/auth/signup.css' %}">
 {% endblock %}
 
 {% block content %}
     <div class="signup-container">
-        {% include 'backend_error.html' %}
+        {% include 'errors/backend_error.html' %}
 
         <div style="text-align: right; margin-bottom: 16px;">
             <a href="{% url 'login' %}">Sign In</a>
@@ -34,13 +33,7 @@
                     <input type="email" id="email" name="email" placeholder="Enter your email here">
                 </div>
 
-                {% if messages %}
-                    {% for message in messages %}
-                        <div id="email-error" class="error-message backend-error">{{message}}</div>
-                    {% endfor %}
-                {% else %}
-                    <div id="email-error" class="error-message">Please enter a valid email (e.g., user@example.com).</div>
-                {% endif %}
+                <div id="email-error" class="error-message">Please enter a valid email (e.g., user@example.com).</div>
             </div>
 
             <div class="form-group">
@@ -95,5 +88,5 @@
 {% endblock %}
 
 {% block js %}
-    <script src="{% static 'js/signup.js' %}"></script>
+    <script src="{% static 'js/auth/signup.js' %}"></script>
 {% endblock %}

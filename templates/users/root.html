@@ -8,7 +8,8 @@
 	<title>{{page_title}}</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-	<link rel="stylesheet" href="{% static 'css/root.css' %}">
+	<link rel="stylesheet" href="{% static 'css/users/root.css' %}">
+	<link rel="stylesheet" href="{% static 'css/errors/error-message.css' %}">
 	<link rel = "icon" type = "image/png" href = "{% static 'images/icon.png' %}">
 	<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css" />
@@ -20,12 +21,12 @@
 </head>
 
 <body>
-    {% include 'shared/navbar.html' %}
+    {% include 'navs/navbar.html' %}
 
 	<div class="body-container">
 		<div class="container">
 			{% if request.user.is_authenticated %}
-				{% include 'sidebar.html' %}
+				{% include 'navs/sidebar.html' %}
 			{% endif %}
 
 			<div class="main-content">
@@ -36,7 +37,7 @@
 	</div>
 
 	{% if not "Dashboard" in page_title %}
-		{% include 'shared/footer.html' %}
+		{% include 'navs/footer.html' %}
 	{% endif %}
 
 	{% block js %}

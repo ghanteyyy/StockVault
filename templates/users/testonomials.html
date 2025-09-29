@@ -1,9 +1,8 @@
-{% extends 'root.html' %}
+{% extends 'users/root.html' %}
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/testonomial.css' %}">
-    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
+    <link rel="stylesheet" href="{% static 'css/users/testonomial.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -17,7 +16,7 @@
                 <button type="submit" id="btn-submit">Add</button>
             </form>
 
-            {% include 'backend_error.html' %}
+            {% include 'errors/backend_error.html' %}
         </div>
 
         <div class="card testonomials">

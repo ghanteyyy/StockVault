@@ -46,7 +46,7 @@ def HomePage(request):
         'faqs': faqs[:5]
     }
 
-    return render(request, 'index.html', context)
+    return render(request, 'users/index.html', context)
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
@@ -86,7 +86,7 @@ def LoginPage(request):
         except ValidationError:
             messages.error(request, 'Invalid email address')
 
-    return render(request, 'login.html', {'page_title': 'Stock Vault | Login', 'next': next_url})
+    return render(request, 'auth/login.html', {'page_title': 'Stock Vault | Login', 'next': next_url})
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
@@ -181,11 +181,10 @@ def SignupPage(request):
 
             return LoginPage(request)
 
-    return render(request, 'signup.html', {'page_title': 'Stock Vault | Register', 'errors': errors})
+    return render(request, 'auth/signup.html', {'page_title': 'Stock Vault | Register', 'errors': errors})
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
-@login_required(login_url='login')
 def Logout(request):
     """
     Logs out the current user and redirects them to the homepage
@@ -270,7 +269,7 @@ def Dashboard(request):
             'overall_gain_loss': round(overall_gain_loss, 2),
         }
 
-    return render(request, 'dashboard.html', context)
+    return render(request, 'users/dashboard.html', context)
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
@@ -331,7 +330,7 @@ def Portfolio(request):
             'errors': errors,
         }
 
-    return render(request, 'portfolio.html', context)
+    return render(request, 'users/portfolio.html', context)
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
@@ -378,7 +377,7 @@ def PortfolioGraph(request):
         'graph_options': graph_options,
     }
 
-    return render(request, 'portfolio_graph.html', context)
+    return render(request, 'users/portfolio_graph.html', context)
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
@@ -432,7 +431,7 @@ def WishListPage(request):
         'errors': errors,
     }
 
-    return render(request, 'wishlist.html', context)
+    return render(request, 'users/wishlist.html', context)
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
@@ -507,7 +506,7 @@ def TargetPage(request):
         'companies': json.dumps(companies),
     }
 
-    return render(request, 'target.html', context)
+    return render(request, 'users/target.html', context)
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
@@ -576,7 +575,7 @@ def PredictPage(request):
         "nepse_predicted_indices": nepse_predicted_indices,
     }
 
-    return render(request, 'predict.html', context)
+    return render(request, 'users/predict.html', context)
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
@@ -630,7 +629,7 @@ def TestonomialsPage(request):
         'page_title': 'Testonomials | StockVault'
     }
 
-    return render(request, 'testonomials.html', context)
+    return render(request, 'users/testonomials.html', context)
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
@@ -658,7 +657,7 @@ def SettingsPage(request, errors=None):
         'errors': errors
     }
 
-    return render(request, 'settings.html', context)
+    return render(request, 'users/settings.html', context)
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
@@ -737,4 +736,4 @@ def ChangePassword(request):
 @ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
 def TradeCalculator(request):
-    return render(request, 'calculator.html', {'page_title': 'Calculator | Stock Vault'})
+    return render(request, 'users/calculator.html', {'page_title': 'Calculator | Stock Vault'})

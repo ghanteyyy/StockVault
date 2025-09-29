@@ -1,9 +1,8 @@
-{% extends 'root.html' %}
+{% extends 'users/root.html' %}
 {% load static %}
 
 {% block content %}
-    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
+    <link rel="stylesheet" href="{% static 'css/users/dashboard.css' %}">
 
     <script id="portfolio_datasets" type="application/json">
         {{ portfolio_datasets|safe }}
@@ -85,8 +84,8 @@
 
     {% block js %}
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="{% static 'js/dashboard.js' %}"></script>
-        <script src="{% static 'js/chart.js' %}"></script>
+        <script src="{% static 'js/users/dashboard.js' %}"></script>
+        <script src="{% static 'js/users/chart.js' %}"></script>
 
         <script>
             const nepse_indices_data = {{nepse_indices|safe}}

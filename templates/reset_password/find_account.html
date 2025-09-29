@@ -1,10 +1,8 @@
-{% extends 'root.html' %}
+{% extends 'users/root.html' %}
 {% load static %}
 
 {% block content %}
-    <script src="{% static 'js/find_account.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
-    <link rel="stylesheet" href="{% static 'css/find_account.css' %}">
+    <link rel="stylesheet" href="{% static 'css/reset_password/find_account.css' %}">
 
     <div class="content">
         <div class="card">
@@ -24,4 +22,8 @@
             </form>
         </div>
     </div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/reset_password/find_account.js' %}"></script>
 {% endblock %}

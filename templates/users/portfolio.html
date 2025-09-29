@@ -1,9 +1,8 @@
-{% extends 'root.html' %}
+{% extends 'users/root.html' %}
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/portfolio.css' %}">
-    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
+    <link rel="stylesheet" href="{% static 'css/users/portfolio.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -11,10 +10,10 @@
         <div class="card">
             <form onsubmit="return validateStockSearchingForm()" action="" method="POST">
                 {% csrf_token %}
-                {% include 'stock_searching.html' %}
+                {% include 'users/stock_searching.html' %}
             </form>
 
-            {% include 'backend_error.html' %}
+            {% include 'errors/backend_error.html' %}
         </div>
 
         <div class="card company-list">
@@ -42,6 +41,6 @@
 
 {% block js%}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script defer src="{% static 'js/portfolio.js' %}"></script>
-    <script src="{% static 'js/stock_searching.js' %}" defer></script>
+    <script defer src="{% static 'js/users/portfolio.js' %}"></script>
+    <script src="{% static 'js/users/stock_searching.js' %}" defer></script>
 {% endblock %}

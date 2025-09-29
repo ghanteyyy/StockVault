@@ -1,13 +1,11 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/stock_searching.css' %}">
-    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
+    <link rel="stylesheet" href="{% static 'css/users/stock_searching.css' %}">
 {% endblock %}
 
 <div class="input-wrapper">
     <div class="input-group">
-        <!-- Stock Search -->
         <div class="input-field">
             <i class="fas fa-search"></i>
             <input type="text" id="stock-input" name="company" class="autocomplete-input" placeholder="Search stocks...">
@@ -53,7 +51,6 @@
             </select>
         {% endif %}
 
-        <!-- Add Button -->
         <button type="submit" id="add-btn" class="add-btn">
             <i class="fas fa-plus"></i> Add
         </button>

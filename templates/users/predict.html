@@ -1,10 +1,9 @@
-{% extends 'root.html' %}
+{% extends 'users/root.html' %}
 {% load static %}
 
 {% block content %}
-    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
-    <link rel="stylesheet" href="{% static 'css/predict.css' %}">
+    <link rel="stylesheet" href="{% static 'css/users/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/users/predict.css' %}">
 
     <script id="nepse_predicted_indices" type="application/json">
         {{ nepse_predicted_indices|safe }}
@@ -15,7 +14,7 @@
             <h2>Company Prediction</h2>
 
             <form id="company_prediction_form" action="">
-                {% include 'stock_searching.html' %}
+                {% include 'users/stock_searching.html' %}
 
                 <p class="error-message" style="display: none;"></p>
             </form>
@@ -33,10 +32,10 @@
     {% block js %}
         <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="{% static 'js/dashboard.js' %}"></script>
-        <script src="{% static 'js/chart.js' %}"></script>
-        <script src="{% static 'js/stock_searching.js' %}"></script>
-        <script src="{% static 'js/predict.js' %}" defer></script>
+        <script src="{% static 'js/users/dashboard.js' %}"></script>
+        <script src="{% static 'js/users/chart.js' %}"></script>
+        <script src="{% static 'js/users/stock_searching.js' %}"></script>
+        <script src="{% static 'js/users/predict.js' %}" defer></script>
 
         <script>
             const future_nepse_indices_data = {{nepse_predicted_indices|safe}}

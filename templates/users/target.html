@@ -1,20 +1,19 @@
-{% extends 'root.html' %}
+{% extends 'users/root.html' %}
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/target.css' %}">
-    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
+    <link rel="stylesheet" href="{% static 'css/users/target.css' %}">
 {% endblock %}
 
 {% block content %}
     <div class="content">
         <div class="card">
             <form onsubmit="return validateStockSearchingForm()" action="" method="POST">
-                {% include 'stock_searching.html' %}
+                {% include 'users/stock_searching.html' %}
                 {% csrf_token %}
             </form>
 
-            {% include 'backend_error.html' %}
+            {% include 'errors/backend_error.html' %}
         </div>
     </div>
 
@@ -85,6 +84,6 @@
 {% endblock %}
 
 {% block js%}
-    <script src="{% static 'js/target.js' %}" defer></script>
-    <script src="{% static 'js/stock_searching.js' %}" defer></script>
+    <script src="{% static 'js/users/target.js' %}" defer></script>
+    <script src="{% static 'js/users/stock_searching.js' %}" defer></script>
 {% endblock %}

@@ -1,11 +1,10 @@
 .error-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #ffebee;
-    border: 1px solid #ef9a9a;
     padding: 15px;
     margin-bottom: 20px;
+    align-items: center;
+    background: #b91c1c;
+    justify-content: space-between;
 }
 
 .error-list {
@@ -14,16 +13,17 @@
 }
 
 .error-item {
-    color: #c62828;
     margin: 5px 0;
+    color: white;
 }
 
 .error-item::before {
-    content: "⚠️" !important;
     font-size: 1rem;
+    content: "⚠️" !important;
 }
 
 .close {
+    color: white;
     cursor: pointer;
     font-weight: bolder;
 }

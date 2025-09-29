@@ -1,14 +1,14 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/backend_error.css' %}">
+    <link rel="stylesheet" href="{% static 'css/errors/backend_error.css' %}">
 {% endblock %}
 
 {% if errors %}
     <div class="error-container">
         <ul class="error-list">
             {% for error in errors %}
-            <li class="error-item">{{ error }}</li>
+                <li class="error-item">{{ error }}</li>
             {% endfor %}
         </ul>
 
@@ -18,5 +18,5 @@
 
 
 {% block js %}
-    <script src="{% static 'js/backend_error.js' %}" defer></script>
+    <script src="{% static 'js/errors/backend_error.js' %}" defer></script>
 {% endblock %}

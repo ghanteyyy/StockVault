@@ -1,7 +1,7 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/navbar.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/navs/navbar.css' %}" />
 {% endblock %}
 
 {% if not request.user.is_authenticated %}
@@ -25,5 +25,5 @@
 {% endif %}
 
 {% block js %}
-    <script src="{% static 'js/nav.js' %}"></script>
+    <script src="{% static 'js/navs/nav.js' %}"></script>
 {% endblock %}

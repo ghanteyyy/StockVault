@@ -1,9 +1,8 @@
-{% extends 'root.html' %}
+{% extends 'users/root.html' %}
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/calculator.css' %}">
-    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
+    <link rel="stylesheet" href="{% static 'css/users/calculator.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -81,5 +80,5 @@
 {% endblock %}
 
 {% block js %}
-    <script src="{% static 'js/calculator.js' %}" defer></script>
+    <script src="{% static 'js/users/calculator.js' %}" defer></script>
 {% endblock %}
