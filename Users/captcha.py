@@ -20,7 +20,8 @@ def VerifyCaptcha(request):
         if valid_captcha:
             return JsonResponse({'status': valid_captcha, 'message': 'Captcha verified'})
 
-        new_captcha = GenerateCaptcha()
+        new_captcha = GenerateCaptcha().content
+        new_captcha = json.loads(new_captcha)
 
         return JsonResponse({'status': valid_captcha, 'message': 'Captcha didn\'t matched ', **new_captcha})
 
