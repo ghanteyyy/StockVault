@@ -49,6 +49,14 @@
                     <option value="{{graph_option}}">{{graph_option}}</option>
                 {% endfor %}
             </select>
+
+            <select name="algorithm_options" id="algorithm_options">
+                <option selected disabled hidden>Algorithm</option>
+
+                {% for algorithm_option in algorithm_options %}
+                    <option value="{{algorithm_option}}">{{algorithm_option}}</option>
+                {% endfor %}
+            </select>
         {% endif %}
 
         <button type="submit" id="add-btn" class="add-btn">

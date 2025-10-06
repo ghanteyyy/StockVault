@@ -585,12 +585,14 @@ def PredictPage(request):
     serialized_companies = share_serializers.CompaniesSerializer(companies, many=True).data
     companies = [company['name'] for company in serialized_companies]
 
+    algorithm_options = ['Prophet', 'SMA', 'EMA', 'Linear']
     graph_options = ['ltp', 'pct_change', 'high', 'low', 'open_price', 'qty', 'turnover']
 
     context = {
         'graph_options': graph_options,
         'companies': json.dumps(companies),
         "page_title": "Predict | StockVault",
+        'algorithm_options': algorithm_options,
         "nepse_predicted_indices": nepse_predicted_indices,
     }
 
@@ -606,6 +608,9 @@ def FetchCompanyPredictionData(request):
     column_type = request.GET.get('column_type', 'ltp').strip()
     column_type = unquote(column_type)
 
+    algorithm_to_implement = request.GET.get('algorithm_options', 'prophet').lower()
+    algorithm_to_implement = unquote(algorithm_to_implement)
+
     if not share_models.ListedCompanies.objects.filter(name__iexact=company_name):
         return JsonResponse({'status': False, 'message': 'Requested Company does not exist'})
 
@@ -617,7 +622,7 @@ def FetchCompanyPredictionData(request):
     qs  = [(date.strftime('%Y-%m-%d'), float(value.replace(',', ''))) for date, value in qs]
 
     company_prediction_data = [(str(d[0]), float(d[1])) for d in qs]
-    company_prediction_data = json.dumps(algorithm.predict(company_prediction_data, 7))
+    company_prediction_data = json.dumps(algorithm.predict(company_prediction_data, 7, algorithm_to_implement))
 
     return JsonResponse({'status': True, 'message': 'FAQ deleted successfully', 'data': company_prediction_data})
 

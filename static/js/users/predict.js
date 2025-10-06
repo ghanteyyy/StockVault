@@ -9,6 +9,8 @@ company_prediction_form.addEventListener('submit', async (e) => {
 
     const company_name = document.getElementById('stock-input');
     const column_type = document.getElementById('graph_options');
+    const algorithm_options = document.getElementById('algorithm_options');
+
     const error_message = document.querySelector('.error-message');
     const company_prediction = document.querySelector('.company_prediction');
 
@@ -23,7 +25,7 @@ company_prediction_form.addEventListener('submit', async (e) => {
         return false;
     }
 
-    const url = new URL(`predict/company/data?company_name=${company_name.value}&column_type=${column_type}`, location.origin);
+    const url = new URL(`predict/company/data?company_name=${company_name.value}&column_type=${column_type}&algorithm_options=${algorithm_options.value}`, location.origin);
     url.searchParams.set('company_name', company_name.value);
     url.searchParams.set('column_type', column_type.value);
 
