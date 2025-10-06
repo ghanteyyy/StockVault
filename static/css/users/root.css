@@ -26,3 +26,14 @@ body {
 	padding: 30px;
 	overflow-y: auto;
 }
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+    background-color: transparent !important;
+    -webkit-box-shadow: 0 0 0px 1000px #0f172a inset !important; /* your background color */
+    -webkit-text-fill-color: #f8fafc !important; /* your text color */
+    transition: background-color 1000s ease-in-out 0s;
+}
