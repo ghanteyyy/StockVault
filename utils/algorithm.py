@@ -180,9 +180,6 @@ def predict_linear(stock_data, days):
     return _format_output(dates, preds, sigma)
 
 
-# --------------------------------------
-# Public API (kept backward-compatible)
-# --------------------------------------
 def predict(stock_data, days, method: str = "prophet", **kwargs):
     """
     Backward-compatible entry point used by your view.
