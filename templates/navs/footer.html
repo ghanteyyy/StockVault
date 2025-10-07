@@ -18,16 +18,17 @@
             </div>
             <div class="footer-section footer-links">
                 <h4>Explore</h4>
-                <a href="{% url 'index' %}">Home</a>
-                <a href="{% url 'index' %}#features">Features</a>
-                <a href="{% url 'index' %}#faq">FAQ</a>
 
-                {% if not user.is_authenticated %}
+                <div class="links">
+                    <a href="{% url 'index' %}">Home</a>
+                    <a href="{% url 'index' %}#features">Features</a>
+                    <a href="{% url 'index' %}#faq">FAQ</a>
                     <a href="/login">Login</a>
-                {% endif %}
+                </div>
             </div>
             <div class="footer-section footer-newsletter">
                 <h4>Stay Updated</h4>
+
                 <div class="social-icons">
                     <a href="#"><i class="fab fa-twitter"></i></a>
                     <a href="#"><i class="fab fa-linkedin"></i></a>
