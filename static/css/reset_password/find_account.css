@@ -102,3 +102,24 @@ input:focus {
 #search-button:hover {
     background-color: #1876f2de;
 }
+
+
+@media (max-width: 768px) {
+    .container{
+        height: 70vh;
+    }
+
+    .content,
+    .card{
+        width: 100%;
+    }
+
+    .content{
+        height: 100%;
+    }
+
+    .card{
+        height: 50%;
+        padding: 20px;
+    }
+}
