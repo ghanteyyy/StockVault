@@ -18,7 +18,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem 2rem;
+    padding: 1rem;
     background-color: var(--dark);
     box-shadow: var(--shadow);
     position: relative;
@@ -79,11 +79,12 @@
 }
 
 .hamburger {
+    position: absolute;
+    right: 10px;
     display: none;
     cursor: pointer;
     background: none;
     border: none;
-    padding: 0.5rem;
     z-index: 1001;
 }
 
@@ -121,28 +122,17 @@ i.iconoir-menu {
     background-color: transparent;
 }
 
-.hamburger[aria-expanded="true"] .iconoir-menu::before {
-    transform: translateY(0.5rem) rotate(45deg);
-}
-
-.hamburger[aria-expanded="true"] .iconoir-menu::after {
-    transform: translateY(-0.5rem) rotate(-45deg);
-}
-
 @media (max-width: 768px) {
-    .nav-bar {
-        padding: 1rem 1.5rem;
-    }
-
     .hamburger {
         display: block;
+        padding-top: 10px;
     }
 
     .nav-links {
         position: fixed;
         top: 0;
         right: -100%;
-        width: 80%;
+        width: 70%;
         max-width: 300px;
         height: 100vh;
         background-color: var(--dark);
@@ -152,7 +142,6 @@ i.iconoir-menu {
         box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
         transition: var(--transition);
         z-index: 1000;
-        padding: 2rem;
     }
 
     .nav-links.active {
