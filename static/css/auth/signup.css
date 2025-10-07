@@ -23,6 +23,10 @@
     pointer-events: none;
 }
 
+i.bx{
+    width: max-content;
+}
+
 .signup-container {
     position: relative;
     width: 100%;
@@ -236,7 +240,7 @@ input[type="file"]::file-selector-button {
     font-size: 1.2rem;
 }
 
-button {
+button:not(.hamburger) {
     width: 100%;
     padding: 14px;
     border: none;
@@ -250,17 +254,17 @@ button {
     transition: transform .15s ease, filter .2s ease, box-shadow .2s ease;
 }
 
-button:hover {
+button:not(.hamburger):hover {
     transform: translateY(-2px);
     filter: brightness(1.02);
     box-shadow: 0 14px 28px rgba(16, 185, 129, 0.45);
 }
 
-button:active {
+button:not(.hamburger):active {
     transform: translateY(0);
 }
 
-button:disabled {
+button:not(.hamburger):disabled {
     opacity: .65;
     cursor: not-allowed;
     box-shadow: none;
@@ -326,7 +330,10 @@ button:disabled {
         right: 10px;
     }
 
-    .form-group input,
+    .form-group input{
+        padding: 12px;
+    }
+
     .form-group select#gender {
         padding: 12px 40px;
     }
