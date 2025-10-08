@@ -4,24 +4,22 @@
     <link rel="stylesheet" href="{% static 'css/navs/navbar.css' %}" />
 {% endblock %}
 
-{% if not request.user.is_authenticated %}
-    <div class="nav-bar">
-        <a class="logo" href="{% url 'index' %}">
-            <img src="{% static 'images/icon.png' %}" alt="Stock Vault Logo" id="logo-image">
-            <p id="logo-name">Stock Vault</p>
-        </a>
+<div class="nav-bar">
+    <a class="logo" href="{% url 'index' %}">
+        <img src="{% static 'images/icon.png' %}" alt="Stock Vault Logo" id="logo-image">
+        <p id="logo-name">Stock Vault</p>
+    </a>
 
-        <div class="nav-links">
-            <a href="{% url 'index' %}#features">Features</a>
-            <a href="{% url 'index' %}#faq">FAQ</a>
-            <a href="{% url 'login' %}">Login</a>
-        </div>
-
-        <button class="hamburger" aria-label="Menu" aria-expanded="false">
-            <i class="iconoir-menu"></i>
-        </button>
+    <div class="nav-links">
+        <a href="{% url 'index' %}#features">Features</a>
+        <a href="{% url 'index' %}#faq">FAQ</a>
+        <a href="{% url 'login' %}">Login</a>
     </div>
-{% endif %}
+
+    <button class="hamburger" aria-label="Menu" aria-expanded="false">
+        <i class="iconoir-menu"></i>
+    </button>
+</div>
 
 {% block js %}
     <script src="{% static 'js/navs/nav.js' %}"></script>

@@ -21,7 +21,9 @@
 </head>
 
 <body>
-    {% include 'navs/navbar.html' %}
+	{% if not request.user.is_authenticated %}
+		{% include 'navs/navbar.html' %}
+	{% endif %}
 
 	<div class="body-container">
 		<div class="container">
