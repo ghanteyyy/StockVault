@@ -220,3 +220,15 @@
     font-weight: 700;
     color: #2c7a7b;
 }
+
+@media (max-width: 768px) {
+    .wrapper{
+        flex-direction: column;
+    }
+
+    .input-wrapper,
+    .output-wrapper{
+        width: 100%;
+    }
+
+}
