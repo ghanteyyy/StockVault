@@ -10,7 +10,7 @@
     background: #fff;
     padding: 15px;
     border-radius: 12px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
 }
 
@@ -80,7 +80,7 @@
     border: 1px solid #ccc;
     border-top: none;
     border-radius: 0 0 8px 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     max-height: 220px;
     overflow-y: auto;
     z-index: 9999;
@@ -119,5 +119,19 @@
     .input-field,
     .add-btn {
         width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .input-field {
+        flex: 0 0 auto;
+    }
+
+    .card:first-child{
+        margin-top: 30px;
+    }
+
+    .input-group{
+        box-shadow: none;
     }
 }

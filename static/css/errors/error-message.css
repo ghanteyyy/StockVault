@@ -7,3 +7,15 @@
     font-weight: normal;
     background: #b91c1c;
 }
+
+
+@media (max-width: 768px) {
+    .error-message{
+        width: 95%;
+        margin: auto;
+    }
+
+    .company-item{
+        margin: 0 10px;
+    }
+}
