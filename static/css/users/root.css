@@ -6,10 +6,13 @@
 }
 
 html {
+    height: 100%;;
     scroll-behavior: smooth;
 }
 
 body {
+    height: 100%;;
+    min-height: 100vh;
     line-height: 1.6;
     color: var(--dark);
     background-color: var(--body-bg);
@@ -17,10 +20,12 @@ body {
 }
 
 .container {
+    height: 100%;
     display: flex;
 }
 
 .main-content {
+    height: 100%;
 	flex-grow: 1;
 	padding: 30px;
 	overflow-y: auto;
@@ -32,7 +37,7 @@ input:-webkit-autofill:focus,
 textarea:-webkit-autofill,
 select:-webkit-autofill {
     background-color: transparent !important;
-    -webkit-box-shadow: 0 0 0px 1000px #0f172a inset !important; /* your background color */
-    -webkit-text-fill-color: #f8fafc !important; /* your text color */
+    -webkit-box-shadow: 0 0 0px 1000px #0f172a inset !important;
+    -webkit-text-fill-color: #f8fafc !important;
     transition: background-color 1000s ease-in-out 0s;
 }

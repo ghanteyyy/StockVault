@@ -3,6 +3,7 @@
 }
 
 .sidebar {
+    height: 100%;
     color: white;
     padding: 20px;
     display: flex;
