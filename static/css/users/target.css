@@ -203,6 +203,7 @@
 
 @media (max-width: 600px) {
     .target-card {
+        margin: 0 10px;
         flex: 1 1 100%;
     }
 }

@@ -146,4 +146,13 @@ input[type="password"]:focus {
     .password-group {
         flex-direction: column;
     }
+
+    .password-group .form-group {
+        flex: 0 0 auto;
+    }
+
+    .change-password{
+        gap: 0;
+    }
+
 }
