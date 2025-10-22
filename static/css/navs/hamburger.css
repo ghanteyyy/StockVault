@@ -1,0 +1,37 @@
+.hamburger {
+    display: none;
+    cursor: pointer;
+    background: none;
+    border: none;
+    z-index: 1001;
+}
+
+i.iconoir-menu,
+i.iconoir-xmark {
+    font-size: 30px;
+    color: rgb(0, 0, 0);
+    display: inline-block;
+}
+
+i.iconoir-xmark.hide,
+i.iconoir-menu.hide{
+    display: none;
+}
+
+.iconoir-menu,
+.iconoir-menu::before,
+.iconoir-menu::after {
+    transition: var(--transition);
+}
+
+
+.hamburger[aria-expanded="true"] .iconoir-menu {
+    background-color: transparent;
+}
+
+
+@media (max-width: 900px) {
+    .hamburger {
+        display: block;
+    }
+}
