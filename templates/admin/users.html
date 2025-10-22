@@ -2,60 +2,110 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
+    <link rel="stylesheet" href="{% static 'css/navs/hamburger.css' %}">
     <link rel="stylesheet" href="{% static 'css/admin/modal.css' %}">
     <link rel="stylesheet" href="{% static 'css/admin/users.css' %}">
 {% endblock %}
 
 {% block content %}
-
     <div class="header">
-        <h2>Users</h2>
+        <div class="header_label">
+            <p class="title">Total Users: {{user_details|length}}</p>
+        </div>
 
-        <button class="btn-add"
-            data-name=""
-            data-gender=""
-            data-dob=""
-            data-email=""
-            data-submit_href="user/add">
-        <i class='bx bx-plus'></i> Add</button>
+        <div class="searching__filtering">
+            <div class="search_bar">
+                <button class="hamburger" aria-label="Menu" aria-expanded="false">
+                    <i class="iconoir-menu"></i>
+                    <i class="iconoir-xmark hide"></i>
+                </button>
+
+                <div class="search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" class="search" placeholder="Search by name or email">
+                </div>
+            </div>
+
+            <div class="filter">
+                <div class="gender_filter">
+                    <select name="gender_filter" id="gender_filter">
+                        <option value="All genders">All genders</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="sort">
+                    <select name="" id="sort_by">
+                        <option value="default" selected disabled>Sort By</option>
+                        <option value="a-z">Name (A-Z)</option>
+                        <option value="z-a">Name (Z-A)</option>
+                        <option value="dob_newest">DOB (newest)</option>
+                        <option value="dob_oldest">DOB (oldest)</option>
+                        <option value="joined_newest">Joined (newest)</option>
+                        <option value="joined_oldest">Joined (oldest)</option>
+                    </select>
+                </div>
+
+                <p class="add_button">Add User</p>
+            </div>
+        </div>
     </div>
 
-    <table id="data_table" class="display">
-        <thead>
-            <tr>
-                <th>SN</th>
-                {% for table_head in table_heads %}
-                <th>{{table_head}}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-                <tr>
-                    <td class="sn">{{forloop.counter}}</td>
-                    <td>{{user.0}}</td>
-                    <td>{{user.1|upper}}</td>
-                    <td>{{user.2}}</td>
-                    <td>{{user.3}}</td>
-                    <td>{{user.4}}</td>
-                    <td class="action-buttons">
-                        <button type="button" class="btn btn-edit"
-                                data-name="{{ user.0 }}"
-                                data-gender="{{ user.1 }}"
-                                data-dob="{{ user.2 }}"
-                                data-email="{{ user.3 }}"
-                                data-submit_href="user/edit">
-                            <i class='bx bx-edit'></i>
-                        </button>
-                        <button type="button" class="btn btn-delete"
-                            data-email="{{ user.3 }}"><i class="bx bx-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="cards">
+        {% for user_detail in user_details %}
+            <div class="card">
+                <div class="avatar">
+                    {% if user_detail.profile_image and user_detail.profile_image.name %}
+                        <img src="{{ user_detail.profile_image.url }}">
+                    {% else %}
+                        <img src="{% static 'images/default-avatar.png' %}" alt="No photo">
+                    {% endif %}
+                </div>
+
+                <div class="card_details">
+                    <span class="user_name">{{user_detail.name}}</span>
+
+                    <div class="card_row">
+                        <span class="email">Email:</span>
+                        <span class="value">{{user_detail.email}}</span>
+                    </div>
+
+                    <div class="card_row">
+                        <span class="gender">Gender:</span>
+                        <span class="value">{{user_detail.gender|title}}</span>
+                    </div>
+
+                    <div class="card_row">
+                        <span class="dob">DOB:</span>
+                        <span class="value">{{user_detail.date_of_birth|date:"Y-m-d"}}</span>
+                    </div>
+
+                    <div class="card_row">
+                        <span class="joined">Joined:</span>
+                        <span class="value">{{user_detail.date_joined|date:"Y-m-d h:i:s A"}}</span>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="pagination">
+        <a
+            href="{% if user_details.has_previous %}?page={{ user_details.previous_page_number }}{% else %}#{% endif %}"
+            class="page_btn {% if not user_details.has_previous %}disabled{% endif %}">
+            « Previous Page
+        </a>
+
+        <span>Page {{ user_details.number }} of {{ user_details.paginator.num_pages }}</span>
+
+        <a
+            href="{% if user_details.has_next %}?page={{ user_details.next_page_number }}{% else %}#{% endif %}"
+            class="page_btn {% if not user_details.has_next %}disabled{% endif %}">
+            Next Page »
+        </a>
+    </div>
 
     <div id="modal" class="modal is-hidden" aria-hidden="true">
         <div class="modal__overlay" id="overlay"></div>
@@ -110,6 +160,11 @@
 {% endblock %}
 
 {% block js %}
+    <script>
+        user_json = JSON.parse('{{ user_json|escapejs }}');
+    </script>
+
+    <script src="{% static 'js/navs/hamburger.js' %}"></script>
     <script src="{% static 'js/admin/modal.js' %}"></script>
     <script src="{% static 'js/admin/users.js' %}"></script>
 {% endblock %}

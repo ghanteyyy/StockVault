@@ -1,12 +1,15 @@
+import json
 import datetime
+from urllib.parse import urljoin
+from django.conf import settings
 from django.shortcuts import render
 import Users.models as user_models
 import Shares.models as share_models
 from django.http import JsonResponse
-from django.db.models import CharField
+from django.templatetags.static import static
+from django.core.paginator import Paginator
 import Users.serializers as users_serializers
 import Shares.serializers as shares_serializers
-from django.db.models.functions import Cast, TruncDate
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.utils.html import escape
@@ -14,21 +17,35 @@ from django.utils.html import escape
 
 @login_required(login_url='login')
 def AdminPage(request):
-    table_heads = ['Name', 'Gender', "Date of Birth", "Email", "Joined At", 'Action']
+    all_users = user_models.CustomUser.objects.all()
 
-    users = (user_models.CustomUser.objects
-        .filter(is_active=True)
-        .annotate(
-            dob_str=Cast('date_of_birth', CharField()),
-            joined_str=Cast(TruncDate('date_joined'), CharField()),
+    page = request.GET.get('page') or 1
+    paginator = Paginator(all_users, 30)
+    user_per_page = paginator.get_page(page)
+
+    users_json = list(
+        user_per_page.object_list.values(
+            'name', 'email', 'gender', 'profile_image', 'date_of_birth', 'date_joined'
         )
-        .values_list('name','gender','dob_str','email','joined_str')
     )
 
+    media_abs = request.build_absolute_uri(settings.MEDIA_URL)
+    default_avatar = request.build_absolute_uri(urljoin(media_abs, 'default.png'))
+
+    for user in users_json:
+        profile_image = user.get('profile_image')
+        user['profile_image'] = urljoin(media_abs, profile_image) if profile_image else default_avatar
+
+        joined_date = user.get('date_joined')
+        user['date_joined'] = joined_date.strftime("%Y-%m-%d %I:%M:%S %p") if joined_date else None
+
+        dob = user.get('date_of_birth')
+        user['date_of_birth'] = dob.strftime('%Y-%m-%d') if dob else None
+
     context = {
-        'users': users,
+        'user_details': user_per_page,
+        'user_json': json.dumps(users_json),
         'page_title': 'Users',
-        'table_heads': table_heads,
     }
 
     return render(request, 'admin/users.html', context)

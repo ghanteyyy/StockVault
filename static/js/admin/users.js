@@ -1,8 +1,119 @@
 const form = document.querySelector('.modal__content');
 const buttons = document.querySelectorAll('.btn-edit');
-const add_button = document.querySelector('.btn-add');
+const search_input = document.querySelector('.search');
+const add_button = document.querySelector('.add_button');
+const users_container = document.querySelector('.cards');
 const delete_buttons = document.querySelectorAll('.btn-delete');
+const gender_filter = document.querySelector('#gender_filter');
+const sort_by = document.querySelector('#sort_by');
 
+
+function renderUserCard(user) {
+    return `
+        <div class="card">
+            <div class="avatar">
+                <img src="${user.profile_image}" alt="${user.name || 'User'}">
+            </div>
+
+            <div class="card_details">
+                <span class="user_name">${user.name || 'Unknown User'}</span>
+
+                <div class="card_row">
+                    <span class="email">Email:</span>
+                    <span class="value">${user.email || 'N/A'}</span>
+                </div>
+
+                <div class="card_row">
+                    <span class="gender">Gender:</span>
+                    <span class="value">${user.gender || 'N/A'}</span>
+                </div>
+
+                <div class="card_row">
+                    <span class="dob">DOB:</span>
+                    <span class="value">${user.date_of_birth || 'N/A'}</span>
+                </div>
+
+                <div class="card_row">
+                    <span class="joined">Joined:</span>
+                    <span class="value">${user.date_joined || 'N/A'}</span>
+                </div>
+            </div>
+        </div>
+  `;
+}
+
+
+function filter_by_gender(query=null){
+    if(query == null || query.toLowerCase() == 'all genders'){
+        return user_json;
+    }
+
+    const filtered_users = [];
+    query = query.toLowerCase();
+
+    user_json.forEach((user) => {
+        const gender = user.gender.toLowerCase();
+
+        if(query == gender){
+            filtered_users.push(user);
+        }
+    });
+
+    return filtered_users;
+}
+
+
+search_input.addEventListener('input', (e) => {
+    const filtered_users = [];
+    const query = e.target.value.toLowerCase();
+
+    user_json.forEach((user) => {
+        const name = user.name.toLowerCase();
+        const email = user.email.toLowerCase();
+
+        if (name.includes(query) || email.includes(query)) {
+            filtered_users.push(user);
+        }
+    });
+
+    users_container.innerHTML = filtered_users.map(renderUserCard).join('');
+});
+
+gender_filter.addEventListener('change', (e) => {
+    const users = filter_by_gender(e.target.value);
+    users_container.innerHTML = users.map(renderUserCard).join('');
+});
+
+sort_by.addEventListener('change', (e) => {
+    const query = e.target.value.toLowerCase();
+    const sort_users = filter_by_gender(gender_filter.value);
+
+    if(query.includes('a-z')){
+        sort_users.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+    }
+
+    else if(query.includes('z-a')){
+        sort_users.sort((a, b) => b.name.toLowerCase().localeCompare(a.name.toLowerCase()));
+    }
+
+    else if(query == 'dob_newest'){
+        sort_users.sort((a, b) => new Date(b.date_of_birth) - new Date(a.date_of_birth));
+    }
+
+    else if(query == 'dob_oldest'){
+        sort_users.sort((a, b) => new Date(a.date_of_birth) - new Date(b.date_of_birth));
+    }
+
+    else if(query == 'joined_newest'){
+        sort_users.sort((a, b) => new Date(b.date_joined) - new Date(a.date_joined));
+    }
+
+    else if(query == 'joined_oldest'){
+        sort_users.sort((a, b) => new Date(a.date_joined) - new Date(b.date_joined));
+    }
+
+    users_container.innerHTML = sort_users.map(renderUserCard).join('');
+});
 
 add_button.addEventListener('click', (e) => {
     email_field = document.querySelector('.email-field');
