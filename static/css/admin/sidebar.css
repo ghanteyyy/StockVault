@@ -44,3 +44,16 @@
 .nav-links a.active i {
     color: #4f46e5
 }
+
+
+@media (max-width: 900px) {
+    .sidebar{
+        display: none;
+        z-index: 99999;
+        position: absolute;
+    }
+
+    .nav-links{
+        margin-top: 40px;
+    }
+}
