@@ -1,0 +1,97 @@
+.cards{
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.card{
+    gap: 12px;
+    flex-direction: column;
+    flex: 1 1 calc((100% - 40px) / 4);
+    max-width: calc((100% - 40px) / 4);
+}
+
+.card.hide{
+    display: none;
+}
+
+.details{
+    gap: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.details span.company{
+    width: 100%;
+    font-weight: bolder;
+}
+
+.actions{
+    gap: 0;
+    padding: 0;
+    margin-top: 20px;
+    justify-content: flex-start;
+}
+
+
+.add_button {
+    display: inline-flex;
+    padding: 10px 20px;
+    background-color: #0078ff;
+    color: #fff;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+    user-select: none;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.add_button:hover {
+    background-color: #0065d9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.btn-edit,
+.btn-delete{
+    border: none;
+    outline: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    background: transparent;
+}
+
+button.btn-edit{
+    color: #0078ff;
+}
+
+button.btn-delete{
+    color: #b91c1c;
+}
+
+.search{
+    gap: 10px;
+}
+
+@media (max-width: 1300px) {
+    .card{
+        flex: 1 1 calc((100% - 40px) / 3);
+        max-width: calc((100% - 40px) / 3);
+    }
+}
+
+@media (max-width: 1000px) {
+    .card{
+        flex: 1 1 calc((100% - 40px) / 2);
+        max-width: calc((100% - 40px) / 2);
+    }
+}
+
+@media (max-width: 800px) {
+    .card{
+        flex: 1 1 calc((100% - 40px));
+        max-width: calc((100% - 40px));
+    }
+}

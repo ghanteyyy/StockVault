@@ -2,58 +2,72 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
     <link rel="stylesheet" href="{% static 'css/admin/modal.css' %}">
     <link rel="stylesheet" href="{% static 'css/admin/users.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/cards.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/companies.css' %}">
 {% endblock %}
 
 {% block content %}
-
     <div class="header">
-        <h2>Listed Companies</h2>
-
-        <button class="btn-add"
-            data-name=""
-            data-submit_href="faq/add">
-        <i class='bx bx-plus'></i> Add</button>
+        <div class="search_bar">
+            <div class="search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" class="search" placeholder="Search by question or answer">
+                <button class="add_button btn-add">Add User</button>
+            </div>
+        </div>
     </div>
 
-    <div class="header">
-        <h2>FAQs</h2>
+    <div class="cards">
+        {% for faq in faqs %}
+            <div class="card">
+                <div class="card_row">
+                    <span>Question:</span>
+                    <span class="question">{{faq.question}}</span>
+                </div>
+
+                <div class="card_row">
+                    <span>Answer:</span>
+                    <span class="answer">{{faq.answer}}</span>
+                </div>
+
+                <div class="actions">
+                    <button type="button" class="btn btn-edit"
+                            data-faq_id="{{faq.id}}"
+                            data-faq_question="{{faq.question}}"
+                            data-faq_answer="{{faq.answer}}"
+                            data-submit_href="faq/edit">
+                        <i class='bx bx-edit'></i>
+                    </button>
+                    <button type="button" class="btn btn-delete"
+                        data-faq_id="{{ faq.id }}"><i class="bx bx-trash"></i>
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
     </div>
 
-    <table id="data_table" class="display">
-        <thead>
-            <tr>
-                <th>SN</th>
+    <p class="error-message">No FAQs</p>
 
-                {% for table_head in table_heads %}
-                    <th>{{table_head}}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for faq in faqs %}
-                <tr>
-                    <td class="sn">{{forloop.counter}}</td>
-                    <td>{{faq.question}}</td>
-                    <td>{{faq.answer}}</td>
-                    <td class="action-buttons">
-                        <button type="button" class="btn btn-edit"
-                                data-faq_id="{{faq.id}}"
-                                data-faq_question="{{faq.question}}"
-                                data-faq_answer="{{faq.answer}}"
-                                data-submit_href="faq/edit">
-                            <i class='bx bx-edit'></i>
-                        </button>
-                        <button type="button" class="btn btn-delete"
-                            data-faq_id="{{ faq.id }}"><i class="bx bx-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    {% if faqs.num_pages > 1 %}
+        <div class="pagination">
+            <a
+                href="{% if faqs.has_previous %}?page={{ faqs.previous_page_number }}{% else %}#{% endif %}"
+                class="page_btn {% if not faqs.has_previous %}disabled{% endif %}">
+                « Previous Page
+            </a>
+
+            <span>Page {{ faqs.number }} of {{ faqs.paginator.num_pages }}</span>
+
+            <a
+                href="{% if faqs.has_next %}?page={{ faqs.next_page_number }}{% else %}#{% endif %}"
+                class="page_btn {% if not faqs.has_next %}disabled{% endif %}">
+                Next Page »
+            </a>
+        </div>
+    {% endif %}
+
 
     <div id="modal" class="modal is-hidden" aria-hidden="true">
         <div class="modal__overlay" id="overlay"></div>
@@ -67,7 +81,8 @@
             <form class="modal__content" method="POST" action="#">
                 {% csrf_token %}
 
-                <p class="error-message"></p>
+                <p class="modal-response-message" style="display: none;"></p>
+                <p class="modal-error-message error-message" style="display: none;">Please complete all required fields before submitting</p>
 
                 <div class="field" style="display: none;">
                     <label for="faq_id">ID <span class="required"> *</span></label>
@@ -93,6 +108,11 @@
 {% endblock %}
 
 {% block js %}
+    <script>
+        search_lists = ['question', 'answer'];
+    </script>
+
     <script src="{% static 'js/admin/modal.js' %}"></script>
     <script src="{% static 'js/admin/faqs.js' %}"></script>
+    <script src="{% static 'js/admin/search.js' %}"></script>
 {% endblock %}

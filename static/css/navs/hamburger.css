@@ -1,9 +1,12 @@
 .hamburger {
-    display: none;
-    cursor: pointer;
-    background: none;
     border: none;
     z-index: 1001;
+    display: none;
+    z-index: 99999;
+    cursor: pointer;
+    background: none;
+    position: relative;
+    height: max-content;
 }
 
 i.iconoir-menu,
@@ -33,5 +36,6 @@ i.iconoir-menu.hide{
 @media (max-width: 900px) {
     .hamburger {
         display: block;
+        margin-right: 20px;
     }
 }

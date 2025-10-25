@@ -8,6 +8,19 @@
     background: #b91c1c;
 }
 
+#success-message,
+.success-message {
+    width: 100%;
+    padding: 20px;
+    display: none;
+    font-size: 14px;
+    color: white;
+    border-radius: 6px;
+    font-weight: normal;
+    background: #16a34a;
+    transition: opacity 0.3s ease;
+}
+
 
 @media (max-width: 768px) {
     .error-message{

@@ -1,0 +1,188 @@
+.content {
+    gap: 40px;
+    display: flex;
+    padding: 0 20px;
+    flex-wrap: wrap;
+    max-width: 700px;
+    margin: 40px auto;
+    border-radius: 12px;
+    flex-direction: column;
+}
+
+.user_contents {
+    gap: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.user_contents a {
+    flex: 1;
+    color: #f5f7fa;
+    padding: 14px 0;
+    font-weight: 600;
+    text-align: center;
+    border-radius: 14px;
+    letter-spacing: 0.4px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(135deg, #1e293b, #334155);
+}
+
+.user_contents a:hover {
+    color: #ffffff;
+    transform: translateY(-5px);
+    box-shadow: 0 6px 14px rgba(37, 99, 235, 0.35);
+}
+
+.profile-section {
+    flex: 1 1 220px;
+    user-select: none;
+    text-align: center;
+}
+
+.profile-image-container {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: 50%;
+    margin: 0 auto 18px;
+    transition: box-shadow 0.3s ease;
+    box-shadow: 0 6px 18px rgba(255, 138, 101, 0.5);
+}
+
+.profile-image-container:hover {
+    box-shadow: 0 10px 30px rgba(255, 138, 101, 0.75);
+}
+
+.profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.profile-image-container:hover .profile-image {
+    transform: scale(1.05);
+}
+
+.profile-section p {
+    font-size: 0.8rem;
+    color: #ff7043;
+    margin-top: 8px;
+    font-weight: 600;
+}
+
+#profile_image {
+    display: none;
+}
+
+.form-group-container {
+    flex: 2 1 440px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+label {
+    font-weight: 600;
+    color: #555;
+    font-size: 1rem;
+}
+
+.no_form_type {
+    background: #f5f5f5;
+    padding: 10px 14px;
+    border-radius: 8px;
+    color: #444;
+    font-weight: 600;
+    user-select: text;
+}
+
+.change-password p {
+    color: #666;
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+}
+
+.password-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.password-group .form-group {
+    flex: 1 1 200px;
+}
+
+input[type="password"] {
+    padding: 10px 14px;
+    font-size: 1rem;
+    border: 1.5px solid #ccc;
+    border-radius: 8px;
+    transition: border-color 0.25s ease;
+}
+
+input[type="password"]:focus {
+    border-color: #999;
+    outline: none;
+    box-shadow: 0 0 6px rgba(150, 150, 150, 0.3);
+}
+
+.error-message {
+    margin-left: 0 !important;
+}
+
+.save-button {
+    align-self: flex-start;
+    padding: 12px 36px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    background: #888;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.save-button:hover {
+    background: #666;
+}
+
+@media (max-width: 720px) {
+    .content {
+        flex-direction: column;
+        max-width: 100%;
+    }
+
+    .profile-section,
+    .form-group-container {
+        flex: 1 1 100%;
+    }
+
+    .password-group {
+        flex-direction: column;
+    }
+
+    .password-group .form-group {
+        flex: 0 0 auto;
+    }
+
+    .change-password {
+        gap: 0;
+    }
+
+}

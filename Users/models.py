@@ -87,6 +87,7 @@ class CustomUser(AbstractUser):
                     )
 
     profile_image = models.ImageField(
+                        default='default.png',
                         verbose_name=_('profile image'),
                         blank=True, null=True, max_length=255,
                         upload_to=utils.user_profile_path

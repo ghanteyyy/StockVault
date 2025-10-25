@@ -15,13 +15,17 @@ from django.db.models import Q
 from django.utils.html import escape
 
 
+def paginator(request, items, items_per_page=100):
+    page = request.GET.get('page') or 1
+    paginator = Paginator(items, items_per_page)
+
+    return paginator.get_page(page)
+
+
 @login_required(login_url='login')
 def AdminPage(request):
     all_users = user_models.CustomUser.objects.all()
-
-    page = request.GET.get('page') or 1
-    paginator = Paginator(all_users, 30)
-    user_per_page = paginator.get_page(page)
+    user_per_page = paginator(request=request, items=all_users, items_per_page=30)
 
     users_json = list(
         user_per_page.object_list.values(
@@ -50,6 +54,77 @@ def AdminPage(request):
 
     return render(request, 'admin/users.html', context)
 
+
+@login_required(login_url='login')
+def UserProfile(request):
+    user_email = request.GET.get('user')
+    user = user_models.CustomUser.objects.get(email__iexact=user_email)
+
+    context = {
+        'user_profile': user,
+        'page_title': 'Users',
+    }
+
+    return render(request, 'admin/profile.html', context)
+
+
+@login_required(login_url='login')
+def ChangeProfile(request):
+    """
+    Handles a request to update a user's profile image.
+
+    It validates the uploaded file to ensure it is a valid image
+    file and has a size less than or equal to 5MB. If the file is
+    valid, it updates the user's profile image.
+    """
+
+    errors = []
+
+    if request.method.lower() == 'post':
+        user_email = request.POST.get('user_email')
+        profile_image = request.FILES.get('profile_image')
+
+        if not profile_image:
+            errors.append('No file uploaded.')
+
+        # Validate file type
+        if not profile_image.name.lower().endswith(('.jpg', '.jpeg', '.png')):
+            errors.append('Only JPG/PNG images are allowed.')
+
+        # Validate file size (e.g., 5MB limit)
+        if profile_image.size > 5 * 1024 * 1024:
+            errors.append('File size must be less than 5MB.')
+
+        if not errors: # Update the user's profile image
+            user = user_models.CustomUser.objects.get(email__iexact=user_email)
+            user.profile_image = profile_image
+            user.save()
+
+    return errors
+
+
+def UserChangePassword(request):
+    """
+    Handles a request to change a user's password.
+
+    The function validates the current password and ensures that
+    the new password and confirm password match. If the current
+    password is correct and the passwords match, it updates the
+    user's password.
+    """
+
+    errors = []
+
+    if request.method.lower() == 'post':
+        user_email = request.POST.get('user_email')
+        user = user_models.CustomUser.objects.get(email__iexact=user_email)
+
+        password = request.POST.get('new_password').strip()
+
+        user.set_password(password)
+        user.save()
+
+        return JsonResponse({'success': True, 'errors': errors, 'user_email': user_email})
 
 @login_required(login_url='login')
 def EditUser(request):
@@ -119,13 +194,12 @@ def DeleteUser(request):
 
 @login_required(login_url='login')
 def AdminListedCompanies(request):
-    companies = share_models.ListedCompanies.objects.all().values_list("name", "sector", "id", "abbreviation")
+    companies = share_models.ListedCompanies.objects.all().values("name", "sector", "id", "abbreviation")
 
-    table_heads = ['Symbol', 'Sector', 'Actions']
+    company_per_page = paginator(request=request, items=companies)
 
     context = {
-        'companies': companies,
-        'table_heads': table_heads,
+        'companies': company_per_page,
         'page_title': 'Listed Companies',
     }
 
@@ -187,15 +261,16 @@ def AdminListedCompaniesDelete(request):
 
 @login_required(login_url='login')
 def AdminPortfolios(request):
-    portfolios = share_models.Portfolios.objects.all()
+    user_email = request.GET.get('user')
+
+    portfolios = share_models.Portfolios.objects.filter(user_id__email__iexact=user_email)
     portfolios = shares_serializers.PortfoliosSerializer(portfolios, many=True).data
 
-    table_heads = ['Company', 'User', 'Number of Shares', 'Total Cost']
+    portfolio_per_page = paginator(request=request, items=portfolios)
 
     context = {
-        'portfolios': portfolios,
-        'table_heads': table_heads,
         'page_title': 'Portfolios',
+        'portfolios': portfolio_per_page,
     }
 
     return render(request, 'admin/portfolios.html', context)
@@ -204,14 +279,13 @@ def AdminPortfolios(request):
 @login_required(login_url='login')
 def AdminPortfoliosLots(request):
     portfolioLots = share_models.PortfolioLots.objects.all()
-    portfolioLots = shares_serializers.PortfolioLotsSerializer(portfolioLots, many=True).data
 
-    table_heads = ['Company', 'User', 'Number of Shares', 'Total Cost', 'Purchased Date']
+    portfolioLots = shares_serializers.PortfolioLotsSerializer(portfolioLots, many=True).data
+    portfolioLots_per_page = paginator(request=request, items=portfolioLots)
 
     context = {
-        'table_heads': table_heads,
-        'portfolioLots': portfolioLots,
         'page_title': 'Portfolio Lots',
+        'portfolioLots': portfolioLots_per_page,
     }
 
     return render(request, 'admin/portfolioLots.html', context)
@@ -219,15 +293,16 @@ def AdminPortfoliosLots(request):
 
 @login_required(login_url='login')
 def AdminTransactions(request):
-    transactions = share_models.Transactions.objects.all()
+    user_email = request.GET.get('user')
+
+    transactions = share_models.Transactions.objects.filter(user_id__email__iexact=user_email)
     transactions = shares_serializers.TransactionsSerializer(transactions, many=True).data
 
-    table_heads = ['Company', 'User', 'Number of Shares', 'Transacted Price', 'Transaction Type', 'Transaction Date']
+    transactions_per_page = paginator(request=request, items=transactions)
 
     context = {
-        'table_heads': table_heads,
-        'transactions': transactions,
         'page_title': 'Transactions',
+        'transactions': transactions_per_page,
     }
 
     return render(request, 'admin/transactions.html', context)
@@ -235,15 +310,16 @@ def AdminTransactions(request):
 
 @login_required(login_url='login')
 def AdminTargets(request):
-    targets = user_models.Targets.objects.all()
+    user_email = request.GET.get('user')
+
+    targets = user_models.Targets.objects.filter(user_id__email__iexact=user_email)
     targets = users_serializers.TargetsSerializer(targets, many=True).data
 
-    table_heads = ['Company', 'User', 'Low Target', 'High Target', 'Target Type', 'Date Created']
+    targets_per_page = paginator(request=request, items=targets)
 
     context = {
-        'targets': targets,
+        'targets': targets_per_page,
         'page_title': 'Targets',
-        'table_heads': table_heads,
     }
 
     return render(request, 'admin/targets.html', context)
@@ -251,15 +327,16 @@ def AdminTargets(request):
 
 @login_required(login_url='login')
 def AdminWishlists(request):
-    wishlists = share_models.WishLists.objects.all()
+    user_email = request.GET.get('user')
+
+    wishlists = share_models.WishLists.objects.filter(user_id__email__iexact=user_email)
     wishlists = shares_serializers.WishlistsSerializer(wishlists, many=True).data
 
-    table_heads = ['User', 'Company']
+    wishlists_per_page =paginator(request=request, items=wishlists)
 
     context = {
-        'wishlists': wishlists,
         'page_title': 'Targets',
-        'table_heads': table_heads,
+        'wishlists': wishlists_per_page,
     }
 
     return render(request, 'admin/wishlists.html', context)
@@ -270,12 +347,11 @@ def AdminFAQs(request):
     faqs = share_models.FAQs.objects.all()
     faqs = shares_serializers.FaqSerializers(faqs, many=True).data
 
-    table_heads = ['Question', 'Answer', 'Actions']
+    faqs_per_page = paginator(request=request, items=faqs)
 
     context = {
-        'faqs': faqs,
+        'faqs': faqs_per_page,
         'page_title': 'FAQs',
-        'table_heads': table_heads,
     }
 
     return render(request, 'admin/faqs.html', context)

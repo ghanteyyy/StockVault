@@ -1,16 +1,17 @@
+const sort_by = document.querySelector('#sort_by');
 const form = document.querySelector('.modal__content');
 const buttons = document.querySelectorAll('.btn-edit');
 const search_input = document.querySelector('.search');
 const add_button = document.querySelector('.add_button');
 const users_container = document.querySelector('.cards');
-const delete_buttons = document.querySelectorAll('.btn-delete');
+const pagination = document.querySelector('.pagination');
 const gender_filter = document.querySelector('#gender_filter');
-const sort_by = document.querySelector('#sort_by');
+const delete_buttons = document.querySelectorAll('.btn-delete');
 
 
 function renderUserCard(user) {
     return `
-        <div class="card">
+        <a class="card" href="${baseUserUrl}?user=${user.email}">
             <div class="avatar">
                 <img src="${user.profile_image}" alt="${user.name || 'User'}">
             </div>
@@ -38,7 +39,7 @@ function renderUserCard(user) {
                     <span class="value">${user.date_joined || 'N/A'}</span>
                 </div>
             </div>
-        </div>
+        </a>
   `;
 }
 
@@ -66,6 +67,7 @@ function filter_by_gender(query=null){
 search_input.addEventListener('input', (e) => {
     const filtered_users = [];
     const query = e.target.value.toLowerCase();
+    const error = document.querySelector('.error-message');
 
     user_json.forEach((user) => {
         const name = user.name.toLowerCase();
@@ -77,6 +79,8 @@ search_input.addEventListener('input', (e) => {
     });
 
     users_container.innerHTML = filtered_users.map(renderUserCard).join('');
+    pagination.style.display = (query) ? 'none' : 'flex';
+    error.style.display = filtered_users.length == 0 ? 'flex' : 'none';
 });
 
 gender_filter.addEventListener('change', (e) => {
@@ -199,16 +203,16 @@ form.addEventListener('submit', async (e) => {
     const dob_field = document.querySelector('#dob');
     const password_field = document.querySelector('#password');
 
-    const error = document.querySelector('.error-message');
+    const modal_empy_field_error = document.querySelector('.modal-error-message');
+    const modal_response_message = document.querySelector('.modal-response-message');
 
     form_base_url = form.action.split('/').slice(-2).join('/');
 
     if((form_base_url == 'user/add' && !password_field.value) || !email_field.value || !name_field.value || !gender_field.value || !dob_field.value){
-        error.style.display = 'block';
-        error.innerHTML = 'Please complete all required fields before submitting';
+        modal_empy_field_error.style.display = 'block';
 
         setTimeout(function() {
-            $(error).fadeOut('fast');
+            $(modal_empy_field_error).fadeOut('fast');
         }, 2000);
 
         return false;
@@ -225,8 +229,10 @@ form.addEventListener('submit', async (e) => {
 
     response = await (res.headers.get('content-type')?.includes('json') ? res.json() : res.text());
 
-    error.innerHTML = response.message;
-    error.style.display = 'block'
+    modal_type = response.status ? 'success-message' : 'error-message';
+    modal_response_message.innerHTML = response.message;
+    modal_response_message.classList.add(modal_type)
+    modal_response_message.style.display = 'block';
 
     if(response.status){
         name_field.value = '';
@@ -234,16 +240,10 @@ form.addEventListener('submit', async (e) => {
         dob_field.value = '';
         email_field.value = '';
         password_field.value = '';
-
-        error.style.cssText = 'display: block;color:#166534;background:#dcfce7;border:1px solid #86efac;';
-    }
-
-    else{
-        error.style.cssText = 'display: block;color:#b91c1c;background:#fee2e2;border:1px solid #fca5a5;';
     }
 
     setTimeout(function() {
-        $(error).fadeOut('fast');
+        $(modal_response_message).fadeOut('fast');
     }, 2000);
 
 });

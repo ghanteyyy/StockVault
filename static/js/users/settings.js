@@ -76,15 +76,13 @@ function changePassword() {
         .then(response => {
             return response.json();
         }).then(data => {
-            console.log('Response errors:', data.errors);
             const imagePreview = document.querySelector('#image-preview');
+
             if (imagePreview) {
                 imagePreview.scrollIntoView({ behavior: 'smooth' });
             }
 
             if (data.errors) {
-                console.log('Errors:', data.errors);
-
                 // Remove existing error container if present
                 const existingContainer = document.querySelector('.error-container');
                 if (existingContainer) existingContainer.remove();

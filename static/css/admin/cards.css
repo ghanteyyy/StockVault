@@ -1,0 +1,74 @@
+.search{
+    display: flex;
+    position: relative;
+    align-items: center;
+}
+
+.search_bar{
+    width: 100%;
+}
+
+i.fa-magnifying-glass{
+    left: 10px;
+    z-index: 100;
+    position: absolute;
+}
+
+input.search{
+    padding-left: 30px;
+}
+
+.cards{
+    gap: 15px;
+    display: flex;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.card{
+    gap: 10px;
+    display: flex;
+    padding: 20px;
+    color: black;
+    border-radius: 18px;
+    text-decoration: none;
+    box-sizing: border-box;
+    flex-direction: column;
+    border: 2px solid rgba(185, 185, 185, 0.58);
+
+    flex: 1 1 calc((100% - 40px) / 4);
+    max-width: calc((100% - 40px) / 4);
+}
+
+span.company_name{
+    margin-bottom: 10px;
+    font-size: 1.05rem;
+    font-weight: bolder;
+}
+
+p.error-message{
+    display: block;
+    font-size: 1rem;
+}
+
+
+@media (max-width: 1300px) {
+    .card{
+        flex: 1 1 calc((100% - 40px) / 3);
+        max-width: calc((100% - 40px) / 3);
+    }
+}
+
+@media (max-width: 1000px) {
+    .card{
+        flex: 1 1 calc((100% - 40px) / 2);
+        max-width: calc((100% - 40px) / 2);
+    }
+}
+
+@media (max-width: 800px) {
+    .card{
+        flex: 1 1 calc((100% - 40px));
+        max-width: calc((100% - 40px));
+    }
+}

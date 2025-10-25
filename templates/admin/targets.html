@@ -2,39 +2,79 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
     <link rel="stylesheet" href="{% static 'css/admin/modal.css' %}">
-    <link rel="stylesheet" href="{% static 'css/admin/users.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/cards.css' %}">
 {% endblock %}
 
 {% block content %}
+    <h1>Targets</h1>
 
-    <div class="header">
-        <h2>Targets</h2>
-    </div>
+    {% if targets %}
+        <div class="header">
+            <div class="search_bar">
+                <div class="search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" class="search" placeholder="Search by name or email">
+                </div>
+            </div>
+        </div>
 
-    <table id="data_table" class="display">
-        <thead>
-            <tr>
-                <th>SN</th>
-
-                {% for table_head in table_heads %}
-                    <th>{{table_head}}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
+        <div class="cards">
             {% for target in targets %}
-                <tr>
-                    <td class="sn">{{forloop.counter}}</td>
-                    <td>{{target.company_name}}</td>
-                    <td>{{target.user_email}}</td>
-                    <td style="text-align: center;">{{target.low_target}}</td>
-                    <td style="text-align: center;">{{target.high_target}}</td>
-                    <td style="text-align: center;">{{target.target_type | title}}</td>
-                    <td style="text-align: center;">{{target.created_date}}</td>
-                </tr>
+                <div class="card">
+                    <div class="card_row">
+                        <span class="company_name">{{target.company_name}}</span>
+                    </div>
+
+                    <div class="card_row">
+                        <span>Low Target:</span>
+                        <span class="low_target">{{target.low_target}}</span>
+                    </div>
+
+                    <div class="card_row">
+                        <span>High Target:</span>
+                        <span class="high_target">{{target.high_target}}</span>
+                    </div>
+
+                    <div class="card_row">
+                        <span>Target Type:</span>
+                        <span class="target_type">{{target.target_type | title}}</span>
+                    </div>
+
+                    <div class="card_row">
+                        <span >Created Date::</span>
+                        <span class="created_date">{{target.created_date}}</span>
+                    </div>
+                </div>
             {% endfor %}
-        </tbody>
-    </table>
+        </div>
+    {% endif %}
+
+    <p class="error-message" style="display: none;">No search results available</p>
+
+    {% if targets.paginator.num_pages > 1 %}
+        <div class="pagination">
+            <a
+                href="{% if targets.has_previous %}?page={{ targets.previous_page_number }}{% else %}#{% endif %}"
+                class="page_btn {% if not targets.has_previous %}disabled{% endif %}">
+                « Previous Page
+            </a>
+
+            <span>Page {{ targets.number }} of {{ targets.paginator.num_pages }}</span>
+
+            <a
+                href="{% if targets.has_next %}?page={{ targets.next_page_number }}{% else %}#{% endif %}"
+                class="page_btn {% if not targets.has_next %}disabled{% endif %}">
+                Next Page »
+            </a>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block js %}
+    <script>
+        search_lists = ['company_name', 'target_type', 'created_date'];
+    </script>
+
+    <script src="{% static 'js/admin/search.js' %}" defer></script>
 {% endblock %}

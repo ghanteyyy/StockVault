@@ -2,35 +2,57 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
     <link rel="stylesheet" href="{% static 'css/admin/modal.css' %}">
-    <link rel="stylesheet" href="{% static 'css/admin/users.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/cards.css' %}">
 {% endblock %}
 
 {% block content %}
+    <h1>Wishlists</h1>
 
-    <div class="header">
-        <h2>WishLists</h2>
-    </div>
+    {% if wishlists %}
+        <div class="header">
+            <div class="search_bar">
+                <div class="search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" class="search" placeholder="Search by name or email">
+                </div>
+            </div>
+        </div>
 
-    <table id="data_table" class="display">
-        <thead>
-            <tr>
-                <th>SN</th>
-
-                {% for table_head in table_heads %}
-                    <th>{{table_head}}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for transaction in transactions %}
-                <tr>
-                    <td class="sn">{{forloop.counter}}</td>
-                    <td>{{transaction.company_name}}</td>
-                    <td>{{transaction.user_email}}</td>
-                </tr>
+        <div class="cards">
+            {% for wishlist in wishlists %}
+                <div class="card">
+                    <span class="company_name">{{wishlist.company_name}}</span>
+                </div>
             {% endfor %}
-        </tbody>
-    </table>
+        </div>
+    {% endif %}
+
+    <p class="error-message" style="display: none;">No search results available</p>
+
+    {% if wishlists.paginator.num_pages > 1 %}
+        <div class="pagination">
+            <a
+                href="{% if wishlists.has_previous %}?page={{ wishlists.previous_page_number }}{% else %}#{% endif %}"
+                class="page_btn {% if not wishlists.has_previous %}disabled{% endif %}">
+                « Previous Page
+            </a>
+
+            <span>Page {{ wishlists.number }} of {{ wishlists.paginator.num_pages }}</span>
+
+            <a
+                href="{% if wishlists.has_next %}?page={{ wishlists.next_page_number }}{% else %}#{% endif %}"
+                class="page_btn {% if not wishlists.has_next %}disabled{% endif %}">
+                Next Page »
+            </a>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block js %}
+    <script>
+        search_lists = ['company_name'];
+    </script>
+
+    <script src="{% static 'js/admin/search.js' %}" defer></script>
 {% endblock %}

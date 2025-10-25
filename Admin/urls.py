@@ -6,7 +6,10 @@ urlpatterns = [
     path('admin/users', views.AdminPage, name='admin-index'),
     path('admin/user/add', views.AddUser, name='admin-user-add'),
     path('admin/user/edit', views.EditUser, name='admin-user-edit'),
+    path('admin/profile', views.UserProfile, name='admin-user-profile'),
     path('admin/user/delete', views.DeleteUser, name='admin-user-delete'),
+    path('admin/profile/change/password', views.UserChangePassword, name='admin-user-change-password'),
+    path('admin/profile/change/profile-image', views.ChangeProfile, name='admin-user-change-profile-image'),
 
     path('admin/companies', views.AdminListedCompanies, name='admin-companies'),
     path('admin/company/add', views.AdminListedCompaniesAdd, name='admin-company-add'),

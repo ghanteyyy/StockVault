@@ -2,9 +2,15 @@ const form = document.querySelector('.modal__content');
 const add_button = document.querySelector('.btn-add');
 const edit_buttons = document.querySelectorAll('.btn-edit');
 const delete_buttons = document.querySelectorAll('.btn-delete');
-
+const modal_error = document.querySelector('.modal')
 
 add_button.addEventListener('click', (e) => {
+    const question_field = document.querySelector('#question');
+    const answer_field = document.querySelector('#answer');
+
+    answer_field.value = '';
+    question_field.value = '';
+
     form.action = `${window.location.origin}/admin/faq/add`;
     openModal();
 });
@@ -54,14 +60,14 @@ form.addEventListener('submit', async (e) => {
     const question_field = document.querySelector('#question');
     const answer_field = document.querySelector('#answer');
 
-    const error = document.querySelector('.error-message');
+    const modal_empy_field_error = document.querySelector('.modal-error-message');
+    const modal_response_message = document.querySelector('.modal-response-message');
 
     if(!question_field.value || !answer_field.value){
-        error.style.display = 'block';
-        error.innerHTML = 'Please complete all required fields before submitting';
+        modal_empy_field_error.style.display = 'block';
 
         setTimeout(function() {
-            $(error).fadeOut('fast');
+            $(modal_empy_field_error).fadeOut('fast');
         }, 2000);
 
         return false;
@@ -78,16 +84,10 @@ form.addEventListener('submit', async (e) => {
 
     response = await (res.headers.get('content-type')?.includes('json') ? res.json() : res.text());
 
-    error.innerHTML = response.message;
-    error.style.display = 'block'
-
-    if(response.status){
-        error.style.cssText = 'display: block;color:#166534;background:#dcfce7;border:1px solid #86efac;';
-    }
-
-    else{
-        error.style.cssText = 'display: block;color:#b91c1c;background:#fee2e2;border:1px solid #fca5a5;';
-    }
+    modal_type = response.status ? 'success-message' : 'error-message';
+    modal_response_message.innerHTML = response.message;
+    modal_response_message.classList.add(modal_type)
+    modal_response_message.style.display = 'block';
 
     if(form.action.split('/').slice(-2).join('/') == 'faq/add'){
         question_field.value = '';
@@ -95,6 +95,6 @@ form.addEventListener('submit', async (e) => {
     }
 
     setTimeout(function() {
-        $(error).fadeOut('fast');
+        $(modal_response_message).fadeOut('fast');
     }, 2000);
 });

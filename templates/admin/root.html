@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/admin/datatables.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/pagination.css' %}">
 
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
@@ -30,6 +31,7 @@
         {% include 'admin/sidebar.html' %}
 
         <div class="main-content">
+            {% include 'admin/hamburger.html' %}
             {% block content %}
             {% endblock %}
         </div>

@@ -2,54 +2,69 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/error-message.css' %}">
     <link rel="stylesheet" href="{% static 'css/admin/modal.css' %}">
-    <link rel="stylesheet" href="{% static 'css/admin/users.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/cards.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/companies.css' %}">
 {% endblock %}
 
 {% block content %}
+    {% if companies %}
+        <div class="header">
+            <div class="search_bar">
+                <div class="search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" class="search" placeholder="Search by company name, abbreviation or investment type">
+                    <button class="add_button btn-add" data-name="" data-sector="" data-company_id="" data-company_abbreviation="" data-submit_href="company/add">Add User</button>
+                </div>
+            </div>
+        </div>
 
-    <div class="header">
-        <h2>Listed Companies</h2>
-
-        <button class="btn-add"
-            data-name=""
-            data-submit_href="company/add">
-        <i class='bx bx-plus'></i> Add</button>
-    </div>
-
-    <table id="data_table" class="display">
-        <thead>
-            <tr>
-                <th>SN</th>
-                {% for table_head in table_heads %}
-                <th>{{table_head}}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
+        <div class="cards">
             {% for company in companies %}
-                <tr>
-                    <td class="sn">{{forloop.counter}}</td>
-                    <td>{{company.0}}</td>
-                    <td>{{company.1}}</td>
-                    <td class="action-buttons">
+                <div class="card">
+                    <div class="details">
+                        <span class="company">{{company.name}}</span>
+                        <span class="sector">{{company.sector}}</span>
+                    </div>
+
+                    <div class="actions">
                         <button type="button" class="btn btn-edit"
-                                data-name="{{ company.0 }}"
-                                data-sector="{{ company.1 }}"
-                                data-company_id="{{company.2}}"
-                                data-company_abbreviation="{{company.3}}"
+                                data-name="{{ company.name }}"
+                                data-sector="{{ company.sector }}"
+                                data-company_id="{{company.id}}"
+                                data-company_abbreviation="{{company.abbreviation}}"
                                 data-submit_href="company/edit">
                             <i class='bx bx-edit'></i>
                         </button>
+
                         <button type="button" class="btn btn-delete"
-                            data-company_id="{{ company.2 }}"><i class="bx bx-trash"></i>
+                            data-company_id="{{ company.id }}"><i class="bx bx-trash"></i>
                         </button>
-                    </td>
-                </tr>
+                    </div>
+                </div>
             {% endfor %}
-        </tbody>
-    </table>
+        </div>
+    {% endif %}
+
+    <p class="error-message">No portfolios</p>
+
+    {% if companies.paginator.num_pages > 1 %}
+        <div class="pagination">
+            <a
+                href="{% if companies.has_previous %}?page={{ companies.previous_page_number }}{% else %}#{% endif %}"
+                class="page_btn {% if not companies.has_previous %}disabled{% endif %}">
+                « Previous Page
+            </a>
+
+            <span>Page {{ companies.number }} of {{ companies.paginator.num_pages }}</span>
+
+            <a
+                href="{% if companies.has_next %}?page={{ companies.next_page_number }}{% else %}#{% endif %}"
+                class="page_btn {% if not companies.has_next %}disabled{% endif %}">
+                Next Page »
+            </a>
+        </div>
+    {% endif %}
 
     <div id="modal" class="modal is-hidden" aria-hidden="true">
         <div class="modal__overlay" id="overlay"></div>
@@ -63,7 +78,8 @@
             <form class="modal__content" method="POST" action="#">
                 {% csrf_token %}
 
-                <p class="error-message"></p>
+                <p class="modal-response-message" style="display: none;"></p>
+                <p class="modal-error-message error-message" style="display: none;">Please complete all required fields before submitting</p>
 
                 <div class="field" style="display: none;">
                     <label for="company_id">ID <span class="required"> *</span></label>
@@ -94,6 +110,11 @@
 {% endblock %}
 
 {% block js %}
-    <script src="{% static 'js/admin/modal.js' %}"></script>
+   <script>
+        search_lists = ['company', 'sector'];
+    </script>
+
     <script src="{% static 'js/admin/companies.js' %}"></script>
+    <script src="{% static 'js/admin/modal.js' %}"></script>
+    <script src="{% static 'js/admin/search.js' %}"></script>
 {% endblock %}
