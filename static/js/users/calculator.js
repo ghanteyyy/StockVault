@@ -175,9 +175,11 @@ function buy_share() {
 
     const shareQuantity = document.querySelector('#share_quantity').value;
     const sharePrice = document.querySelector('#share_price').value;
+    const buy_type = document.querySelector('input[name="buy_type"]:checked')?.value || null;
 
-    if(!number_regex.test(shareQuantity) || !float_regex.test(sharePrice)){
+    if(!number_regex.test(shareQuantity) || !float_regex.test(sharePrice || !buy_type)){
         error.style.display = 'block';
+        remove_error_message(error);
         return;
     }
 
@@ -185,14 +187,20 @@ function buy_share() {
         error.style.display = 'none';
     }
 
-    calculated_values = buy_shares_calculation(shareQuantity, sharePrice);
+    calculated_values = (buy_type == 'ipo') ? shareQuantity * sharePrice : buy_shares_calculation(shareQuantity, sharePrice);
     document.querySelector('.output-wrapper').replaceChildren();
 
-    makeOutputInnerDivs("Total Purchase Amount", calculated_values.total_purchase_amount);
-    makeOutputInnerDivs(`Broker Commission (${brokerage_rate * 100}%)`, calculated_values.bokerage_commission);
-    makeOutputInnerDivs(`SEBON Commission (${charges.sebonFeeRate * 100}%)`, calculated_values.sebon_commission);
-    makeOutputInnerDivs("DP Charge", calculated_values.dp_charge);
-    makeOutputInnerDivs("Total Payable Amount", calculated_values.total_amount, '.output-wrapper', 'answer-div');
+    if(buy_type == 'secondary'){
+        makeOutputInnerDivs("Total Purchase Amount", calculated_values.total_purchase_amount);
+        makeOutputInnerDivs(`Broker Commission (${brokerage_rate * 100}%)`, calculated_values.bokerage_commission);
+        makeOutputInnerDivs(`SEBON Commission (${charges.sebonFeeRate * 100}%)`, calculated_values.sebon_commission);
+        makeOutputInnerDivs("DP Charge", calculated_values.dp_charge);
+        makeOutputInnerDivs("Total Payable Amount", calculated_values.total_amount, '.output-wrapper', 'answer-div');
+    }
+
+    else{
+        makeOutputInnerDivs("Total Purchase Amount", formatPrice(calculated_values));
+    }
 }
 
 
@@ -209,8 +217,9 @@ function sell_share() {
     cgt_value = document.getElementById('CGT').value;
 
     if(!buy_type || !number_regex.test(share_quantity) || !float_regex.test(purchase_value) || !float_regex.test(selling_price || !cgt_value)){
-
+        console.log(error);
         error.style.display = 'block';
+        remove_error_message(error);
         return;
     }
 
@@ -260,4 +269,11 @@ function makeOutputInnerDivs(text1 = '', text2 = '', wrapperSelector = '.output-
     wrapper.appendChild(div);
 
     return div;
+}
+
+
+function remove_error_message(error, timeout=2000){
+    setTimeout(function() {
+        $(error).fadeOut('fast');
+    }, timeout);
 }
