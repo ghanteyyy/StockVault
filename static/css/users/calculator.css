@@ -140,7 +140,6 @@
 }
 
 .CGT {
-    margin-top: 20px;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -204,8 +203,11 @@
 
 .output-wrapper {
     width: 50%;
+    display: flex;
     font-weight: 600;
     color: #2d3748;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .output-row {
