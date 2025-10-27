@@ -26,7 +26,10 @@ function validateStockSearchingForm(){
 
     else if(urlName.toLowerCase() == 'target'){
         result = validateTargetForm();
-        console.log(result);
+    }
+
+    else if(urlName.toLowerCase() == 'testonomials'){
+        result = validateTestonomialsForm();
     }
 
     else{
@@ -37,6 +40,8 @@ function validateStockSearchingForm(){
         suggestions.style.display = 'none';
         error_searching_stocks.style.display = 'block';
         error_searching_stocks.innerHTML = result.message;
+
+        remove_error_message(error_searching_stocks);
     }
 
     return result.success;

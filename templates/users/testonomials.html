@@ -8,12 +8,9 @@
 {% block content %}
     <div class="content">
         <div class="card">
-            <form action="" method="POST">
+            <form action="" onsubmit="return validateStockSearchingForm()" method="POST">
                 {% csrf_token %}
-
-                <input type="text" class="testonomial-text" name="testonomial" placeholder="Testimonial ...">
-
-                <button type="submit" id="btn-submit">Add</button>
+                {% include 'users/stock_searching.html' %}
             </form>
 
             {% include 'errors/backend_error.html' %}
@@ -33,4 +30,9 @@
             {% endfor %}
         </div>
     </div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/users/testonomials.js' %}"></script>
+    <script src="{% static 'js/users/stock_searching.js' %}" defer></script>
 {% endblock %}
