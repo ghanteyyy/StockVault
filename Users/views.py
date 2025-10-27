@@ -648,9 +648,15 @@ def TestonomialsPage(request):
 
     testonomials = user_models.Testonomials.objects.filter(user_id=request.user)
 
+    companies = share_models.ListedCompanies.objects.all()
+
+    serialized_companies = share_serializers.CompaniesSerializer(companies, many=True).data
+    companies = [company['name'] for company in serialized_companies]
+
     context = {
         'testonomials': testonomials,
-        'page_title': 'Testonomials | StockVault'
+        'page_title': 'Testonomials | StockVault',
+        'companies': json.dumps(companies),
     }
 
     return render(request, 'users/testonomials.html', context)
