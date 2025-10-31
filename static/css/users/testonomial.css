@@ -15,6 +15,21 @@ form{
     justify-content: space-between;
 }
 
+.input-field{
+    gap: 20px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.input-field > div{
+    gap: 20px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
 input{
     width: 100%;
     padding: 10px;
@@ -25,19 +40,31 @@ input{
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.input-field textarea {
+    width: 90%;
+    resize: none;
+    padding: 14px;
+    outline: none;
+    font-size: 16px;
+    color: #1e293b;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border: 1px solid #334155;
+}
+
 #btn-submit{
-    background: #1976d2;
-    color: white;
-    padding: 10px 16px;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     gap: 6px;
-    cursor: pointer;
+    border: none;
+    padding: 16px;
+    display: flex;
+    color: white;
     flex-shrink: 0;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 8px;
+    align-items: center;
+    background: #1976d2;
+    justify-content: center;
     transition: background 0.2s ease;
 }
 

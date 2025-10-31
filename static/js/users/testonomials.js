@@ -1,14 +1,16 @@
 function validateTestonomialsForm(){
-    result = {"message": '', 'success': true}
-    stock_name = document.querySelector('#stock-input').trim();
+    form_error = document.querySelector('.form-error-message');
+    testonomial = document.querySelector('.testonomial-input').value.trim();
 
-    if(!stock_name){
-        result.success = false;
-        result.message = 'Please complete all required fields before submitting'
+    if(!testonomial){
+        form_error.textContent = 'Please complete all required fields before submitting';
+        form_error.style.display = 'block';
+
+        remove_error_message(form_error);
+
+        return false;
     }
 
-    return result
+    return true;
 
 }
-
-window.validateTestonomialsForm = validateTestonomialsForm;
