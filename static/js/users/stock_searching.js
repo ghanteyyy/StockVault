@@ -28,10 +28,6 @@ function validateStockSearchingForm(){
         result = validateTargetForm();
     }
 
-    else if(urlName.toLowerCase() == 'testonomials'){
-        result = validateTestonomialsForm();
-    }
-
     else{
         result.success = true;
     }
