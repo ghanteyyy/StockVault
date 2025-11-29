@@ -23,6 +23,8 @@ function closeModal() {
 
     document.documentElement.classList.remove('modal-open');
     document.body.classList.remove('modal-open');
+
+    window.location.reload();
 }
 
 document.addEventListener('keydown', (e) => {
