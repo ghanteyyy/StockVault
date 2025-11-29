@@ -11,6 +11,13 @@ const formattedMaxDate = maxDate.toISOString().split('T')[0];
 document.getElementById('dob').max = formattedMaxDate;
 
 
+function remove_error(error_element){
+    setTimeout(function() {
+        $(error_element).fadeOut('fast');
+    }, 2000);
+}
+
+
 reload_btn.addEventListener('click', async (e) => {
     url = `${window.location.origin}/generate-captcha/`;
     console.log(url);
@@ -131,5 +138,11 @@ form.addEventListener("submit", async (e) => {
 
     if(status && response.status){
         e.target.submit();
+    }
+
+    else{
+        [nameError, emailError, passwordError, dobError, profileError, genderError, captchaError].forEach((error) => {
+            remove_error(error);
+        })
     }
 });
