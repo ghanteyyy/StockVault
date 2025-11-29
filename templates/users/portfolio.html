@@ -31,6 +31,10 @@
                         <p>Share Quantity</p>
                         <p class="quantity">{{ share_holding.number_of_shares }}</p>
                     </div>
+                    <div class="company-details">
+                        <p>Total Cost</p>
+                        <p class="quantity">{{ share_holding.total_cost }}</p>
+                    </div>
                 </div>
             {% empty %}
                 <p class="error-message" style="display: block;">The dataset is currently empty or incomplete</p>
