@@ -19,6 +19,7 @@ from django_ratelimit.decorators import ratelimit
 import Shares.serializers as share_serializers
 from Shares import scraper
 from . import captcha as Captcha
+from Shares import share_trading_calculator
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
@@ -330,12 +331,28 @@ def Portfolio(request):
             errors.append('Buying rate must be a valid number')
 
         if not errors:
-            share_views.modify_shares(request.user, company, quantity, buying_rate, 'buy')
+            buy_type = request.POST.get('buy-type')
+            bought = share_trading_calculator.buy_shares_calculation(float(quantity), float(buying_rate), buy_type)
 
-    # Getting share names along with its abbreviation. Eg: Green Venture Limited (GVL)
-    user_companies = share_models.Portfolios.objects.filter(user_id=request.user).values_list('company_id', flat=True)
+            company_name = share_models.ListedCompanies.objects.get(name__iexact=company)
+            portfolio = share_models.Portfolios.objects.filter(user_id=request.user, company_id=company_name)
 
-    companies = share_models.ListedCompanies.objects.exclude(id__in=user_companies)
+            if portfolio:
+                portfolio = portfolio.first()
+
+                number_of_shares = int(quantity) + portfolio.number_of_shares
+                total_cost = round(float(bought['total_amount']) + portfolio.total_cost, 2)
+
+                portfolio.number_of_shares = number_of_shares
+                portfolio.total_cost = total_cost
+                portfolio.save()
+
+            else:
+                share_models.Portfolios.objects.create(user_id=request.user, company_id=company_name, number_of_shares=int(quantity), total_cost=round(float(bought['total_amount']), 2))
+
+            share_models.Transactions.objects.create(user_id=request.user, company_id=company_name, number_of_shares=abs(int(quantity)), transacted_price=abs(round(float(bought['total_amount']), 2)), transaction_type='buy')
+
+    companies = share_models.ListedCompanies.objects.all()
     serialized_companies = share_serializers.CompaniesSerializer(companies, many=True).data
     companies = [company['name'] for company in serialized_companies]
 
