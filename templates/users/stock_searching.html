@@ -20,6 +20,14 @@
                 <i class="fas fa-dollar-sign"></i>
                 <input type="text" placeholder="Buying Rate" class="buying_rate share_numbering" name="buying_rate">
             </div>
+            <div class="input-field">
+                <i class="fas fa-bullseye"></i>
+                <select name="buy-type" id="buy-type">
+                    <option value="" selected hidden>Buy Type</option>
+                    <option value="ipo">IPO</option>
+                    <option value="secondary">Secondary</option>
+                </select>
+            </div>
         {% endif %}
 
         {% if request.resolver_match.url_name == 'target' %}

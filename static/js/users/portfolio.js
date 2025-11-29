@@ -10,10 +10,12 @@ share_numberings.forEach(share_numbering => {
 function validatePortfolioForm(){
     result = {"message": '', 'success': false}
 
-    buying_rate = document.querySelector('.buying_rate').value
-    number_of_stock = document.querySelector('.share_quantity').value
+    buying_rate = document.querySelector('.buying_rate').value;
+    number_of_stock = document.querySelector('.share_quantity').value;
+    buy_type = document.querySelector('#buy-type').value;
 
-    if(!number_of_stock || !buying_rate){
+
+    if(!number_of_stock || !buying_rate || !buy_type){
         result.message = 'Please complete all required fields before submitting'
     }
 
