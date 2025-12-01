@@ -67,6 +67,9 @@ def LoginPage(request):
     the page title and the value of the 'next' parameter.
     """
 
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
     next_url = request.POST.get('next', request.GET.get('next', 'dashboard'))
 
     if request.method.lower() == 'post':
@@ -116,6 +119,9 @@ def SignupPage(request):
     """
 
     errors = []
+
+    if request.user.is_authenticated:
+        return redirect('dashboard')
 
     if request.method == 'POST':
         email = request.POST.get('email').strip()
