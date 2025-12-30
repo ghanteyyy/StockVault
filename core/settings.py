@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'Users',
     'Shares',
     'Admin',
+    'api',
 ]
 SITE_ID = 1
 

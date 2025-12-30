@@ -23,6 +23,7 @@ urlpatterns = [
     # path('admin/', admin.site.urls),
     path('', include('Users.urls')),
     path('', include('Admin.urls')),
+    path('api/', include('api.urls')),
     path("captcha/", include("captcha.urls")),
 ]
 
