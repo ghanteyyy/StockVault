@@ -51,8 +51,9 @@ INSTALLED_APPS = [
     'Users',
     'Shares',
     'Admin',
-    'api',
+    'accounts',
 ]
+
 SITE_ID = 1
 
 MIDDLEWARE = [
