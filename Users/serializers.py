@@ -1,40 +1,24 @@
-from rest_framework import serializers
-from . import models
+import Users.models as user_models
 from rest_framework import serializers
 
 
-class TargetsSerializer(serializers.ModelSerializer):
-    abbreviation = serializers.SerializerMethodField()
-    company_name = serializers.SerializerMethodField()
-    company_id = serializers.SerializerMethodField()
-    user_email = serializers.SerializerMethodField()
-    created_date = serializers.SerializerMethodField()
+class MeSerializer(serializers.ModelSerializer):
+    date_joined = serializers.DateTimeField(format="%B %d, %Y at %I:%M %p (UTC)")
+    date_of_birth = serializers.DateField(format="%B %d, %Y")
 
     class Meta:
-        model = models.Targets
-        fields = ['id', 'user_email', 'company_name', 'company_id', 'abbreviation', 'low_target', 'high_target', 'target_type', 'created_date']
+        model = user_models.CustomUser
+        exclude = ['password', 'last_login', 'groups', 'user_permissions', 'first_name', 'last_name']
+
+
+class TargetSerializer(serializers.ModelSerializer):
+    company_name = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(format="%Y/%m/%d %d %I:%M %p (UTC)")
+    updated_at = serializers.DateTimeField(format="%Y/%m/%d %d %I:%M %p (UTC)")
+
+    class Meta:
+        model = user_models.Targets
+        exclude = ['id', 'user_id', 'company_id']
 
     def get_company_name(self, obj):
         return obj.company_id.name
-
-    def get_abbreviation(self, obj):
-        return obj.company_id.abbreviation
-
-    def get_company_id(self, obj):
-        return obj.company_id.id
-
-    def get_user_email(self, obj):
-        return obj.user_id.email
-
-    def get_created_date(self, obj):
-        return obj.created_at.strftime("%b %e, %Y")
-
-class TestonomialsSerializer(serializers.ModelSerializer):
-    user_name = serializers.SerializerMethodField()
-
-    class Meta:
-        model = models.Testonomials
-        fields = ['id', 'user_name', 'message', 'created_at']
-
-    def get_user_name(self, obj):
-        return obj.user_id.name
