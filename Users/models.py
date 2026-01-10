@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.utils.timezone import now
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _
@@ -111,6 +112,13 @@ class Targets(models.Model):
     class Meta:
         verbose_name = _("Targets")
         verbose_name_plural = _("Targets")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user_id", "company_id", "target_type"],
+                condition=Q(is_deleted=False),
+                name="uniq_active_target_per_user_company_type",
+            )
+        ]
 
     def __str__(self):
         return self.company_id.name
@@ -133,7 +141,7 @@ class Targets(models.Model):
 
     created_at = models.DateTimeField(
         verbose_name=_('created at'),
-        default=now,
+        auto_now=True,
         editable=False,
     )
 
@@ -145,8 +153,7 @@ class Targets(models.Model):
 
     updated_at = models.DateTimeField(
         verbose_name=_('updated at'),
-        default=now,
-        editable=False,
+        auto_now=True
     )
 
     def get_target_type(self):
