@@ -1,3 +1,5 @@
+import random
+
 from django_ratelimit.decorators import ratelimit
 from django.db import IntegrityError, transaction
 from django.utils.decorators import method_decorator
@@ -5,7 +7,7 @@ from django.utils.decorators import method_decorator
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
 
 import Users.models as user_models
@@ -145,3 +147,20 @@ class Targets(APIView):
                 "message": "Target added"
             }, status=status.HTTP_201_CREATED
         )
+
+
+@ratelimit(key='ip', rate='100/m', block=True)
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def Testinomials(request):
+    testinomials_ids = list(user_models.Testonomials.objects.values_list("id", flat=True))
+    random_ids = random.sample(testinomials_ids, k=min(5, len(testinomials_ids)))
+
+    testinomials = user_models.Testonomials.objects.filter(id__in=random_ids)
+
+    return Response(
+        {
+            "status": True,
+            "testinomials": custom_serializer.TestinomialSerializer(testinomials, many=True).data
+        }, status=status.HTTP_200_OK
+    )

@@ -22,3 +22,14 @@ class TargetSerializer(serializers.ModelSerializer):
 
     def get_company_name(self, obj):
         return obj.company_id.name
+
+
+class TestinomialSerializer(serializers.ModelSerializer):
+    user_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = user_models.Testonomials
+        exclude = ['id', 'user_id', 'created_at']
+
+    def get_user_name(self, obj):
+        return obj.user_id.name

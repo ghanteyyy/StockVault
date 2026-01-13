@@ -6,4 +6,5 @@ from . import captcha
 urlpatterns = [
     path('api/me/', views.me),
     path('api/targets/', views.Targets.as_view()),
+    path('api/testinomials/', views.Testinomials),
 ]
