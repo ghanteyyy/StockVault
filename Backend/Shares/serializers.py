@@ -48,3 +48,9 @@ class NepseIndicesSerializer(serializers.ModelSerializer):
     class Meta:
         model = share_models.NepseIndices
         exclude = ["id"]
+
+
+class FaqsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = share_models.FAQs
+        exclude = ["id", "created_at"]

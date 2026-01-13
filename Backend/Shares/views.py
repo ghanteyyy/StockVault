@@ -1,3 +1,5 @@
+import random
+
 from django.db import transaction
 from django.core.cache import cache
 from django_ratelimit.decorators import ratelimit
@@ -6,7 +8,7 @@ from django.utils.decorators import method_decorator
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
 
 from utils import calculator
@@ -295,3 +297,24 @@ class Wishlist(APIView):
                     "message": "Wishlist not found"
                 }, status=status.HTTP_404_NOT_FOUND
             )
+
+
+@ratelimit(key='ip', rate='100/m', block=True)
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def Faqs(request):
+    """
+    Retrieve faqs
+    """
+
+    faqs_ids = list(share_models.FAQs.objects.values_list("id", flat=True))
+    random_ids = random.sample(faqs_ids, k=min(5, len(faqs_ids)))
+
+    faqs = share_models.FAQs.objects.filter(id__in=random_ids)
+
+    return Response(
+        {
+            "status": True,
+            "faqs": custom_serializer.FaqsSerializer(faqs, many=True).data
+        }, status=status.HTTP_200_OK
+    )
