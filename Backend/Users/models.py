@@ -178,3 +178,22 @@ class Testonomials(models.Model):
         default=now,
         editable=False,
     )
+
+
+class FeedBack(models.Model):
+    """
+    Model representing information about FeedBack.
+    """
+
+    class Meta:
+        verbose_name_plural = "FeedBack"
+
+    id = models.UUIDField(primary_key=True, default=utils.generate_uuid_hex, editable=False)
+    name = models.CharField(null = False, blank = False, max_length = 100)
+    email = models.EmailField(null=False, blank=False)
+    subject = models.EmailField(null=False, blank=False)
+    message = models.TextField(null=False, blank=False)
+    created_at = models.DateTimeField(null=False, blank=False, auto_now=True, editable=False)
+
+    def __str__(self):
+        return str(self.ID)

@@ -164,3 +164,28 @@ def Testinomials(request):
             "testinomials": custom_serializer.TestinomialSerializer(testinomials, many=True).data
         }, status=status.HTTP_200_OK
     )
+
+
+@ratelimit(key='ip', rate='100/m', block=True)
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def Feebacks(request):
+    name = request.data.get('name', '').strip().lower()
+    email = request.data.get('email', '').strip().lower()
+    subject = request.data.get('subject', '').strip().lower()
+    message = request.data.get('message', '').strip().lower()
+
+    if not any([name, email, subject, message]):
+        return Response(
+            {
+                'status': False,
+                'message': 'All the fields are required'
+            }, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    return Response(
+        {
+            "status": True,
+            "message": "Message Sent!"
+        }, status=status.HTTP_200_OK
+    )
