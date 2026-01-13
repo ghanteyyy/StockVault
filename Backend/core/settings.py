@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
+    'corsheaders',
     'captcha',
     'Users',
     'Shares',
@@ -66,6 +67,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.middleware.AdminRedirectMiddleware',
     'django_ratelimit.middleware.RatelimitMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -175,7 +177,9 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),                         # Ensure it matches your frontend headers
 }
 
-CSRF_TRUSTED_ORIGINS = []
+CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
+CORS_ALLOWED_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
 # Redis cache configuration
 CACHES = {
