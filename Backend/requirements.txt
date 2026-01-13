@@ -6,6 +6,7 @@ requests
 psycopg2
 python-dotenv
 beautifulsoup4
+django-cors-headers
 djangorestframework
 django-simple-captcha
 djangorestframework-simplejwt
