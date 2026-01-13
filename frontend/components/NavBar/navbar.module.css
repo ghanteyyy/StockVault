@@ -1,0 +1,300 @@
+:root {
+    --primary: #0066ff;
+    --primary-dark: #0052cc;
+    --primary-light: #4d94ff;
+    --secondary: #00c9a7;
+    --accent: #ff6b35;
+    --light: #f8fafc;
+    --dark: #0a0e27;
+    --dark-secondary: #1a1f3a;
+    --gray: #64748b;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 3rem;
+    background: rgba(10, 14, 39, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 1px rgba(0, 102, 255, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: var(--transition);
+}
+
+.navbar::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    opacity: 0.5;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    gap: 1rem;
+    transition: var(--transition);
+}
+
+.brand:hover {
+    transform: translateY(-2px);
+}
+
+.brand_logo {
+    height: 3.5rem;
+    width: auto;
+    filter: drop-shadow(0 4px 12px rgba(0, 102, 255, 0.5));
+}
+
+.brand_name {
+    font-size: 1.6rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ffffff 0%, var(--primary-light) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.nav_links {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+}
+
+.nav_links a {
+    text-decoration: none;
+    color: var(--light);
+    font-weight: 500;
+    font-size: 1rem;
+    transition: var(--transition);
+    position: relative;
+    padding: 0.5rem 0;
+    letter-spacing: 0.01em;
+}
+
+.nav_links a:not(.btn)::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 2px;
+}
+
+.nav_links a:not(.btn):hover {
+    color: var(--primary-light);
+    transform: translateY(-1px);
+}
+
+.nav_links a:not(.btn):hover::before {
+    width: 100%;
+}
+
+.nav_links a:not(.btn)::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    background: var(--primary);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.nav_links a:not(.btn):hover::after {
+    opacity: 1;
+}
+
+/* CTA Button in Nav */
+.nav_links .btn {
+    padding: 0.6rem 1.5rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border-radius: 10px;
+    font-weight: 600;
+    transition: var(--transition);
+    border: 1px solid rgba(0, 102, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.nav_links .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s ease;
+}
+
+.nav_links .btn:hover::before {
+    left: 100%;
+}
+
+.nav_links .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 102, 255, 0.4);
+    border-color: var(--primary-light);
+}
+
+/* Hamburger Menu */
+.hamburger {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 1001;
+    position: relative;
+    padding: 0;
+    width: auto;
+    height: auto;
+}
+
+.hamburger i {
+    display: block;
+    font-size: 1.8rem;
+    color: white;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hide class for icons */
+.hamburger i.hide,
+.hamburger .hide {
+    display: none !important;
+}
+
+/* Mobile Menu */
+@media (max-width: 900px) {
+    .navbar {
+        padding: 1rem 1.5rem;
+    }
+
+    .hamburger {
+        display: block;
+    }
+
+    .nav_links {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 80%;
+        max-width: 350px;
+        height: 100vh;
+        background: linear-gradient(180deg, rgba(10, 14, 39, 0.98) 0%, rgba(26, 31, 58, 0.98) 100%);
+        backdrop-filter: blur(20px);
+        flex-direction: column;
+        justify-content: center;
+        gap: 2.5rem;
+        box-shadow: -8px 0 32px rgba(0, 0, 0, 0.6);
+        transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1000;
+        border-left: 1px solid rgba(0, 102, 255, 0.2);
+    }
+
+    .nav_links::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background:
+            radial-gradient(circle at 50% 20%, rgba(0, 102, 255, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 50% 80%, rgba(0, 201, 167, 0.1) 0%, transparent 50%);
+        z-index: -1;
+    }
+
+    .nav_links.active {
+        right: 0;
+    }
+
+    .nav_links a {
+        font-size: 1.3rem;
+        padding: 1rem 2rem;
+        width: 100%;
+        text-align: center;
+        border-radius: 12px;
+        transition: var(--transition);
+    }
+
+    .nav_links a:not(.btn):hover {
+        background: rgba(0, 102, 255, 0.15);
+    }
+
+    .nav_links a:not(.btn)::before {
+        display: none;
+    }
+
+    .nav_links .btn {
+        padding: 1rem 2rem;
+        width: calc(100% - 4rem);
+        margin: 0 2rem;
+        font-size: 1.2rem;
+    }
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Scrolled State */
+.navbar.scrolled {
+    padding: 0.875rem 3rem;
+    background: rgba(10, 14, 39, 0.98);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+@media (max-width: 900px) {
+    .navbar.scrolled {
+        padding: 0.875rem 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .brand_logo {
+        height: 3rem;
+    }
+
+    .brand_name {
+        font-size: 1.3rem;
+    }
+
+    .nav_links {
+        width: 85%;
+    }
+}
