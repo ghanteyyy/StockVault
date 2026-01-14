@@ -38,12 +38,6 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-**5. Open following URL in your web browser**
-
-```
-127.0.0.1:8000/
-```
-
 ## Optional Database Configurations
 
 The following configurations are necessary solely for the purpose of generating dummy data for testing.
@@ -60,14 +54,31 @@ python manage.py PopulateStocks
 python manage.py PopulateUsers
 ```
 
-**3. Populate Portfolios for respective user**
+**3. Populate Companies**
+
+```
+python manage.py PopulateCompanies
+```
+
+**4. Populate Portfolios for respective user**
 
 ```
 python manage.py PopulatePortfolios
 ```
 
+**5. Populate Testinomials user**
+
+```
+python manage.py PopulateUserTestonomials
+```
+
+**6. Populate FAQs**
+
+```
+python manage.py PopulateFaqs
+```
+
 ## Technologies Used
 
-- **Frontend:** HTML5, CSS3, JavaScript
 - **Backend:** Django
 - **Database:** PostgreSQL
