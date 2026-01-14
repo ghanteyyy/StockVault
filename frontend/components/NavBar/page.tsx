@@ -41,7 +41,7 @@ export const NavBar = () => {
                 <div className={`${styles.nav_links} ${isMenuOpen ? styles.active : ''}`}>
                     <Link href="/#features" onClick={toggleMenu}>Features</Link>
                     <Link href="/#faq" onClick={toggleMenu}>FAQ</Link>
-                    <Link href="/#Login" onClick={toggleMenu}>Login</Link>
+                    <Link href="/login" onClick={toggleMenu}>Login</Link>
                 </div>
 
                 <button
