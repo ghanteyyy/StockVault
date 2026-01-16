@@ -103,18 +103,6 @@ h2 {
     position: relative;
 }
 
-h2::after {
-    content: '';
-    position: absolute;
-    bottom: -1rem;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80px;
-    height: 4px;
-    background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
-    border-radius: 2px;
-}
-
 h3 {
     font-size: clamp(1.5rem, 2.5vw, 2rem);
     font-weight: 600;
