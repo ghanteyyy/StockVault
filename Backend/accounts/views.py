@@ -119,9 +119,32 @@ def Signup(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def Logout(request):
-    return Response(
-        {
-            "status": True,
-            "message": "Logout worked"
-        }, status=status.HTTP_200_OK
-    )
+    try:
+        refresh = request.data.get("refresh")
+
+        if not refresh:
+            return Response(
+                {
+                    "status": False,
+                    "message": "Refresh token required"
+                }, status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        token = RefreshToken(refresh)
+        token.blacklist()
+
+        return Response(
+            {
+                "status": True,
+                "message": "Logged out successfully"
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    except Exception as e:
+        return Response(
+            {
+                "status": False,
+                "message": "Invalid token"
+            }, status=status.HTTP_400_BAD_REQUEST,
+        )
