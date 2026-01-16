@@ -20,7 +20,6 @@ const LoginPage = () => {
     });
 
     const [showPassword, setShowPassword] = useState(false);
-    const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -80,7 +79,6 @@ const LoginPage = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        setSuccessMessage('');
         setErrorMessage('');
 
         if (!validateForm()) {
@@ -106,12 +104,7 @@ const LoginPage = () => {
                 localStorage.setItem('token', response.data.token);
             }
 
-            setSuccessMessage('Login successful! Redirecting...');
-
-            // Redirect after 1.5 seconds
-            setTimeout(() => {
-                window.location.href = '/dashboard';
-            }, 1500);
+            window.location.href = '/dashboard';
 
         } catch (err: any) {
             const message = err.response?.data?.message || 'Invalid email or password. Please try again.';
@@ -144,13 +137,6 @@ const LoginPage = () => {
                             Sign in to continue to your account
                         </p>
                     </div>
-
-                    {/* Success Message */}
-                    {successMessage && (
-                        <div className={styles.success_message}>
-                            {successMessage}
-                        </div>
-                    )}
 
                     {/* Error Message */}
                     {errorMessage && (
