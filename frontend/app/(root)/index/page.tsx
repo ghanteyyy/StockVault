@@ -8,11 +8,13 @@ import type { Testinomial, Faqs } from '@/interface/interfaces';
 import styles from "./index.module.css";
 
 const IndexPage = () => {
+    const BACKEND_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
     const [testinomials, setTestinomials] = useState<Testinomial[]>([]);
     const [error, setError] = useState("");
 
     useEffect(() => {
-            api.get('/api/testinomials/')
+            api.get(`${BACKEND_URL}/api/testinomials/`)
             .then((res) => setTestinomials(res.data.testinomials))
             .catch((err) => setError(err.response?.data?.message || err.message));
         }, []);
@@ -22,7 +24,7 @@ const IndexPage = () => {
     const [faqError, setFaqError] = useState();
 
     useEffect(() => {
-        api.get('api/faqs/')
+        api.get(`${BACKEND_URL}/api/faqs/`)
         .then((res) => setFaqs(res.data.faqs))
         .catch((err) => setFaqError(err.response?.data?.message || err.message))
     }, [])
