@@ -144,7 +144,7 @@ const IndexPage = () => {
             <div className={styles.hero_content}>
                 <h1>Track. Predict. Profit.</h1>
                 <p>Your smart companion for monitoring stock portfolios, analyzing trends, and making better investments.</p>
-                <Link href="/" className='cta_button'>Get Started</Link>
+                <Link href="/signup" className='cta_button'>Get Started</Link>
             </div>
 
             <section id="features" className={styles.features}>
