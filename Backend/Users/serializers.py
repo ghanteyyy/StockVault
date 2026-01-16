@@ -3,8 +3,8 @@ from rest_framework import serializers
 
 
 class MeSerializer(serializers.ModelSerializer):
-    date_joined = serializers.DateTimeField(format="%B %d, %Y at %I:%M %p (UTC)")
-    date_of_birth = serializers.DateField(format="%B %d, %Y")
+    date_joined = serializers.DateTimeField(format="%B %d, %Y at %I:%M %p (UTC)", read_only=True)
+    date_of_birth = serializers.DateField(format="%B %d, %Y", input_formats=["%Y-%m-%d", "%Y/%m/%d"])
 
     class Meta:
         model = user_models.CustomUser
@@ -13,8 +13,8 @@ class MeSerializer(serializers.ModelSerializer):
 
 class TargetSerializer(serializers.ModelSerializer):
     company_name = serializers.SerializerMethodField()
-    created_at = serializers.DateTimeField(format="%Y/%m/%d %d %I:%M %p (UTC)")
-    updated_at = serializers.DateTimeField(format="%Y/%m/%d %d %I:%M %p (UTC)")
+    created_at = serializers.DateTimeField(format="%Y/%m/%d %d %I:%M %p (UTC)", read_only=True)
+    updated_at = serializers.DateTimeField(format="%Y/%m/%d %d %I:%M %p (UTC)", read_only=True)
 
     class Meta:
         model = user_models.Targets
@@ -25,7 +25,7 @@ class TargetSerializer(serializers.ModelSerializer):
 
 
 class TestinomialSerializer(serializers.ModelSerializer):
-    user_name = serializers.SerializerMethodField()
+    user_name = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = user_models.Testonomials

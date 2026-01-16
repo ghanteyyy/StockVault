@@ -54,3 +54,14 @@ class FaqsSerializer(serializers.ModelSerializer):
     class Meta:
         model = share_models.FAQs
         exclude = ["id", "created_at"]
+
+
+class TransactionsSerializer(serializers.ModelSerializer):
+    company = serializers.CharField(
+        source="company_id.abbreviation",
+        read_only=True
+    )
+
+    class Meta:
+        exclude = ['company_id', 'user_id']
+        model = share_models.Transactions
