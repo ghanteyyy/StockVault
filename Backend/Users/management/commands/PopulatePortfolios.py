@@ -2,7 +2,7 @@ import random
 import datetime
 import Users.models as user_models
 import Shares.models as share_models
-from Shares import share_trading_calculator
+from utils import calculator as share_trading_calculator
 from django.core.management.base import BaseCommand
 
 
