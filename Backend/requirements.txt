@@ -4,6 +4,7 @@ pandas
 Prophet
 requests
 psycopg2
+django_redis
 python-dotenv
 beautifulsoup4
 django-cors-headers
