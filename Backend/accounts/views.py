@@ -104,7 +104,7 @@ def Signup(request):
             }, status=status.HTTP_400_BAD_REQUEST
         )
 
-    user = RegisterSerializer.MeSerializer(data=request.data)
+    user = RegisterSerializer(data=request.data)
     user.is_valid(raise_exception=True)
     user.save()
 
