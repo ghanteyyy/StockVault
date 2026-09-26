@@ -10,16 +10,19 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from urllib.parse import unquote
-from utils import algorithm
-import Shares.views as share_views
 import Users.models as user_models
 import Shares.models as share_models
 import Users.serializers as user_serializers
 from django_ratelimit.decorators import ratelimit
 import Shares.serializers as share_serializers
 from Shares import scraper
-from . import captcha as Captcha
-from Shares import share_trading_calculator
+from utils import captcha as Captcha
+from utils import calculator
+from nepse import Nepse
+from utils.utils import nepali_comma
+
+
+nepse = Nepse()
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
@@ -27,12 +30,12 @@ def HomePage(request):
     """
     Displays the homepage of Stock Vault.
 
-    If the user is logged in, it redirects to the dashboard page.
+    If the user is logged in, it redirects to the portfolio page.
     Otherwise, it renders the index.html template with the page title.
     """
 
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect('portfolio')
 
     testonomials = user_models.Testonomials.objects.all()
     testonomials = user_serializers.TestonomialsSerializer(testonomials, many=True).data
@@ -61,16 +64,16 @@ def LoginPage(request):
     the email, and then authenticates the user. If the user is
     authenticated, it logs the user in and redirects them to the page
     specified by the 'next' parameter in the request, or to the
-    dashboard page if no 'next' parameter is provided.
+    portfolio page if no 'next' parameter is provided.
 
     If the method is not POST, it renders the login template with
     the page title and the value of the 'next' parameter.
     """
 
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect('portfolio')
 
-    next_url = request.POST.get('next', request.GET.get('next', 'dashboard'))
+    next_url = request.POST.get('next', request.GET.get('next', 'portfolio'))
 
     if request.method.lower() == 'post':
         email = request.POST.get('email').strip()
@@ -121,7 +124,7 @@ def SignupPage(request):
     errors = []
 
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect('portfolio')
 
     if request.method == 'POST':
         email = request.POST.get('email').strip()
@@ -223,83 +226,6 @@ def Logout(request):
 
 @ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
-def Dashboard(request):
-    """
-    Provides a dashboard with a portfolio overview
-
-    This view displays a user's portfolio, including the total number
-    of stocks they own, the current value of their portfolio, and the
-    percentage change in the value of their portfolio over the last day.
-    It also displays the five most recent activities a user has performed.
-    """
-
-    total_stocks = 0
-    portfolio_data = []
-    portfolio_values = 0
-    overall_gain_loss = 0
-
-    NepseIndices = (share_models.NepseIndices.objects
-                    .using('stockmarketdata')
-                    .order_by('date')).values_list('date', 'index_value')
-    NepseIndices = json.dumps(list(NepseIndices), default=str)
-
-    share_holdings = share_models.Portfolios.objects.filter(user_id=request.user).order_by('company_id__name').distinct('company_id__name')
-
-    for share_holding in share_holdings:
-        company_name = share_holding.company_id.name
-
-        qs = (share_models.StockMarketData.objects
-            .using("stockmarketdata")
-            .filter(company_name=company_name)
-            .only("trade_date", "ltp", "pct_change", "open_price")
-            .order_by("-trade_date"))[:2]     # Getting first two latest data
-
-        if len(qs) < 2:
-            portfolio_data.append(
-                {
-                    'error': 'No market value yet.',
-                    'company_name': company_name,
-                }
-            )
-
-            continue
-
-        total_stocks += share_holding.number_of_shares
-
-        percentage_change = qs[1].pct_change
-        previous_closing_price = float(qs[1].ltp)
-        previous_opening_price = float(qs[0].open_price)
-        portfolio_values += round(share_holding.number_of_shares * previous_closing_price, 2)
-
-        portfolio_data.append(
-            {
-                'company_name': company_name,
-                'today_opening_price': previous_opening_price,
-                'today_closing_price': previous_closing_price,
-                'percentage_change': f"{percentage_change}%"
-            }
-        )
-
-        overall_gain_loss += float(percentage_change)
-
-    recent_activites = share_models.Transactions.objects.filter(user_id=request.user).order_by('-transaction_date')[:5]
-    recent_activites = share_serializers.TransactionsSerializer(recent_activites, many=True).data[:5]
-
-    context = {
-            'page_title': 'Dashboard | Stock Vault',
-            'portfolio_value': portfolio_values,
-            'nepse_indices': NepseIndices,
-            'total_stocks': total_stocks,
-            'portfolio_datasets': portfolio_data,
-            'recent_activities': recent_activites,
-            'overall_gain_loss': round(overall_gain_loss, 2),
-        }
-
-    return render(request, 'users/dashboard.html', context)
-
-
-@ratelimit(key='ip', rate='100/m', block=True)
-@login_required(login_url='login')
 def Portfolio(request):
     """
     Provides a portfolio page where users can see their current portfolio and add new shares
@@ -338,7 +264,7 @@ def Portfolio(request):
 
         if not errors:
             buy_type = request.POST.get('buy-type')
-            bought = share_trading_calculator.buy_shares_calculation(float(quantity), float(buying_rate), buy_type)
+            bought = calculator.buy_shares_calculation(float(quantity), float(buying_rate), buy_type)
 
             company_name = share_models.ListedCompanies.objects.get(name__iexact=company)
             portfolio = share_models.Portfolios.objects.filter(user_id=request.user, company_id=company_name)
@@ -362,64 +288,100 @@ def Portfolio(request):
     serialized_companies = share_serializers.CompaniesSerializer(companies, many=True).data
     companies = [company['name'] for company in serialized_companies]
 
-    share_holdings = share_models.Portfolios.objects.filter(user_id=request.user).order_by('-created_at')
-    share_holdings = share_serializers.PortfoliosSerializer(share_holdings, many=True).data
+    share_holdings = []
+
+    for portfolio in share_models.Portfolios.objects.filter(user_id=request.user).order_by('company_id__name'):
+        data = dict()
+        nepse_data = nepse.getCompanyDetails(portfolio.company_id.abbreviation)['securityDailyTradeDto']
+
+        data["company_id"] = portfolio.company_id.id
+        data['company_name'] = portfolio.company_id.name
+        data['company_sector'] = portfolio.company_id.sector
+        data['number_of_shares'] = portfolio.number_of_shares
+
+        if 'tail' not in data:
+            data['tail'] = dict()
+
+        data['tail']['previousClose'] = (nepali_comma(nepse_data['previousClose']), 'Previous Close')
+        data['tail']['lastTradedPrice'] = (nepali_comma(nepse_data['lastTradedPrice']), 'Last Traded Price')
+        data['tail']['openPrice'] = (nepali_comma(nepse_data['openPrice']), 'Open Price')
+        data['tail']['highPrice'] = (nepali_comma(nepse_data['highPrice']), 'High Price')
+        data['tail']['lowPrice'] = (nepali_comma(nepse_data['lowPrice']), 'Low Price')
+        data['tail']['closePrice'] = (nepali_comma(nepse_data['closePrice']), 'Close Price')
+        data['tail']['fiftyTwoWeekHigh'] = (nepali_comma(nepse_data['fiftyTwoWeekHigh']), '52 Week High')
+        data['tail']['fiftyTwoWeekLow'] = (nepali_comma(nepse_data['fiftyTwoWeekLow']), '52 Week Low')
+        data['tail']['percentchange'] = (nepali_comma(str(round(((float(nepse_data['lastTradedPrice']) - float(nepse_data['previousClose'])) / float(nepse_data['previousClose'])) * 100, 2))) + " %", 'Percent Change')
+
+        share_holdings.append(data)
+
+        total = 0
+        when_to_sell_key = ''
+        when_to_sell_value = ''
+        data['when_to_sell'] = dict()
+        other_costs = calculator.calculate_trade_charges(portfolio.total_cost)
+
+        for key, value in other_costs.items():
+            key = key.replace('_', ' ').upper()
+
+            when_to_sell_key += key + ', '
+            when_to_sell_value += str(value) + ', '
+
+            total -= float(value)
+
+        data['when_to_sell'][when_to_sell_key.strip(', ')] = when_to_sell_value.strip(', ')
+        total += round(float(nepse_data['lastTradedPrice']) * portfolio.number_of_shares, 2)
+
+        data['when_to_sell']['NUMBER OF SHARES'] = nepali_comma(str(portfolio.number_of_shares))
+        data['when_to_sell']['BOUGHT AT'] = nepali_comma(str(portfolio.total_cost))
+        data['when_to_sell']['SOLD AT'] = nepali_comma(str(round(float(nepse_data['lastTradedPrice']) * portfolio.number_of_shares, 2)))
+        data['when_to_sell']['CASH IN HAND'] = nepali_comma(str(total))
+        data['when_to_sell']['PROFIT / LOSS'] = nepali_comma(str(round(total - portfolio.total_cost, 2)))
+
+    recent_activites = share_models.Transactions.objects.filter(user_id=request.user).order_by('-transaction_date')[:5]
+    recent_activites = share_serializers.TransactionsSerializer(recent_activites, many=True).data[:5]
 
     context = {
             'page_title': 'Portfolio | Stock Vault',
             'companies': json.dumps(companies),
-            'share_holdings': share_holdings,
+            'portfolio_datasets': share_holdings,
+            'recent_activities': recent_activites,
             'errors': errors,
         }
 
     return render(request, 'users/portfolio.html', context)
 
 
+
 @ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
-def PortfolioGraph(request):
-    """
-    Render the timeline page showing a user's share holdings and recent activities for a specific company.
+def DeleteProtfolio(request):
+    try:
+        data = json.loads(request.body)
+        company_id = data.get("company_id")
 
-    The function retrieves the company name from the GET request,
-    fetches the user's share holdings and recent activities associated
-    with that company, and renders the 'timeline.html' template with
-    the appropriate context.
-    """
+        portfolio = share_models.Portfolios.objects.get(
+            company_id_id=company_id,
+            user_id=request.user,
+        )
 
-    company_name = request.GET.get('company_name', '').strip()
-    company_name = unquote(company_name)
+        portfolio.delete()
 
-    column_type = request.GET.get('column_type', 'ltp').strip()
-    column_type = unquote(column_type)
+        return JsonResponse({
+            "status": True,
+            "message": "Portfolio deleted successfully"
+        })
 
-    share_holdings = share_models.Portfolios.objects.filter(user_id=request.user, company_id__name__iexact=company_name)
-    share_holdings = share_serializers.PortfoliosSerializer(share_holdings, many=True).data
+    except share_models.Portfolios.DoesNotExist:
+        return JsonResponse({
+            "status": False,
+            "message": "Portfolio not found"
+        }, status=404)
 
-    histories = share_models.Transactions.objects.filter(user_id=request.user, company_id__name=company_name)
-    histories = share_serializers.TransactionsSerializer(histories, many=True).data
-
-    qs = (share_models.StockMarketData.objects
-        .using("stockmarketdata")
-        .filter(company_name=company_name)
-        .order_by("trade_date")
-        .values_list("trade_date", column_type))
-
-    graph_data = [float(v) for _, v in qs]
-    graph_labels = [d.strftime("%Y-%m-%d") for d, _ in qs]
-    graph_options = ['ltp', 'pct_change', 'high', 'low', 'open_price', 'qty', 'turnover']
-
-    context = {
-        'page_title': 'Portfolio | Stock Vault',
-        'share_holdings': share_holdings,
-        'histories': histories,
-        'page_title': f'{company_name} | Stock Vault',
-        'graph_labels': graph_labels,
-        'graph_data': graph_data,
-        'graph_options': graph_options,
-    }
-
-    return render(request, 'users/portfolio_graph.html', context)
+    except (json.JSONDecodeError, TypeError):
+        return JsonResponse({
+            "status": False,
+            "message": "Invalid request data"
+        }, status=400)
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
@@ -591,63 +553,6 @@ def TargetEdit(request):
             target.save()
 
         return redirect('target')
-
-
-@ratelimit(key='ip', rate='100/m', block=True)
-@login_required(login_url='login')
-def PredictPage(request):
-    nepse_indices = (share_models.NepseIndices.objects
-                    .using('stockmarketdata')
-                    .order_by('date')).values_list('date', 'index_value')
-    nepse_indices  = [(date.strftime('%Y-%m-%d'), float(index_value.replace(',', ''))) for date, index_value in nepse_indices]
-
-    nepse_predicted_indices = [(str(d[0]), float(d[1])) for d in nepse_indices]
-    nepse_predicted_indices = algorithm.predict(nepse_predicted_indices, 100)
-
-    companies = share_models.ListedCompanies.objects.all()
-    serialized_companies = share_serializers.CompaniesSerializer(companies, many=True).data
-    companies = [company['name'] for company in serialized_companies]
-
-    algorithm_options = ['Prophet', 'SMA', 'EMA', 'Linear']
-    graph_options = ['ltp', 'pct_change', 'high', 'low', 'open_price', 'qty', 'turnover']
-
-    context = {
-        'graph_options': graph_options,
-        'companies': json.dumps(companies),
-        "page_title": "Predict | StockVault",
-        'algorithm_options': algorithm_options,
-        "nepse_predicted_indices": nepse_predicted_indices,
-    }
-
-    return render(request, 'users/predict.html', context)
-
-
-@ratelimit(key='ip', rate='100/m', block=True)
-@login_required(login_url='login')
-def FetchCompanyPredictionData(request):
-    company_name = request.GET.get('company_name', '').strip()
-    company_name = unquote(company_name)
-
-    column_type = request.GET.get('column_type', 'ltp').strip()
-    column_type = unquote(column_type)
-
-    algorithm_to_implement = request.GET.get('algorithm_options', 'prophet').lower()
-    algorithm_to_implement = unquote(algorithm_to_implement)
-
-    if not share_models.ListedCompanies.objects.filter(name__iexact=company_name):
-        return JsonResponse({'status': False, 'message': 'Requested Company does not exist'})
-
-    qs = (share_models.StockMarketData.objects
-        .using('stockmarketdata')
-        .filter(company_name=company_name)
-        .order_by('trade_date')).values_list('trade_date', column_type)
-
-    qs  = [(date.strftime('%Y-%m-%d'), float(value.replace(',', ''))) for date, value in qs]
-
-    company_prediction_data = [(str(d[0]), float(d[1])) for d in qs]
-    company_prediction_data = json.dumps(algorithm.predict(company_prediction_data, 7, algorithm_to_implement))
-
-    return JsonResponse({'status': True, 'message': 'FAQ deleted successfully', 'data': company_prediction_data})
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
