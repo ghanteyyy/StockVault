@@ -26,7 +26,4 @@ urlpatterns = [
     path('admin/faq/add', views.AdminFaqAdd, name='admin-faq-add'),
     path('admin/faq/edit', views.AdminFaqEdit, name='admin-faq-edit'),
     path('admin/faq/delete', views.AdminFaqDelete, name='admin-faq-delete'),
-
-    path('admin/market/data', views.AdminMarketData, name='admin-market-data'),
-    path('api/stockmarketdata/', views.stockmarketdata_dt, name='stockmarketdata_dt'),
 ]
