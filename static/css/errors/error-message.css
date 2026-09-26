@@ -1,34 +1,100 @@
-.error-message{
-    width: 100%;
-    padding: 20px;
-    display: none;
-    font-size: 14px;
-    color: white;
-    font-weight: normal;
-    background: #b91c1c;
-}
-
+.error-message,
 #success-message,
 .success-message {
-    width: 100%;
-    padding: 20px;
     display: none;
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0 0 12px;
+    padding: 14px 16px;
+    font-family: inherit;
     font-size: 14px;
-    color: white;
-    border-radius: 6px;
-    font-weight: normal;
-    background: #16a34a;
-    transition: opacity 0.3s ease;
+    font-weight: 400;
+    line-height: 1.6;
+    text-align: start;
+    overflow-wrap: anywhere;
+
+    border: 1px solid;
+    border-inline-start-width: 4px;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 4%);
+
+    /* Keep text visible when existing JS changes display. */
+    opacity: 1;
+    transform: none;
 }
 
+/* Error */
+.error-message {
+    color: #991b1b;
+    background: #fef2f2;
+    border-color: #fecaca;
+    border-inline-start-color: #dc2626;
+}
+
+/* Success */
+#success-message,
+.success-message {
+    color: #166534;
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    border-inline-start-color: #16a34a;
+}
+
+/* Optional class-based visibility */
+.error-message.show,
+#success-message.show,
+.success-message.show {
+    display: block;
+}
+
+/* Optional heading inside the message */
+.error-message strong,
+#success-message strong,
+.success-message strong {
+    color: inherit;
+    font-weight: 600;
+}
+
+/* Prevent default paragraph margins from adding extra space */
+.error-message p,
+#success-message p,
+.success-message p {
+    margin: 0;
+}
+
+.error-message p + p,
+#success-message p + p,
+.success-message p + p {
+    margin-top: 6px;
+}
+
+/* Keep recovery/action links recognizable */
+.error-message a,
+#success-message a,
+.success-message a {
+    color: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.error-message a:focus-visible,
+#success-message a:focus-visible,
+.success-message a:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+    border-radius: 2px;
+}
 
 @media (max-width: 768px) {
-    .error-message{
-        width: 95%;
-        margin: auto;
+    .error-message,
+    #success-message,
+    .success-message {
+        padding: 12px 14px;
     }
 
-    .company-item{
-        margin: 0 10px;
+    .company-item {
+        margin-inline: 10px;
     }
 }
