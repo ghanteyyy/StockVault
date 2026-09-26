@@ -7,19 +7,16 @@
 <button class="hamburger" id="hamburger-btn">☰</button>
 
 <div class="sidebar">
-    <a class="logo" href="{% url 'dashboard' %}">
+    <a class="logo" href="{% url 'portfolio' %}">
         <img src="{% static 'images/icon.png' %}" alt="Stock Vault Logo" id="logo-image">
         <p id="logo-name">Stock Vault</p>
     </a>
     <div>
         <ul>
-            <li class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><a class="sidebar-links" href="{% url 'dashboard' %}">📊 Dashboard</a></li>
             <li class="{% if request.resolver_match.url_name == 'portfolio' or request.resolver_match.url_name == 'portfolio-graph' %}active{% endif %}"><a class='sidebar-links' href="{% url 'portfolio' %}">💹 Portfolio</a></li>
             <li class="{% if request.resolver_match.url_name == 'trade-calculator' %}active{% endif %}"><a class="sidebar-links" href="{% url 'trade-calculator' %}">🧮 Calculator</a></li>
             <li class="{% if request.resolver_match.url_name == 'wishlist' %}active{% endif %}"><a class='sidebar-links' href="{% url 'wishlist' %}">⭐ Wishlist</a></li>
             <li class="{% if request.resolver_match.url_name == 'target' %}active{% endif %}"><a class='sidebar-links' href="{% url 'target' %}">🎯 Target</a></li>
-            <li class="{% if request.resolver_match.url_name == 'predict' %}active{% endif %}"><a class='sidebar-links' href="{% url 'predict' %}">🔮 Predict</a></li>
-            <li class="{% if request.resolver_match.url_name == 'testonomials' %}active{% endif %}"><a class='sidebar-links' href="{% url 'testonomials' %}">💬 Testimonial</a></li>
             <li class="{% if request.resolver_match.url_name == 'settings' %}active{% endif %}"><a class='sidebar-links' href="{% url 'settings' %}">⚙️ Settings</a></li>
             <li><a class='sidebar-links' href="{% url 'logout' %}">🚪 Logout</a></li>
         </ul>
