@@ -35,3 +35,31 @@ def company_logo_path(instance, filename):
     new_file_name = f'{generate_uuid_hex()}.{extension}'
 
     return f'Company/{instance.name}/profile/{new_file_name}'
+
+
+def nepali_comma(number: str):
+    '''
+    Format a number with commas in the Nepali numbering system.
+    '''
+
+    sign = ''
+    group = []
+    number = str(number)
+    integer, dot, decimal = number.partition('.')
+
+    if integer.startswith(('+', '-')):
+        sign = integer[0]
+        integer = integer[1:]
+
+    group.append(integer[-3:])
+
+    integer = integer[:-3]
+
+    while integer:
+        group.append(integer[-2:])
+
+        integer = integer[:-2]
+
+    group.reverse()
+
+    return sign + ','.join(group) + (dot + decimal if dot else "")
