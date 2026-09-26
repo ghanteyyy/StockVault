@@ -16,29 +16,64 @@
             {% include 'errors/backend_error.html' %}
         </div>
 
-        <div class="card company-list">
-            {% for share_holding in share_holdings %}
-                <div class="company-item">
-                    <div>
-                        <a class="company-title" href="{% url 'portfolio-graph' %}?company_name={{share_holding.company_name|urlencode}}">{{ share_holding.company_name }}</a>
+        <div class="card">
+            {% if not portfolio_datasets %}
+                <p class="error-message" style="display: block;">The dataset is currently empty or incomplete.</p>
+            {% else %}
+                <div class="portfolio-list">
+                    {% for data in portfolio_datasets %}
+                        <div class="portfolio-item">
+                            <div class="portfolio-header">
+                                <span class="company-name">{{ data.company_name }}</span>
+                                <span class="company-sector">{{ data.company_sector }}</span>
 
-                        <a class="delete-btn" href="{% url 'portfolio' %}?portfolio_id={{share_holding.id}}&action=delete">
-                            <i class="fas fa-trash-alt"></i>
-                        </a>
-                    </div>
+                                <i class="fas fa-trash" data-company-id="{{data.company_id}}"></i>
+                            </div>
 
-                    <div class="company-details">
-                        <p>Share Quantity</p>
-                        <p class="quantity">{{ share_holding.number_of_shares }}</p>
-                    </div>
-                    <div class="company-details">
-                        <p>Total Cost</p>
-                        <p class="quantity">{{ share_holding.total_cost }}</p>
-                    </div>
+                            {% if data.error %}
+                                <p class="no-market-price">{{data.error}}</p>
+
+                            {% else %}
+                                <div class="portfolio-details">
+                                    {% for label, value in data.tail.items %}
+                                        {% if label == "percentchange" %}
+                                            <p class="portfolio-values">
+                                                <span class="strong">Change (%):</span>
+                                                <span class="{% if value.0|slice:':1' == '-' %}negative{% else %}positive{% endif %} values">
+                                                    {{ value.0 }}
+                                                </span>
+                                            </p>
+
+                                        {% else %}
+                                            <p class="portfolio-values">
+                                                <span class="strong">{{ value.1 }}</span>
+                                                <span class="values">{{ value.0 }}</span>
+                                            </p>
+                                        {% endif %}
+
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="when-to-sell">
+                                {% for label, value in data.when_to_sell.items %}
+                                    <p class="portfolio-values">
+                                        <span class="strong">{{ label }}</span>
+
+                                        {% if label == 'PROFIT / LOSS' %}
+                                            <span class="{% if value|slice:':1' == '-' %}negative{% else %}positive{% endif %} values">{{ value }}</span>
+                                        {% else %}
+                                            <span class="values">{{ value }}</span>
+                                        {% endif %}
+                                    </p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="error-message" style="display: block;">The dataset is currently empty or incomplete</p>
+                    {% endfor %}
                 </div>
-            {% empty %}
-                <p class="error-message" style="display: block;">The dataset is currently empty or incomplete</p>
-            {% endfor %}
+            {% endif %}
         </div>
     </div>
 {% endblock %}
