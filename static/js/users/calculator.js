@@ -1,11 +1,11 @@
-let active = null;
-submit = document.querySelector('.submit');
 const wrapper = document.querySelector('.wrapper');
-const choices = document.querySelectorAll('.choice');
-const actionInput = document.querySelector('.action');
-const input_wrapper = document.querySelector('.input-wrapper');
-const buy_wrapper = document.querySelector('.buy-input-wrapper');
-const sell_wrapper = document.querySelector('.sell-input-wrapper');
+const submit_button = document.querySelector('#submit');
+const sell_submit = document.querySelector('#sell-submit');
+const output = document.querySelector('#output');
+const transaction_type = document.querySelector('#transaction-type');
+const CGT = document.querySelector('.CGT');
+
+const error = document.querySelector('.error-message');
 
 const charges = {
     broker: {
@@ -21,61 +21,11 @@ const charges = {
     sebonFeeRate: 0.00015,
     dpCharge: 25,
     capitalGainsTax: {
-        "Less than a year (7.5%)": 0.075,
-        "More than a year (5%)": 0.05,
+        "365 days or less (5%)": 0.05,
+        "365 days or more (3.75%)": 0.0375,
         "Institutional (10%)": 0.10,
-    }
+    },
 };
-
-
-choices.forEach(choice => {
-    choice.addEventListener('click', () => {
-        if (active === choice) {
-            choices.forEach(c => c.style.flex = '1');
-            active = null;
-            actionInput.value = '';
-
-            wrapper.style.display = 'none';
-            submit.style.display = 'none';
-            document.querySelector('.output-wrapper').replaceChildren();
-        }
-        else {
-            choices.forEach(c => c.style.flex = c === choice ? '4' : '1');
-            active = choice;
-
-            actionInput.value = choice.classList.contains('buy') ? 'buy' : 'sell';
-
-            wrapper.style.display = 'flex';
-            submit.style.display = 'block';
-
-            if(actionInput.value == 'buy'){
-                sell_wrapper.style.display = 'none';
-                buy_wrapper.style.display = 'flex';
-
-                submit.classList.remove('sell-submit');
-            }
-            else{
-                submit.classList.add('sell-submit');
-
-                buy_wrapper.style.display = 'none';
-                sell_wrapper.style.display = 'flex';
-            }
-        }
-    });
-});
-
-
-
-submit.addEventListener("click", () => {
-    if(actionInput.value == "buy"){
-        buy_share();
-    }
-
-    else if(actionInput.value == "sell"){
-        sell_share();
-    }
-});
-
 
 function formatPrice(num) {
     const rounded = parseFloat(num.toFixed(2));
@@ -86,6 +36,23 @@ function formatPrice(num) {
     });
 }
 
+transaction_type.addEventListener('change', function() {
+    const display = this.value === 'sell' ? 'flex' : 'none';
+
+    selling_price_wrapper.style.display = display;
+    CGT.style.display = display;
+
+});
+
+submit_button.addEventListener('click', function() {
+    if(transaction_type.value === 'buy'){
+        buy_share();
+    }
+
+    else{
+        sell_share();
+    }
+});
 
 function buy_shares_calculation(share_quantity, price_per_share){
     total_purchase_amount = share_quantity * price_per_share;
@@ -171,11 +138,9 @@ function buy_share() {
     number_regex = /^-?\d+$/;
     float_regex = /^-?\d+(\.\d+)?$/;
 
-    const error = document.querySelector('.error-message');
-
-    const shareQuantity = document.querySelector('#share_quantity').value;
-    const sharePrice = document.querySelector('#share_price').value;
-    const buy_type = document.querySelector('input[name="buy_type"]:checked')?.value || null;
+    const sharePrice = document.querySelector('#purchase-price').value;
+    const shareQuantity = document.querySelector('#share-quantity').value;
+    const buy_type = document.querySelector('input[name="buy-type"]:checked')?.value || null;
 
     if(!number_regex.test(shareQuantity) || !float_regex.test(sharePrice || !buy_type)){
         error.style.display = 'block';
@@ -188,14 +153,16 @@ function buy_share() {
     }
 
     calculated_values = (buy_type == 'ipo') ? shareQuantity * sharePrice : buy_shares_calculation(shareQuantity, sharePrice);
-    document.querySelector('.output-wrapper').replaceChildren();
+    console.log(calculated_values);
+
+    output.replaceChildren();
 
     if(buy_type == 'secondary'){
         makeOutputInnerDivs("Total Purchase Amount", calculated_values.total_purchase_amount);
         makeOutputInnerDivs(`Broker Commission (${brokerage_rate * 100}%)`, calculated_values.bokerage_commission);
         makeOutputInnerDivs(`SEBON Commission (${charges.sebonFeeRate * 100}%)`, calculated_values.sebon_commission);
         makeOutputInnerDivs("DP Charge", calculated_values.dp_charge);
-        makeOutputInnerDivs("Total Payable Amount", calculated_values.total_amount, '.output-wrapper', 'answer-div');
+        makeOutputInnerDivs("Total Purchased Amount", calculated_values.total_amount, innerClassName='answer-div');
     }
 
     else{
@@ -208,16 +175,13 @@ function sell_share() {
     number_regex = /^-?\d+$/;
     float_regex = /^-?\d+(\.\d+)?$/;
 
-    const error = document.getElementsByClassName('error-message')[1];
-
-    buy_type = document.querySelector('input[name="buy_type"]:checked')?.value || null;
-    share_quantity = document.querySelector('#share_quantity_sell').value;
-    purchase_value = document.querySelector('#purchase_price').value;
-    selling_price = document.querySelector('#selling_price').value;
+    buy_type = document.querySelector('input[name="buy-type"]:checked')?.value || null;
+    share_quantity = document.querySelector('#share-quantity').value;
+    purchase_value = document.querySelector('#purchase-price').value;
+    selling_price = document.querySelector('#selling-price').value;
     cgt_value = document.getElementById('CGT').value;
 
     if(!buy_type || !number_regex.test(share_quantity) || !float_regex.test(purchase_value) || !float_regex.test(selling_price || !cgt_value)){
-        console.log(error);
         error.style.display = 'block';
         remove_error_message(error);
         return;
@@ -227,16 +191,17 @@ function sell_share() {
         error.style.display = 'none';
     }
 
-    calculated_values = sell_share_calculation(buy_type, share_quantity, purchase_value, selling_price, cgt_value);
+    output.replaceChildren();
 
-    document.querySelector('.output-wrapper').replaceChildren();
+    calculated_values = sell_share_calculation(buy_type, share_quantity, purchase_value, selling_price, cgt_value);
+    output.replaceChildren();
 
     if(buy_type == 'secondary'){
         makeOutputInnerDivs(`Total Purchased Amount`, calculated_values.secondary.total_purchased_amount);
         makeOutputInnerDivs(`Broker Commission (${brokerage_rate * 100}%)`, calculated_values.secondary.brokerage_commission);
         makeOutputInnerDivs(`SEBON Commission (${charges.sebonFeeRate * 100}%)`, calculated_values.secondary.sebon_commission);
         makeOutputInnerDivs("DP Charge", formatPrice(dp_charge));
-        makeOutputInnerDivs("Total Payable Amount", calculated_values.secondary.total_payable_amount, '.output-wrapper', 'answer-div');
+        makeOutputInnerDivs("Total Purchased Amount", calculated_values.secondary.total_payable_amount, innerClassName='answer-div');
     }
 
     makeOutputInnerDivs("Total Selling Amount", calculated_values.total_selling_amount);
@@ -245,12 +210,12 @@ function sell_share() {
     makeOutputInnerDivs("DP Charge", calculated_values.dp_charge);
     makeOutputInnerDivs(`Capital Gain Tax (${charges.capitalGainsTax[cgt_value] * 100}%)`, calculated_values.capital_gain_tax);
     makeOutputInnerDivs("Final Receivable Amount", calculated_values.final_receivable_amount);
-    makeOutputInnerDivs("Profit Amount", calculated_values.profit_amount, '.output-wrapper', 'answer-div');
+    makeOutputInnerDivs("Profit Amount", calculated_values.profit_amount, innerClassName='answer-div');
 }
 
 
-function makeOutputInnerDivs(text1 = '', text2 = '', wrapperSelector = '.output-wrapper', innerClassName='') {
-    const wrapper = document.querySelector(wrapperSelector);
+function makeOutputInnerDivs(text1 = '', text2 = '', innerClassName='') {
+    const wrapper = output;
 
     if (!wrapper) {
         return null;
