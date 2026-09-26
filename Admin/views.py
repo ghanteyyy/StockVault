@@ -6,13 +6,10 @@ from django.shortcuts import render
 import Users.models as user_models
 import Shares.models as share_models
 from django.http import JsonResponse
-from django.templatetags.static import static
 from django.core.paginator import Paginator
 import Users.serializers as users_serializers
 import Shares.serializers as shares_serializers
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
-from django.utils.html import escape
 
 
 def paginator(request, items, items_per_page=100):
@@ -405,70 +402,3 @@ def AdminFaqDelete(request):
     company.delete()
 
     return JsonResponse({'status': True, 'message': 'FAQ deleted successfully'})
-
-
-@login_required(login_url='login')
-def AdminMarketData(request):
-    targets = user_models.Targets.objects.all()
-    targets = users_serializers.TargetsSerializer(targets, many=True).data
-
-    table_heads = ['Company', 'Sector', 'LTP', '% Change', 'Open Price', 'Low', 'High', 'Qty', 'Turnover', 'Trade Date']
-
-    context = {
-        'page_title': 'Market Data',
-        'table_heads': table_heads,
-    }
-
-    return render(request, 'admin/market_data.html', context)
-
-
-DT_COLUMNS = [
-    "company_name", "sector", "ltp", "pct_change", "open_price",
-    "low", "high", "qty", "turnover", "trade_date"
-]
-
-
-@login_required(login_url='login')
-def stockmarketdata_dt(request):
-    draw   = int(request.GET.get("draw", 1))
-    start  = int(request.GET.get("start", 0))
-    length = int(request.GET.get("length", 25))
-    search = request.GET.get("search[value]", "")
-
-    qs = (share_models.StockMarketData.objects
-          .using("stockmarketdata")
-          .order_by("trade_date", "company_name"))
-
-    total = qs.count()
-
-    if search:
-        qs = qs.filter(
-            Q(company_name__icontains=search) |
-            Q(sector__icontains=search) |
-            Q(ltp__icontains=search)
-        )
-
-    filtered = qs.count()
-    page = qs.values(*DT_COLUMNS)[start:start+length]
-
-    data = [{
-        "sn": i+start+1,
-        "company_name": escape(r["company_name"] or ""),
-        "company_abbreviation": escape(r["company_name"].split('(')[0] or ""),
-        "sector": escape(r["sector"] or ""),
-        "ltp": r["ltp"] or "",
-        "pct_change": r["pct_change"] or "",
-        "open_price": r["open_price"] or "",
-        "low": r["low"] or "",
-        "high": r["high"] or "",
-        "qty": r["qty"] or "",
-        "turnover": r["turnover"] or "",
-        "trade_date": r["trade_date"].strftime("%b %d, %Y") if r["trade_date"] else ""
-    } for i, r in enumerate(page)]
-
-    return JsonResponse({
-        "draw": draw,
-        "recordsTotal": total,
-        "recordsFiltered": filtered,
-        "data": data
-    })
