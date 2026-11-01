@@ -12,6 +12,7 @@ urlpatterns = [
     path('portfolio/', views.Portfolio, name='portfolio'),
     path('wishlist/', views.WishListPage, name='wishlist'),
     path('settings/', views.SettingsPage, name='settings'),
+    path('dashboard/', views.DashboardPage, name='dashboard'),
     path('target/edit', views.TargetEdit, name='edit-target'),
     path('testonomials/', views.TestonomialsPage, name='testonomials'),
     path('portfolio/delete/', views.DeleteProtfolio, name='portfolio-delete'),

@@ -1,18 +1,24 @@
 import re
 import json
-import random
 import datetime as dt
-from django.contrib import messages
+import math
+import warnings
+from io import BytesIO
+from PIL import Image, UnidentifiedImageError
+from decimal import Decimal
+from django.db.models import F, Sum, DecimalField
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
-from urllib.parse import unquote
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth.password_validation import validate_password
+from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 import Users.models as user_models
 import Shares.models as share_models
-import Users.serializers as user_serializers
 from django_ratelimit.decorators import ratelimit
 import Shares.serializers as share_serializers
 from Shares import scraper
@@ -27,28 +33,18 @@ nepse = Nepse()
 
 @ratelimit(key='ip', rate='100/m', block=True)
 def HomePage(request):
-    """
+    '''
     Displays the homepage of Stock Vault.
 
     If the user is logged in, it redirects to the portfolio page.
     Otherwise, it renders the index.html template with the page title.
-    """
+    '''
 
     if request.user.is_authenticated:
         return redirect('portfolio')
 
-    testonomials = user_models.Testonomials.objects.all()
-    testonomials = user_serializers.TestonomialsSerializer(testonomials, many=True).data
-    random.shuffle(testonomials)
-
-    faqs = share_models.FAQs.objects.all()
-    faqs = share_serializers.FaqSerializers(faqs, many=True).data
-    random.shuffle(faqs)
-
     context = {
-        'page_title': 'Stock Vault – Smarter Stock Tracking',
-        'testonomials': testonomials[:2],
-        'faqs': faqs[:5]
+        'page_title': 'StockVault | Your investments, in focus',
     }
 
     return render(request, 'users/index.html', context)
@@ -56,51 +52,55 @@ def HomePage(request):
 
 @ratelimit(key='ip', rate='100/m', block=True)
 def LoginPage(request):
-    """
-    Handles login functionality for the website.
-
-    The function first looks for a POST request. If the method is POST,
-    it extracts the email and password from the request, validates
-    the email, and then authenticates the user. If the user is
-    authenticated, it logs the user in and redirects them to the page
-    specified by the 'next' parameter in the request, or to the
-    portfolio page if no 'next' parameter is provided.
-
-    If the method is not POST, it renders the login template with
-    the page title and the value of the 'next' parameter.
-    """
+    '''
+    Sign in, keeping safe form values available after a failed attempt.
+    '''
 
     if request.user.is_authenticated:
         return redirect('portfolio')
 
-    next_url = request.POST.get('next', request.GET.get('next', 'portfolio'))
+    next_url = request.POST.get('next', request.GET.get('next', ''))
+
+    if not next_url or not url_has_allowed_host_and_scheme(
+        next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        next_url = reverse('portfolio')
+
+    errors = []
+    email = ''
 
     if request.method.lower() == 'post':
-        email = request.POST.get('email').strip()
-        password = request.POST.get('password').strip()
+        email = (request.POST.get('email') or '').strip()
+        password = request.POST.get('password') or ''
 
         try:
             validate_email(email)
 
-            user = authenticate(request, email=email, password=password)
+            if not password:
+                errors.append('Enter your password.')
 
-            if not user:
-                messages.error(request, 'Credentials not matched')
-                return redirect('login')
+            else:
+                user = authenticate(request, email=email, password=password)
 
-            login(request, user)
-            return redirect(next_url)
+                if user:
+                    login(request, user)
+
+                    return redirect(next_url)
+
+                errors.append('The email or password is incorrect. Please try again.')
 
         except ValidationError:
-            messages.error(request, 'Invalid email address')
+            errors.append('Enter a valid email address.')
 
     new_captcha = Captcha.GenerateCaptcha().content
     new_captcha = json.loads(new_captcha)
 
     context = {
         **new_captcha,
+        'errors': errors,
+        'form_values': {'email': email},
         'next': next_url,
-        'page_title': 'Stock Vault | Login',
+        'page_title': 'Sign in | StockVault',
     }
 
     return render(request, 'auth/login.html', context)
@@ -108,51 +108,44 @@ def LoginPage(request):
 
 @ratelimit(key='ip', rate='100/m', block=True)
 def SignupPage(request):
-    """
-    Handles signup functionality for the website.
-
-    The function first looks for a POST request. If the method is POST,
-    it extracts the email, gender, name, password, profile picture, and
-    date of birth from the request, validates the email, gender, name,
-    password, profile picture, and date of birth, and then creates a
-    new user if there are no errors.
-
-    If the method is not POST, it renders the signup template with
-    the page title and the list of errors.
-    """
+    '''
+    Create an account with validation matching the registration form.
+    '''
 
     errors = []
+    form_values = {'name': '', 'email': '', 'dob': '', 'gender': ''}
 
     if request.user.is_authenticated:
         return redirect('portfolio')
 
     if request.method == 'POST':
-        email = request.POST.get('email').strip()
-        gender = request.POST.get('gender').strip()
-        name = request.POST.get('fullName').strip()
-        password = request.POST.get('password').strip()
-        profile = request.FILES['profilePicture']
-        dob = request.POST.get('dob').strip()
+        email = (request.POST.get('email') or '').strip()
+        gender = (request.POST.get('gender') or '').strip()
+        name = (request.POST.get('fullName') or '').strip()
+        password = request.POST.get('password') or ''
+        profile = request.FILES.get('profilePicture')
+        dob = (request.POST.get('dob') or '').strip()
+        form_values = {'name': name, 'email': email, 'dob': dob, 'gender': gender}
 
         # Validating email
         try:
             validate_email(email)
 
             if user_models.CustomUser.objects.filter(email=email).exists():
-                errors.append('Email already exists')
+                errors.append('An account with this email already exists. Sign in instead.')
 
         except ValidationError:
-            errors.append('Invalid email address')
+            errors.append('Enter a valid email address.')
 
         # Validating genders
         valid_genders = ['male', 'female', 'others']
 
         if gender not in valid_genders:
-            errors.append('Invalid gender selected')
+            errors.append('Choose a gender from the available options.')
 
         # Validating name
-        if not name and len(name) < 3:
-            errors.append('Name must be at least 3 characters long')
+        if not 3 <= len(name) <= 100:
+            errors.append('Enter a full name between 3 and 100 characters.')
 
         # Validating password
         password_regex = r'^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*[0-9]).{8,}$'
@@ -162,38 +155,35 @@ def SignupPage(request):
 
         # Validating profile picture
         if not profile:
-            errors.append('Profile picture is required')
+            errors.append('Choose a profile picture.')
 
-        if profile.size == 0:
-            errors.append('Profile picture cannot be empty')
+        else:
+            if profile.size == 0:
+                errors.append('Profile picture cannot be empty.')
 
-        profile_size = 5 * 1024 * 1024  # 5MB limit
+            if profile.size > 5 * 1024 * 1024:
+                errors.append('Choose a profile picture no larger than 5 MB.')
 
-        if profile.size > profile_size:
-            errors.append('Profile picture size must be less than 5MB')
-
-        if not profile.name.lower().endswith(('.jpg', '.jpeg', '.png')):
-            errors.append('Only JPG/PNG images are allowed.')
+            if not profile.name.lower().endswith(('.jpg', '.jpeg', '.png')):
+                errors.append('Only JPG/PNG images are allowed.')
 
         # Validating date of birth
         try:
-            dob_obj = dt.datetime.strptime(dob, '%Y-%m-%d')
+            dob_obj = dt.datetime.strptime(dob, '%Y-%m-%d').date()
+            today = timezone.localdate()
+            age = today.year - dob_obj.year - ((today.month, today.day) < (dob_obj.month, dob_obj.day))
 
-            today = dt.datetime.today()
-
-            if ((today - dob_obj).days) // 365 < 13:
+            if age < 13:
                 errors.append('You must be at least 13 years old to register.')
 
-        except (ValueError, TypeError) as e:
-            errors.append('Invalid date of birth format. Use YYYY/MM/DD.')
+            elif age > 110:
+                errors.append('Enter a date of birth within the last 110 years.')
+
+        except (ValueError, TypeError):
+            errors.append('Enter a valid date of birth.')
 
         if not errors:
-            new_user = user_models.CustomUser(
-                email=email,
-                name=name,
-                gender=gender,
-                date_of_birth=dob_obj.date()
-            )
+            new_user = user_models.CustomUser(email=email, name=name, gender=gender, date_of_birth=dob_obj)
 
             new_user.profile_image = profile
             new_user.set_password(password)
@@ -207,7 +197,8 @@ def SignupPage(request):
     context = {
         **new_captcha,
         'errors': errors,
-        'page_title': 'Stock Vault | Register',
+        'form_values': form_values,
+        'page_title': 'Create an account | StockVault',
     }
 
     return render(request, 'auth/signup.html', context)
@@ -215,9 +206,9 @@ def SignupPage(request):
 
 @ratelimit(key='ip', rate='100/m', block=True)
 def Logout(request):
-    """
+    '''
     Logs out the current user and redirects them to the homepage
-    """
+    '''
 
     logout(request)
 
@@ -226,14 +217,52 @@ def Logout(request):
 
 @ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
+def DashboardPage(request):
+    total_investment = share_models.Portfolios.objects.filter(user_id=request.user).aggregate(
+        total_amount = Sum(F("total_cost"), output_field=DecimalField(max_digits=20, decimal_places=2)))['total_amount'] or 0
+
+    data_per_company_sector = {}
+    total_portfolio_value = Decimal('0.00')
+    price_cache = {}
+
+    portfolios = (share_models.Portfolios.objects.filter(user_id=request.user).select_related('company_id'))
+
+    for portfolio in portfolios:
+        company = portfolio.company_id
+        sector = company.sector
+
+        data_per_company_sector[sector] = (data_per_company_sector.get(sector, 0) + 1)
+        symbol = company.abbreviation
+
+        if symbol not in price_cache:
+            company_details = nepse.getCompanyDetails(symbol)
+            price_cache[symbol] = Decimal(str(company_details['securityDailyTradeDto']['lastTradedPrice']))
+
+        total_portfolio_value += (price_cache[symbol] * portfolio.number_of_shares)
+
+    total_portfolio_value = round(total_portfolio_value, 2)
+    percentage_change = round(((total_portfolio_value - total_investment) / total_investment) * 100, 2) if total_investment else 0
+
+    context = {
+        'page_title': 'Dashboard | Stock Vault',
+        'total_investment': str(total_investment),
+        'total_sales': str(total_portfolio_value),
+        'percentage_change': percentage_change,
+        'data_per_company_sector': data_per_company_sector
+    }
+    return render(request, 'users/dashboard.html', context)
+
+
+@ratelimit(key='ip', rate='100/m', block=True)
+@login_required(login_url='login')
 def Portfolio(request):
-    """
+    '''
     Provides a portfolio page where users can see their current portfolio and add new shares
 
     This view displays a user's portfolio, including the shares they own,
     the number of shares, and the total value of their portfolio. It also
     displays an input form where users can add new shares to their portfolio.
-    """
+    '''
 
     errors = []
 
@@ -351,7 +380,6 @@ def Portfolio(request):
     return render(request, 'users/portfolio.html', context)
 
 
-
 @ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
 def DeleteProtfolio(request):
@@ -359,11 +387,7 @@ def DeleteProtfolio(request):
         data = json.loads(request.body)
         company_id = data.get("company_id")
 
-        portfolio = share_models.Portfolios.objects.get(
-            company_id_id=company_id,
-            user_id=request.user,
-        )
-
+        portfolio = share_models.Portfolios.objects.get(company_id_id=company_id, user_id=request.user,)
         portfolio.delete()
 
         return JsonResponse({
@@ -384,175 +408,272 @@ def DeleteProtfolio(request):
         }, status=400)
 
 
+def _wishlist_context(request, errors=None):
+    saved_companies = []
+    saved_company_ids = set()
+    saved_items = share_models.WishLists.objects.filter(user_id=request.user).select_related('company_id').order_by('company_id__name', 'id')
+
+    for item in saved_items:
+        company = item.company_id
+        saved_company_ids.add(company.id)
+
+        saved_companies.append({
+            'id': item.id,
+            'company_id': company.id,
+            'company_name': company.name,
+            'abbreviation': company.abbreviation,
+            'sector': (company.sector or '').strip(),
+        })
+
+    available = share_models.ListedCompanies.objects.exclude(id__in=saved_company_ids).order_by('name')
+
+    wishlist_companies = [{
+        'name': company.name,
+        'abbreviation': company.abbreviation,
+        'sector': (company.sector or '').strip(),
+    } for company in available]
+
+    notices = {
+        'added': 'The company has been added to your wishlist.',
+        'removed': 'The company has been removed from your wishlist.',
+    }
+
+    return {
+        'page_title': 'Wishlist | Stock Vault',
+        'saved_companies': saved_companies,
+        'wishlist_companies': wishlist_companies,
+        'companies': json.dumps([company['name'] for company in wishlist_companies]),
+        'saved_company_count': len(saved_companies),
+        'available_company_count': len(wishlist_companies),
+        'wishlist_sector_count': len({company['sector'] for company in saved_companies if company['sector']}),
+        'wishlist_notice': notices.get(request.GET.get('notice'), ''),
+        'errors': errors or [],
+    }
+
+
 @ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
 def WishListPage(request):
-    """
-    Render the wishlist page showing a user's wishlist.
-
-    The function retrieves the wishlist items associated with the user,
-    fetches the list of companies that are not in the user's wishlist, and
-    renders the 'wishlist.html' template with the appropriate context.
-    """
+    '''
+    Manage only the current user's saved companies through explicit posts
+    '''
 
     errors = []
 
-    if request.method.lower() == 'get':
-        action = request.GET.get('action', '')
+    if request.method == 'POST':
+        action = (request.POST.get('action') or 'add').strip()
 
         if action == 'delete':
-            company_id = request.GET.get('company_id', '')
+            wishlist_id = (request.POST.get('wishlist_id') or '').strip()
 
-            wishlist = share_models.WishLists.objects.filter(id__iexact=company_id, user_id=request.user)
-            wishlist.delete()
+            item = share_models.WishLists.objects.filter(id=wishlist_id, user_id=request.user).first() if wishlist_id else None
 
-            return redirect('wishlist')
+            if item is None:
+                errors.append('This saved company could not be found. Please refresh and try again.')
 
-    if request.method.lower() == 'post':
-        company_name = request.POST.get('company').strip()
-        company = share_models.ListedCompanies.objects.get(name=company_name)
+            else:
+                item.delete()
+                return redirect(f"{reverse('wishlist')}?notice=removed")
 
-        if share_models.WishLists.objects.filter(company_id=company).exists():
-            errors.append(f'A wishlist with this name ({company_name}) already exists.')
-            messages.error(request, f'A wishlist with this name ({company_name}) already exists.')
+        elif action == 'add':
+            company_name = (request.POST.get('company') or '').strip()
+            company = share_models.ListedCompanies.objects.filter(name__iexact=company_name).first() if company_name else None
 
+            if company is None:
+                errors.append('Choose a company from the current list.')
+
+            elif share_models.WishLists.objects.filter(user_id=request.user, company_id=company).exists():
+                errors.append(f'{company.name} is already in your wishlist.')
+
+            else:
+                share_models.WishLists.objects.create(user_id=request.user, company_id=company)
+
+                return redirect(f"{reverse('wishlist')}?notice=added")
         else:
-            share_models.WishLists.objects.create(user_id=request.user, company_id=company)
+            errors.append('Choose a wishlist action and try again.')
 
-    user_companies = share_models.WishLists.objects.filter(user_id=request.user).values_list('company_id', flat=True)
-    companies = share_models.ListedCompanies.objects.exclude(id__in=user_companies)
+    return render(request, 'users/wishlist.html', _wishlist_context(request, errors))
 
-    serialized_companies = share_serializers.CompaniesSerializer(companies, many=True).data
-    companies = [company['name'] for company in serialized_companies]
 
-    saved_companies = share_models.WishLists.objects.filter(user_id=request.user)
-    saved_companies = share_serializers.WishlistsSerializer(saved_companies, many=True).data
+def _target_range(low_value, high_value):
+    '''
+    Validate a complete, finite and positive target range before saving
+    '''
 
-    context = {
-        'page_title': 'Wishlist | Stock Vault',
-        'saved_companies': saved_companies,
-        'companies': json.dumps(companies),
-        'errors': errors,
+    try:
+        low_target, high_target = float(low_value), float(high_value)
+
+    except (TypeError, ValueError, OverflowError):
+        return None, 'Enter valid low and high target prices.'
+
+    if not all(math.isfinite(value) and value > 0 for value in (low_target, high_target)):
+        return None, 'Target prices must be positive, finite numbers.'
+
+    if low_target >= high_target:
+        return None, 'Low target must be less than high target.'
+
+    return (low_target, high_target), None
+
+
+def _target_page_context(request, errors=None):
+    targets = []
+    market_prices = {}
+
+    companies = list(share_models.ListedCompanies.objects.values_list('name', flat=True))
+    holdings = user_models.Targets.objects.filter(user_id=request.user, is_deleted=False).select_related('company_id')
+
+    for holding in holdings:
+        company = holding.company_id
+        abbreviation = company.abbreviation
+
+        if abbreviation not in market_prices:
+            try:
+                market_data = scraper.get_market_data(abbreviation)
+                market_price = float(str(market_data['market_price']).replace(',', '').strip())
+                market_prices[abbreviation] = market_price if math.isfinite(market_price) and market_price >= 0 else None
+
+            except Exception:  # One unavailable quote should not hide the rest of the watchlist.
+                market_prices[abbreviation] = None
+
+        market_price = market_prices[abbreviation]
+        price_range, _ = _target_range(holding.low_target, holding.high_target)
+        in_range = market_price is not None and price_range is not None and price_range[0] <= market_price <= price_range[1]
+
+        targets.append({
+            'id': holding.id,
+            'user_email': getattr(request.user, 'email', ''),
+            'company_name': company.name,
+            'company_id': company.id,
+            'abbreviation': abbreviation,
+            'low_target': holding.low_target,
+            'high_target': holding.high_target,
+            'target_type': holding.target_type,
+            'created_date': holding.created_at.strftime('%b %d, %Y'),
+            'market_price': market_price,
+            'show_buy_sell': in_range,
+            'market_error': 'Market price is currently unavailable.' if market_price is None else '',
+        })
+
+    notices = {
+        'created': 'Your price target has been added.',
+        'updated': 'Your price target has been updated.',
+        'deleted': 'Your price target has been removed.',
     }
 
-    return render(request, 'users/wishlist.html', context)
+    return {
+        'errors': errors or [],
+        'targets': targets,
+        'page_title': 'Target | Stock Vault',
+        'companies': json.dumps(companies),
+        'target_companies': companies,
+        'target_notice': notices.get(request.GET.get('notice'), ''),
+    }
+
+
+def _target_redirect(notice):
+    return redirect(f"{reverse('target')}?notice={notice}")
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
 def TargetPage(request):
-    """
-    Handles the logic for adding a target to buy/sell a share
-    at a specific price when it reaches a certain price.
-    """
+    '''
+    Display a user's targets and add a validated buy or sell price range
+    '''
 
     errors = []
 
-    if request.method.lower() == 'post':
-        company_name = request.POST.get('company').strip()
-        low_target = request.POST.get('low_target').strip()
-        high_target = request.POST.get('high_target').strip()
-        target_type = request.POST.get('target_type').strip()
+    if request.method == 'POST':
+        company_name = (request.POST.get('company') or '').strip()
+        target_type = (request.POST.get('target_type') or '').strip()
 
-        if not any([company_name, low_target, high_target, target_type]):
-            errors.append('All fields are required')
+        price_range, range_error = _target_range(request.POST.get('low_target'), request.POST.get('high_target'))
 
-        try:
-            float(low_target)
-            float(high_target)
+        if range_error:
+            errors.append(range_error)
 
-        except ValueError:
-            errors.append('Low and high targets must be valid numbers')
+        if target_type not in ('buy', 'sell'):
+            errors.append('Choose a buy or sell target.')
 
-        if float(low_target) >= float(high_target):
-            errors.append('Low target must be less than high target')
+        company = share_models.ListedCompanies.objects.filter(name__iexact=company_name).first() if company_name else None
 
-        if target_type not in ['buy', 'sell']:
-            errors.append('Invalid target type selected')
-
-        company = share_models.ListedCompanies.objects.get(name__iexact=company_name)
-
-        if user_models.Targets.objects.filter(user_id=request.user, company_id=company, target_type=target_type, is_deleted=False).exists():
-            errors.append(f'Target for {company_name} already exists')
+        if company is None:
+            errors.append('Choose a company from the current list.')
 
         if not errors:
-            user_models.Targets.objects.create(
-                user_id=request.user,
-                company_id=company,
-                low_target=float(low_target),
-                high_target=float(high_target),
-                target_type=target_type
-            )
+            if user_models.Targets.objects.filter(user_id=request.user, company_id=company, target_type=target_type, is_deleted=False).exists():
+                errors.append(f'A {target_type} target for {company.name} already exists.')
 
-    # Getting share names along with its abbreviation. Eg: Green Venture Limited (GVL)
-    companies = share_models.ListedCompanies.objects.all()
+            else:
+                user_models.Targets.objects.create(
+                    user_id=request.user, company_id=company,
+                    low_target=price_range[0], high_target=price_range[1],
+                    target_type=target_type
+                )
 
-    serialized_companies = share_serializers.CompaniesSerializer(companies, many=True).data
-    companies = [company['name'] for company in serialized_companies]
+                return _target_redirect('created')
 
-    targets = user_models.Targets.objects.filter(user_id=request.user, is_deleted=False)
-    targets = user_serializers.TargetsSerializer(targets, many=True).data
-
-    for target in targets:
-        market_data = scraper.get_market_data(target['abbreviation'])
-        market_price = float(market_data['market_price'])
-
-        low_target, high_target = target['low_target'], target['high_target']
-        show_buy_sell = True if low_target <= market_price <= high_target else False
-
-        target['market_price'] = market_price
-        target['show_buy_sell'] = show_buy_sell
-
-    context = {
-        'errors': errors,
-        'targets': targets,
-        'page_title': 'Target | Stock Vault',
-        'companies': json.dumps(companies),
-    }
-
-    return render(request, 'users/target.html', context)
+    return render(request, 'users/target.html', _target_page_context(request, errors))
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
 def TargetDelete(request, company):
-    """
-    Deletes a target for a specific company.
-    """
+    '''
+    Remove exactly one owned target; visiting a link never deletes data
+    '''
 
-    target = user_models.Targets.objects.filter(user_id=request.user, company_id=company, is_deleted=False).first()
+    if request.method != 'POST':
+        return redirect('target')
 
-    if target:
-        target.is_deleted = True
-        target.save()
+    target_id = (request.POST.get('target_id') or '').strip()
 
-    return redirect('target')
+    target = user_models.Targets.objects.filter(
+        id=target_id, user_id=request.user, company_id=company, is_deleted=False
+    ).first() if target_id else None
+
+    if target is None:
+        return render(request, 'users/target.html', _target_page_context(
+            request, ['This target could not be found. Please refresh and try again.']
+        ))
+
+    target.is_deleted = True
+    target.save(update_fields=['is_deleted'])
+
+    return _target_redirect('deleted')
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
 def TargetEdit(request):
-    """
-    Handles the logic for editing a target for a specific company
-    """
+    '''
+    Update the requested owned target without mixing buy and sell records
+    '''
 
-    if request.method.lower() == 'post':
-        company_abbr = request.POST.get('company_abbr').strip()
-        low_target = request.POST.get('edit_low_target').strip()
-        high_target = request.POST.get('edit_high_target').strip()
-
-        target = user_models.Targets.objects.filter(user_id=request.user, company_id__abbreviation__iexact=company_abbr, is_deleted=False).first()
-
-        if target:
-            low_target = float(low_target)
-            high_target = float(high_target)
-
-            target.low_target = low_target
-            target.high_target = high_target
-
-            target.save()
-
+    if request.method != 'POST':
         return redirect('target')
+
+    target_id = (request.POST.get('target_id') or '').strip()
+    company_abbr = (request.POST.get('company_abbr') or '').strip()
+
+    target = user_models.Targets.objects.filter(
+        id=target_id, user_id=request.user, is_deleted=False
+    ).select_related('company_id').first() if target_id else None
+
+    if target is None or (company_abbr and company_abbr.casefold() != target.company_id.abbreviation.casefold()):
+        return render(request, 'users/target.html', _target_page_context(
+            request, ['This target could not be found. Please refresh and try again.']
+        ))
+
+    price_range, range_error = _target_range(request.POST.get('edit_low_target'), request.POST.get('edit_high_target'))
+
+    if range_error:
+        return render(request, 'users/target.html', _target_page_context(request, [range_error]))
+
+    target.low_target, target.high_target = price_range
+    target.save(update_fields=['low_target', 'high_target'])
+
+    return _target_redirect('updated')
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
@@ -590,105 +711,209 @@ def TestonomialsPage(request):
     return render(request, 'users/testonomials.html', context)
 
 
+def _settings_image_url(user):
+    '''
+    A missing default photo uses the page's initials avatar
+    '''
+
+    profile_image = getattr(user, 'profile_image', None)
+
+    if not profile_image:
+        return ''
+
+    try:
+        return profile_image.url if profile_image.storage.exists(profile_image.name) else ''
+
+    except (ValueError, OSError):
+        return ''
+
+
+def _settings_payload(user, field_errors=None, message=''):
+    field_errors = field_errors or {}
+    birth_date = getattr(user, 'date_of_birth', None)
+
+    return {
+        'success': not field_errors,
+        'errors': list(field_errors.values()),
+        'field_errors': field_errors,
+        'message': message if not field_errors else 'Please check the highlighted fields.',
+        'profile': {
+            'name': user.name,
+            'email': user.email,
+            'gender': user.gender,
+            'date_of_birth': birth_date.isoformat() if birth_date else '',
+            'image_url': _settings_image_url(user),
+        },
+    }
+
+
+def _update_settings_details(request):
+    name = (request.POST.get('name') or '').strip()
+    gender = (request.POST.get('gender') or '').strip()
+    date_value = (request.POST.get('date_of_birth') or '').strip()
+
+    field_errors = {}
+    birth_date = None
+
+    if not name:
+        field_errors['name'] = 'Enter your full name.'
+
+    elif len(name) > 100:
+        field_errors['name'] = 'Your name must be 100 characters or fewer.'
+
+    if gender not in ('male', 'female', 'others'):
+        field_errors['gender'] = 'Choose a gender from the available options.'
+
+    if date_value:
+        try:
+            if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', date_value):
+                raise ValueError
+
+            birth_date = dt.date.fromisoformat(date_value)
+
+            if birth_date > timezone.localdate():
+                field_errors['date_of_birth'] = 'Date of birth cannot be in the future.'
+
+        except ValueError:
+            field_errors['date_of_birth'] = 'Enter a valid date of birth.'
+
+    if not field_errors:
+        request.user.name = name
+        request.user.gender = gender
+        request.user.date_of_birth = birth_date
+        request.user.save(update_fields=['name', 'gender', 'date_of_birth'])
+
+    return _settings_payload(request.user, field_errors, 'Your personal details have been saved.')
+
+
 @ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
 def SettingsPage(request, errors=None):
-    """
-    Handles requests for the settings page. If the request is a POST, it validates
-    the data and if the data is valid, it changes the user's profile or password.
-    If the request is a GET, it renders the settings page.
-    """
+    '''
+    Save only the profile, personal details, or password the user selected
+    '''
 
-    errors = []
+    if request.method == 'POST':
+        actions = [action for action in ('update_details', 'change_profile', 'change_password') if action in request.POST]
 
-    if request.method.lower() == 'post':
-        if 'change_profile' in request.POST:
-            errors = ChangeProfile(request)
+        if len(actions) != 1:
+            payload = _settings_payload(request.user, {'__all__': 'Choose one settings update and try again.'})
 
-        elif 'change_password' in request.POST:
-            errors = ChangePassword(request)
+        elif actions[0] == 'update_details':
+            payload = _update_settings_details(request)
 
-        return JsonResponse({'success': True, 'errors': errors})
+        elif actions[0] == 'change_profile':
+            payload = ChangeProfile(request)
 
-    context = {
+        else:
+            payload = ChangePassword(request)
+
+        return JsonResponse(payload, status=200 if payload['success'] else 400)
+
+    return render(request, 'users/settings.html', {
         'page_title': 'Settings | Stock Vault',
-        'errors': errors
-    }
+        'errors': errors or [],
+        'settings_profile_image_url': _settings_image_url(request.user),
+        'settings_today': timezone.localdate().isoformat(),
+    })
 
-    return render(request, 'users/settings.html', context)
 
-
-@ratelimit(key='ip', rate='100/m', block=True)
-@login_required(login_url='login')
 def ChangeProfile(request):
-    """
-    Handles a request to update a user's profile image.
+    '''
+    Validate the uploaded image before replacing the saved profile photo
+    '''
 
-    It validates the uploaded file to ensure it is a valid image
-    file and has a size less than or equal to 5MB. If the file is
-    valid, it updates the user's profile image.
-    """
+    profile_image = request.FILES.get('profile_image')
+    image_error = ''
+    maximum_size = 5 * 1024 * 1024
 
-    errors = []
+    if not profile_image:
+        image_error = 'Choose a PNG or JPEG photo.'
 
-    if request.method.lower() == 'post':
-        profile_image = request.FILES.get('profile_image')
+    elif not profile_image.name.lower().endswith(('.jpg', '.jpeg', '.png')):
+        image_error = 'Choose a PNG or JPEG photo.'
 
-        if not profile_image:
-            errors.append('No file uploaded.')
+    elif profile_image.size > maximum_size:
+        image_error = 'Your photo must be 5 MB or smaller.'
 
-        # Validate file type
-        if not profile_image.name.lower().endswith(('.jpg', '.jpeg', '.png')):
-            errors.append('Only JPG/PNG images are allowed.')
+    else:
+        try:
+            image_bytes = profile_image.read(maximum_size + 1)
 
-        # Validate file size (e.g., 5MB limit)
-        if profile_image.size > 5 * 1024 * 1024:
-            errors.append('File size must be less than 5MB.')
+            if len(image_bytes) > maximum_size:
+                image_error = 'Your photo must be 5 MB or smaller.'
 
-        if not errors: # Update the user's profile image
-            user = user_models.CustomUser.objects.get(id=request.user.id)
-            user.profile_image = profile_image
-            user.save()
+            else:
+                with warnings.catch_warnings():
+                    warnings.simplefilter('error', Image.DecompressionBombWarning)
+                    with Image.open(BytesIO(image_bytes)) as uploaded:
+                        if uploaded.format not in ('PNG', 'JPEG'):
+                            image_error = 'Choose a PNG or JPEG photo.'
 
-    return errors
+                        else:
+                            uploaded.verify()
+
+                    if not image_error:
+                        with Image.open(BytesIO(image_bytes)) as uploaded:
+                            uploaded.load()
+        except (UnidentifiedImageError, OSError, ValueError, SyntaxError, Image.DecompressionBombError, Image.DecompressionBombWarning):
+            image_error = 'This photo could not be read. Choose a valid PNG or JPEG image.'
+
+        finally:
+            profile_image.seek(0)
+
+    if image_error:
+        return _settings_payload(request.user, {'profile_image': image_error})
+
+    request.user.profile_image = profile_image
+    request.user.save(update_fields=['profile_image'])
+
+    return _settings_payload(request.user, message='Your profile photo has been updated.')
 
 
-@ratelimit(key='ip', rate='100/m', block=True)
-@login_required(login_url='login')
 def ChangePassword(request):
-    """
-    Handles a request to change a user's password.
+    '''
+    Validate a password change and preserve the user's current session
+    '''
 
-    The function validates the current password and ensures that
-    the new password and confirm password match. If the current
-    password is correct and the passwords match, it updates the
-    user's password.
-    """
+    current_password = request.POST.get('current_password') or ''
+    new_password = request.POST.get('new_password') or ''
+    confirm_password = request.POST.get('confirm_password') or ''
+    field_errors = {}
 
-    errors = []
+    if not current_password:
+        field_errors['current_password'] = 'Enter your current password.'
 
-    if request.method.lower() == 'post':
-        current_password = request.POST.get('current_password').strip()
-        new_password = request.POST.get('new_password').strip()
-        confirm_password = request.POST.get('confirm_password').strip()
+    elif not request.user.check_password(current_password):
+        field_errors['current_password'] = 'Your current password is incorrect.'
 
-        if not authenticate(request, email=request.user.email, password=current_password):
-            errors.append('Either email or current password not matched')
+    if not new_password:
+        field_errors['new_password'] = 'Enter a new password.'
 
-        if not current_password or not new_password or not confirm_password:
-            errors.append('All fields are required')
+    elif not (len(new_password) >= 8 and re.search(r'[A-Z]', new_password)
+              and re.search(r'[0-9]', new_password) and re.search(r'[!@#$%^&*]', new_password)):
+        field_errors['new_password'] = 'Use at least 8 characters, an uppercase letter, a number, and a symbol (!@#$%^&*).'
 
-        if new_password != confirm_password:
-            errors.append('New password and confirm password do not match')
+    else:
+        try:
+            validate_password(new_password, user=request.user)
 
-        if not errors:
-            user = request.user
-            user.set_password(new_password)
-            user.save()
+        except ValidationError as validation_error:
+            field_errors['new_password'] = ' '.join(validation_error.messages)
 
-            user = authenticate(request, email=request.user.email, password=new_password)
+    if not confirm_password:
+        field_errors['confirm_password'] = 'Confirm your new password.'
 
-    return errors
+    elif new_password != confirm_password:
+        field_errors['confirm_password'] = 'Your new passwords do not match.'
+
+    if not field_errors:
+        request.user.set_password(new_password)
+        request.user.save(update_fields=['password'])
+
+        update_session_auth_hash(request, request.user)
+
+    return _settings_payload(request.user, field_errors, 'Your password has been updated.')
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
