@@ -1,29 +1,75 @@
-{% extends 'users/root.html' %}
+{% extends 'reset_password/_base.html' %}
 {% load static %}
-
-{% block content %}
-    <link rel="stylesheet" href="{% static 'css/reset_password/find_account.css' %}">
-
-    <div class="content">
-        <div class="card">
-            <h2>Find Your Account</h2>
-
-            <form method="post" onsubmit="return validateFindAccountForm();">
-                {% csrf_token %}
-                <div class="email-field">
-                    <input type="text" placeholder="Enter email" name="email">
-                    <small class="error-message"></small>
-                </div>
-
-                <div class="buttons">
-                    <a id="cancel-button" href="{% url 'login' %}">Cancel</a>
-                    <button id="search-button" type="submit">Search</button>
-                </div>
-            </form>
-        </div>
-    </div>
+{% block recovery_body_class %}sv-recovery-request{% endblock %}
+{% block recovery_css %}
+    <link rel="stylesheet" href="{% static 'css/reset_password/find_account.css' %}?v=contrast-1">
 {% endblock %}
 
-{% block js %}
-    <script src="{% static 'js/reset_password/find_account.js' %}"></script>
+{% block recovery_panel %}
+    <a class="recovery-back-link" href="{% url 'login' %}">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M19 12H5M11 6l-6 6 6 6" />
+        </svg>
+        Back to sign in</a>
+    <span class="recovery-state-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+            <circle cx="8" cy="8" r="5" />
+            <path d="m12 12 9 9M17 17l3-3M14 14l3-3" />
+        </svg>
+    </span>
+    <div class="auth-form-header">
+        <p class="auth-eyebrow">Account recovery</p>
+        <h1 id="recovery-title">Forgot your password?</h1>
+        <p>It happens. Enter the email you use for StockVault and we’ll send you a reset link.</p>
+    </div>
+    {% if form.non_field_errors %}
+        <div class="auth-alert" role="alert">{{ form.non_field_errors }}</div>
+    {% endif %}
+    <form id="password-reset-form" class="auth-form" data-recovery-form="request" action="{% url 'reset_password' %}" method="post" novalidate>
+        {% csrf_token %}
+        <div class="auth-field">
+            <label for="email">Email address</label>
+            <div class="auth-input-wrap">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3" y="5" width="18" height="14" rx="3" />
+                    <path d="m3 7 9 6 9-6" />
+                </svg>
+                <input type="email" id="email" name="email" value="{{ form.email.value|default_if_none:'' }}" placeholder="you@example.com" autocomplete="email" inputmode="email" maxlength="254" aria-describedby="email-hint email-error"{% if form.email.errors %} aria-invalid="true"{% endif %} required>
+            </div>
+            <p id="email-hint" class="auth-hint">Use the email address linked to your account.</p>
+            <p id="email-error" class="error-message"{% if form.email.errors %} role="alert"{% else %} hidden{% endif %}>
+                {% for error in form.email.errors %}
+                    {{ error }}
+                    {% if not forloop.last %}{% endif %}
+                {% endfor %}
+            </p>
+        </div>
+        <button id="search-button" type="submit" class="auth-submit" data-recovery-submit data-submit-label-default="Send reset link" data-submit-label-busy="Sending link…">
+            <span data-submit-label>Send reset link</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+        </button>
+        <p class="auth-status" data-recovery-status role="status" aria-live="polite"></p>
+    </form>
+    <div class="recovery-note">
+        <span aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 8v4l3 2" />
+            </svg>
+        </span>
+        <div>
+            <strong>What happens next?</strong>
+            <p>Open the link in your email to choose a new password. The link is valid for 15 minutes.</p>
+        </div>
+    </div>
+    <p class="auth-form-switch">
+        New to StockVault? <a href="{% url 'signup' %}">Create an account <span aria-hidden="true">↗</span></a>
+    </p>
+    <p class="auth-form-footnote">A fresh password. A familiar workspace.</p>
+{% endblock %}
+
+{% block recovery_js %}
+    <script src="{% static 'js/reset_password/find_account.js' %}?v=2" defer></script>
 {% endblock %}

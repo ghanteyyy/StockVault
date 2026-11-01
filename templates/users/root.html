@@ -3,47 +3,65 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-	<meta charset="UTF-8" />
-	<title>{{page_title}}</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <head>
+        <meta charset="UTF-8" />
+        <title>{{ page_title }}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        {% block meta %}{% endblock %}
 
-	<link rel="stylesheet" href="{% static 'css/users/root.css' %}">
-    <link rel="stylesheet" href="{% static 'css/navs/hamburger.css' %}">
-	<link rel="stylesheet" href="{% static 'css/errors/error-message.css' %}">
-	<link rel = "icon" type = "image/png" href = "{% static 'images/icon.png' %}">
-	<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-	<link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="{% static 'css/users/root.css' %}?v=contrast-1">
+        {% if request.user.is_authenticated %}
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+            <link rel="stylesheet" href="{% static 'css/navs/sidebar.css' %}?v=contrast-1">
+            <script src="{% static 'js/navs/sidebar.js' %}?v=2" defer></script>
 
-	<script src="{% static 'js/users/root.js' %}" defer></script>
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+        {% else %}
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+            <link rel="stylesheet" href="{% static 'css/navs/header.css' %}?v=contrast-1">
+            <link rel="stylesheet" href="{% static 'css/navs/footer.css' %}?v=contrast-1">
+            <script src="{% static 'js/navs/header.js' %}?v=1" defer></script>
+        {% endif %}
+        <link rel="stylesheet" href="{% static 'css/errors/error-message.css' %}?v=contrast-1">
+        <link rel = "icon" type = "image/png" href = "{% static 'images/icon.png' %}">
+        {% block global_assets %}
+            <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css" />
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+            <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
 
-	{% block css %}
-	{% endblock %}
-</head>
+            <script src="{% static 'js/users/root.js' %}" defer></script>
+            <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+        {% endblock %}
 
-<body>
-	{% if not request.user.is_authenticated %}
-		{% include 'navs/navbar.html' %}
-	{% endif %}
+        {% block css %}{% endblock %}
+    </head>
 
-	<div class="container">
-		{% if request.user.is_authenticated %}
-			{% include 'navs/sidebar.html' %}
-		{% endif %}
+    <body class="{% block body_class %}{% if request.user.is_authenticated %}has-user-sidebar{% else %}{% block public_body_class %}{% endblock %}{% endif %}{% endblock %}">
+        {% if not request.user.is_authenticated %}
+            {% block public_navigation %}
+                {% include 'navs/header.html' %}
+            {% endblock %}
+        {% endif %}
 
-		<div class="main-content">
-			{% block content %}
-			{% endblock %}
-		</div>
-	</div>
+        <div class="container{% if request.user.is_authenticated %} workspace-shell{% endif %}">
+            {% if request.user.is_authenticated %}
+                {% include 'navs/sidebar.html' %}
+            {% endif %}
 
-	{% if not "Dashboard" in page_title %}
-		{% include 'navs/footer.html' %}
-	{% endif %}
+            <main class="main-content" id="workspace-content" tabindex="-1">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
 
-	{% block js %}
-	{% endblock %}
-</body>
+        {% block public_footer %}
+            {% if not "Dashboard" in page_title %}
+                {% include 'navs/footer.html' %}
+            {% endif %}
+        {% endblock %}
+
+        {% block js %}{% endblock %}
+    </body>

@@ -1,0 +1,112 @@
+{% extends 'admin/root.html' %}
+{% block content %}
+    <div class="adm-page-heading">
+        <div>
+            <p class="adm-eyebrow">Administrative history</p>
+            <h1>A clear record of changes.</h1>
+            <p>Review who changed a record, what they changed, and when it happened.</p>
+        </div>
+        <a class="adm-button adm-button--ghost" href="?{% if query_string %}{{ query_string }}&{% endif %}export=csv">
+            {% include 'admin/_icon.html' with name='download' %}
+            Export CSV</a>
+    </div>
+    {% if metrics %}
+        {% include 'admin/_metrics.html' %}
+    {% endif %}
+    {% if filter_errors %}
+        <div class="adm-alert adm-alert--warning" role="alert">
+            <ul>
+                {% for error in filter_errors.values %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    <section class="adm-card">
+        <div class="adm-section-heading">
+            <div>
+                <h2>Activity log</h2>
+                <p>
+                    {{ page_obj.paginator.count }} administrative event{{ page_obj.paginator.count|pluralize }} matching your filters
+                </p>
+            </div>
+            <span class="adm-badge adm-badge--purple">Audit history</span>
+        </div>
+        <form class="adm-toolbar" method="get" role="search">
+            <div class="adm-field adm-search-field">
+                <label for="activity-search">Search activity</label>
+                <input type="search" id="activity-search" name="q" value="{{ filters.q }}" placeholder="Administrator, record, or change">
+            </div>
+            <div class="adm-field">
+                <label for="activity-action">Action</label>
+                <select id="activity-action" name="action">
+                    <option value="">All actions</option>
+                    <option value="addition"{% if filters.action == 'addition' %} selected{% endif %}>Added</option>
+                    <option value="change"{% if filters.action == 'change' %} selected{% endif %}>Updated</option>
+                    <option value="deletion"{% if filters.action == 'deletion' %} selected{% endif %}>Removed</option>
+                </select>
+            </div>
+            <div class="adm-field">
+                <label for="activity-from">From date</label>
+                <input type="date" name="date_from" id="activity-from" value="{{ filters.date_from }}">
+            </div>
+            <div class="adm-field">
+                <label for="activity-to">To date</label>
+                <input type="date" name="date_to" id="activity-to" value="{{ filters.date_to }}">
+            </div>
+            <button type="submit" class="adm-button adm-button--primary">Apply filters</button>
+            <a class="adm-button adm-button--ghost" href="{% url 'admin-activity' %}">Reset</a>
+        </form>
+        {% if page_obj %}
+            <div class="adm-table-wrap">
+                <table class="adm-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Action</th>
+                            <th scope="col">Administrator</th>
+                            <th scope="col">Record</th>
+                            <th scope="col">Change</th>
+                            <th scope="col">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in page_obj %}
+                            <tr>
+                                <td>
+                                    {% if entry.action_flag == 1 %}
+                                        <span class="adm-badge adm-badge--success">Added</span>
+
+                                    {% elif entry.action_flag == 3 %}
+                                        <span class="adm-badge adm-badge--danger">Removed</span>
+
+                                    {% else %}
+                                        <span class="adm-badge adm-badge--purple">Updated</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ entry.user.name|default:entry.user.email }}</strong><small>{{ entry.user.email }}</small>
+                                </td>
+                                <td>
+                                    <strong>{{ entry.object_repr }}</strong><small>{{ entry.content_type.name|default:'Administration'|title }}</small>
+                                </td>
+                                <td class="adm-change-cell">{{ entry.get_change_message }}</td>
+                                <td class="adm-date-cell">
+                                    {{ entry.action_time|date:'j M Y' }}<small>{{ entry.action_time|date:'H:i' }}</small>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        {% else %}
+            <div class="adm-empty">
+                {% include 'admin/_icon.html' with name='activity' %}
+                <h3>No changes to show.</h3>
+                <p>Administrative changes are recorded here as you manage members, companies, and questions.</p>
+                <a class="adm-button adm-button--ghost" href="{% url 'admin-activity' %}">Reset filters</a>
+            </div>
+        {% endif %}
+        {% include 'admin/_pagination.html' %}
+    </section>
+{% endblock %}

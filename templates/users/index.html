@@ -1,109 +1,507 @@
 {% extends 'users/root.html' %}
 {% load static %}
 
+{% block public_body_class %}sv-home-page{% endblock %}
+{% block global_assets %}{% endblock %}
+{% block meta %}
+    <meta name="description" content="Bring your holdings, price targets, saved companies, and trade cost estimates together in StockVault, a personal investment workspace for Nepal's stock market.">
+    <meta name="theme-color" content="#20243d">
+{% endblock %}
 {% block css %}
-	<link rel="stylesheet" href="{% static 'css/users/index.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/users/index.css' %}?v=contrast-1">
 {% endblock %}
 
 {% block content %}
-	<div class="hero-content">
-		<h1>Track. Predict. Profit.</h1>
-		<p>Your smart companion for monitoring stock portfolios, analyzing trends, and making better investments.</p>
-		<a href="{% url 'signup' %}" class="cta-button">Get Started</a>
-	</div>
+    <div class="sv-home">
+        <section class="home-hero" aria-labelledby="home-hero-title">
+            <div class="home-shell home-hero-layout">
+                <div class="home-hero-copy">
+                    <p class="home-eyebrow home-eyebrow--light">
+                        <span aria-hidden="true"></span> A workspace for Nepal’s investors
+                    </p>
+                    <h1 id="home-hero-title">
+                        Your investments.
+                        <br>
+                        <span>A clearer perspective.</span>
+                    </h1>
+                    <p class="home-hero-description">
+                        Bring your holdings, price targets, and next ideas into one thoughtful workspace. Keep track of what you own and make room for what’s next.
+                    </p>
+                    <div class="home-hero-actions">
+                        <a class="home-button home-button--hero" href="{% url 'signup' %}">Create your account <span aria-hidden="true">↗</span></a><a class="home-hero-secondary" href="#features">Explore the tools <span aria-hidden="true">↓</span></a>
+                    </div>
+                    <div class="home-hero-notes">
+                        <span>
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="m5 12 4 4L19 6" />
+                            </svg>
+                            Your personal portfolio</span><span>
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="m5 12 4 4L19 6" />
+                            </svg>
+                            Figures in NPR</span>
+                    </div>
+                </div>
+                <div class="home-hero-visual">
+                    <div class="home-preview-window">
+                        <div class="home-preview-header">
+                            <span class="home-preview-brand"><span aria-hidden="true"></span> StockVault</span><span class="home-example-label">Illustrative example</span>
+                        </div>
+                        <div class="home-preview-body">
+                            <div class="home-preview-title">
+                                <div>
+                                    <span>Your workspace</span>
+                                    <h2>Portfolio snapshot</h2>
+                                </div>
+                                <span class="home-preview-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24">
+                                        <rect x="3" y="3" width="7" height="7" rx="2" />
+                                        <rect x="14" y="3" width="7" height="7" rx="2" />
+                                        <rect x="3" y="14" width="7" height="7" rx="2" />
+                                        <rect x="14" y="14" width="7" height="7" rx="2" />
+                                    </svg>
+                                </span>
+                            </div>
+                            <div class="home-preview-capital">
+                                <span>Total invested</span><strong><span>Rs.</span> 1,25,000<span class="home-preview-decimal">.00</span></strong>
+                                <div>
+                                    <span>3 holdings</span><span>2 sectors</span>
+                                </div>
+                            </div>
+                            <div class="home-preview-bottom">
+                                <div class="home-preview-holdings">
+                                    <p>On your portfolio</p>
+                                    <div>
+                                        <span class="home-preview-ticker">NA</span><span><strong>NABIL</strong><small>Commercial Banks</small></span><span>100 shares</span>
+                                    </div>
+                                    <div>
+                                        <span class="home-preview-ticker home-preview-ticker--mint">CH</span><span><strong>CHCL</strong><small>Hydro Power</small></span><span>50 shares</span>
+                                    </div>
+                                    <div>
+                                        <span class="home-preview-ticker home-preview-ticker--gold">SA</span><span><strong>SANIMA</strong><small>Commercial Banks</small></span><span>75 shares</span>
+                                    </div>
+                                </div>
+                                <div class="home-preview-allocation">
+                                    <div class="home-allocation-donut" aria-hidden="true">
+                                        <span><strong>3</strong><small>holdings</small></span>
+                                    </div>
+                                    <p>Holdings by sector</p>
+                                    <span><i aria-hidden="true"></i> Banks <strong>2</strong></span><span><i aria-hidden="true"></i> Hydro <strong>1</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="home-visual-note">
+                        <span aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M7 3H3v4M17 3h4v4M3 17v4h4M21 17v4h-4M7 12l3 3 7-7" />
+                            </svg>
+                        </span>
+                        <div>
+                            <strong>A place for the bigger picture.</strong><span>Holdings, ideas, and plans together.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="home-shell home-hero-bottom">
+                <span>A little more organization. A lot more clarity.</span><a href="#product-tour">Take a closer look <span aria-hidden="true">↓</span></a>
+            </div>
+        </section>
 
-	<section id="features" class="features">
-		<h2>Core Features</h2>
-		<div class="feature-cards">
-			<div class="card">
-				<i class="fas fa-chart-line"></i>
-				<h3>Live Holdings</h3>
-				<p>Track your investment quantity, price per share, and portfolio health.</p>
-			</div>
-			<div class="card">
-				<i class="fas fa-star"></i>
-				<h3>Wishlist Management</h3>
-				<p>Add favorite companies and watch their market trends in real-time.</p>
-			</div>
-			<div class="card">
-				<i class="fas fa-history"></i>
-				<h3>Historical Analytics</h3>
-				<p>View detailed company price history and trends to predict future gains.</p>
-			</div>
-		</div>
-	</section>
+        <div class="home-principles home-shell" aria-label="What StockVault helps you do">
+            <div>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3" y="7" width="18" height="14" rx="3" />
+                    <path d="M8 7V3h8v4M3 12h18" />
+                </svg>
+                <span><strong>See the full picture</strong><small>Your holdings in one workspace</small></span>
+            </div>
+            <div>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M6 3h12v18l-6-4-6 4V3Z" />
+                </svg>
+                <span><strong>Keep good ideas close</strong><small>A shortlist you can come back to</small></span>
+            </div>
+            <div>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="11" cy="13" r="8" />
+                    <circle cx="11" cy="13" r="4" />
+                    <path d="m11 13 9-9M16 3v5h5" />
+                </svg>
+                <span><strong>Give your plans a range</strong><small>Clear price targets to follow</small></span>
+            </div>
+        </div>
 
-	<section class="why">
-		<h2>Why Choose Stock Vault?</h2>
-		<div class="why-grid">
-			<div>
-				<h3>📊 Data Driven</h3>
-				<p>Make informed decisions based on historical price patterns and trends.</p>
-			</div>
-			<div>
-				<h3>🔒 Secure</h3>
-				<p>Your data is stored securely with modern authentication methods.</p>
-			</div>
-			<div>
-				<h3>⚡ Lightning Fast</h3>
-				<p>Optimized performance ensures smooth experience even on low bandwidth.</p>
-			</div>
-		</div>
-	</section>
+        <section class="home-section home-features" id="features" aria-labelledby="home-features-title">
+            <div class="home-shell">
+                <div class="home-section-heading">
+                    <div>
+                        <p class="home-eyebrow">The tools for your everyday routine</p>
+                        <h2 id="home-features-title">
+                            The essentials.
+                            <br>
+                            <span>Thoughtfully together.</span>
+                        </h2>
+                    </div>
+                    <p>From your first holding to your next idea, keep the details that matter within reach.</p>
+                </div>
+                <div class="home-feature-grid">
+                    <article class="home-feature-card home-feature-card--portfolio"><span class="home-feature-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="3" y="7" width="18" height="14" rx="3" />
+                                <path d="M8 7V3h8v4M3 12h18M10 12v3h4v-3" />
+                            </svg>
+                        </span><span class="home-feature-number">01</span>
+                        <h3>A home for your holdings</h3>
+                        <p>
+                            Record share quantities and purchase costs. Review market-price snapshots and estimated sale outcomes for the companies you own.
+                        </p>
+                        <span class="home-feature-tag">Portfolio management</span></article>
+                    <article class="home-feature-card"><span class="home-feature-icon home-feature-icon--mint" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="3" y="3" width="7" height="7" rx="2" />
+                                <rect x="14" y="3" width="7" height="7" rx="2" />
+                                <rect x="3" y="14" width="7" height="7" rx="2" />
+                                <rect x="14" y="14" width="7" height="7" rx="2" />
+                            </svg>
+                        </span><span class="home-feature-number">02</span>
+                        <h3>The bigger picture</h3>
+                        <p>See invested capital, portfolio movement, and how your holdings are distributed across sectors.</p>
+                        <span class="home-feature-tag">Dashboard overview</span></article>
+                    <article class="home-feature-card"><span class="home-feature-icon home-feature-icon--gold" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="5" y="2" width="14" height="20" rx="3" />
+                                <path d="M8 6h8M8 10h1M15 10h1M8 14h1M15 14h1M8 18h1M15 18h1" />
+                            </svg>
+                        </span><span class="home-feature-number">03</span>
+                        <h3>Every charge, in view</h3>
+                        <p>
+                            Estimate buy and sell costs with a breakdown of brokerage, SEBON fees, DP charges, and applicable capital gains tax.
+                        </p>
+                        <span class="home-feature-tag">Trade calculator</span></article>
+                    <article class="home-feature-card"><span class="home-feature-icon home-feature-icon--gold" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M6 3h12v18l-6-4-6 4V3Z" />
+                                <path d="M9 8h6" />
+                            </svg>
+                        </span><span class="home-feature-number">04</span>
+                        <h3>Good ideas, saved</h3>
+                        <p>Build a shortlist of companies. Search by name or symbol, filter by sector, and pick up where you left off.</p>
+                        <span class="home-feature-tag">Your wishlist</span></article>
+                    <article class="home-feature-card"><span class="home-feature-icon home-feature-icon--mint" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="11" cy="13" r="8" />
+                                <circle cx="11" cy="13" r="4" />
+                                <path d="m11 13 9-9M16 3v5h5" />
+                            </svg>
+                        </span><span class="home-feature-number">05</span>
+                        <h3>A range for your next move</h3>
+                        <p>Set low and high prices for a buy or sell target, then see where the available market snapshot stands.</p>
+                        <span class="home-feature-tag">Price targets</span></article>
+                    <article class="home-feature-card"><span class="home-feature-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="8" r="4" />
+                                <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
+                            </svg>
+                        </span><span class="home-feature-number">06</span>
+                        <h3>A workspace that’s yours</h3>
+                        <p>Keep your personal details and profile photo up to date, and manage your password from one settings page.</p>
+                        <span class="home-feature-tag">Personal account</span></article>
+                </div>
+            </div>
+        </section>
 
-	<section class="how">
-		<h2>How It Works</h2>
-		<div class="steps">
-			<div class="step">
-				<span>1</span>
-				<h4>Register</h4>
-				<p>Create your free account with email and start tracking.</p>
-			</div>
-			<div class="step">
-				<span>2</span>
-				<h4>Add Holdings</h4>
-				<p>Enter share quantity, price, and companies you invested in.</p>
-			</div>
-			<div class="step">
-				<span>3</span>
-				<h4>Analyze</h4>
-				<p>Visualize portfolio health, profit/loss and market movement.</p>
-			</div>
-		</div>
-	</section>
+        <section class="home-section home-tour" id="product-tour" aria-labelledby="home-tour-title">
+            <div class="home-shell home-tour-layout">
+                <div class="home-tour-copy">
+                    <p class="home-eyebrow">A closer look</p>
+                    <h2 id="home-tour-title">
+                        A few details.
+                        <br>
+                        <span>A lot more clarity.</span>
+                    </h2>
+                    <p>Explore three ways StockVault brings a little more structure to your investment routine.</p>
+                    <div class="home-tour-tabs" role="tablist" aria-label="Explore StockVault tools" aria-orientation="vertical">
+                        <button type="button" id="tour-tab-overview" data-tour-tab="overview" role="tab" aria-selected="true" aria-controls="tour-panel-overview" tabindex="0">
+                            <span class="home-tour-tab-number">01</span><span><strong>See your holdings</strong><small>Quantities, costs, and the bigger picture.</small></span><span aria-hidden="true">↗</span>
+                        </button>
+                        <button type="button" id="tour-tab-targets" data-tour-tab="targets" role="tab" aria-selected="false" aria-controls="tour-panel-targets" tabindex="-1">
+                            <span class="home-tour-tab-number">02</span><span><strong>Put a range on your plan</strong><small>Low and high prices, clearly defined.</small></span><span aria-hidden="true">↗</span>
+                        </button>
+                        <button type="button" id="tour-tab-calculator" data-tour-tab="calculator" role="tab" aria-selected="false" aria-controls="tour-panel-calculator" tabindex="-1">
+                            <span class="home-tour-tab-number">03</span><span><strong>Look beyond the share price</strong><small>See how trade charges add up.</small></span><span aria-hidden="true">↗</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="home-tour-previews">
+                    <div id="tour-panel-overview" class="home-tour-panel" data-tour-panel="overview" role="tabpanel" aria-labelledby="tour-tab-overview" tabindex="0">
+                        <div class="home-tour-panel-top">
+                            <span class="home-tour-panel-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <rect x="3" y="7" width="18" height="14" rx="3" />
+                                    <path d="M8 7V3h8v4M3 12h18" />
+                                </svg>
+                            </span><span class="home-example-label">Illustrative example</span>
+                        </div>
+                        <p class="home-tour-preview-eyebrow">Portfolio overview</p>
+                        <h3>Your holdings, at a glance.</h3>
+                        <div class="home-tour-value">
+                            <span>Invested capital</span><strong><small>Rs.</small> 1,25,000.00</strong>
+                        </div>
+                        <div class="home-tour-mini-grid">
+                            <div>
+                                <span>Companies held</span><strong>3</strong>
+                            </div>
+                            <div>
+                                <span>Sectors represented</span><strong>2</strong>
+                            </div>
+                        </div>
+                        <div class="home-tour-company-row">
+                            <span>NABIL</span><span>Commercial Banks</span><strong>100 shares</strong>
+                        </div>
+                        <div class="home-tour-company-row">
+                            <span>CHCL</span><span>Hydro Power</span><strong>50 shares</strong>
+                        </div>
+                        <div class="home-tour-company-row">
+                            <span>SANIMA</span><span>Commercial Banks</span><strong>75 shares</strong>
+                        </div>
+                        <p class="home-tour-caption">Keep share quantities, purchase costs, and market snapshots together.</p>
+                    </div>
+                    <div id="tour-panel-targets" class="home-tour-panel" data-tour-panel="targets" role="tabpanel" aria-labelledby="tour-tab-targets" tabindex="0" hidden>
+                        <div class="home-tour-panel-top">
+                            <span class="home-tour-panel-icon home-tour-panel-icon--mint" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <circle cx="11" cy="13" r="8" />
+                                    <circle cx="11" cy="13" r="4" />
+                                    <path d="m11 13 9-9M16 3v5h5" />
+                                </svg>
+                            </span><span class="home-example-label">Illustrative example</span>
+                        </div>
+                        <p class="home-tour-preview-eyebrow">Price target / NABIL</p>
+                        <h3>A plan with clear boundaries.</h3>
+                        <div class="home-tour-target-price">
+                            <div>
+                                <span>Market snapshot</span><strong><small>Rs.</small> 512.80</strong>
+                            </div>
+                            <span class="home-in-range">In range</span>
+                        </div>
+                        <div class="home-tour-range" aria-hidden="true">
+                            <span></span><i></i>
+                        </div>
+                        <div class="home-tour-range-labels">
+                            <div>
+                                <span>Low target</span><strong>Rs. 450.00</strong>
+                            </div>
+                            <div>
+                                <span>High target</span><strong>Rs. 550.00</strong>
+                            </div>
+                        </div>
+                        <div class="home-tour-intent">
+                            <span>↗ Buy target</span>
+                            <p>Your chosen price range, compared with the available market price.</p>
+                        </div>
+                        <p class="home-tour-caption">Set separate buy and sell targets for the same company.</p>
+                    </div>
+                    <div id="tour-panel-calculator" class="home-tour-panel" data-tour-panel="calculator" role="tabpanel" aria-labelledby="tour-tab-calculator" tabindex="0" hidden>
+                        <div class="home-tour-panel-top">
+                            <span class="home-tour-panel-icon home-tour-panel-icon--gold" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <rect x="5" y="2" width="14" height="20" rx="3" />
+                                    <path d="M8 6h8M8 10h1M15 10h1M8 14h1M15 14h1M8 18h1M15 18h1" />
+                                </svg>
+                            </span><span class="home-example-label">Illustrative example</span>
+                        </div>
+                        <p class="home-tour-preview-eyebrow">Secondary market / Buy estimate</p>
+                        <h3>The full cost of a trade.</h3>
+                        <p class="home-tour-trade-context">100 shares × Rs. 250.00</p>
+                        <dl class="home-tour-charge-list">
+                            <div>
+                                <dt>Share value</dt>
+                                <dd>
+                                    Rs. 25,000.00
+                                </dd>
+                            </div>
+                            <div>
+                                <dt>Broker commission</dt>
+                                <dd>
+                                    Rs. 90.00
+                                </dd>
+                            </div>
+                            <div>
+                                <dt>SEBON fee</dt>
+                                <dd>
+                                    Rs. 3.75
+                                </dd>
+                            </div>
+                            <div>
+                                <dt>DP charge</dt>
+                                <dd>
+                                    Rs. 25.00
+                                </dd>
+                            </div>
+                        </dl>
+                        <div class="home-tour-trade-total">
+                            <span>Estimated purchase cost</span><strong>Rs. 25,118.75</strong>
+                        </div>
+                        <p class="home-tour-caption">Sample figures using the app’s configured fees.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-	<section class="testimonials">
-		<h2>What Users Say</h2>
+        <section class="home-section home-how" id="how-it-works" aria-labelledby="home-how-title">
+            <div class="home-shell">
+                <div class="home-centered-heading">
+                    <p class="home-eyebrow">From a first step to a useful routine</p>
+                    <h2 id="home-how-title">Make yourself at home.</h2>
+                    <p>Start with what you own. Build the rest as you go.</p>
+                </div>
+                <ol class="home-steps">
+                    <li>
+                        <span class="home-step-number">01</span>
+                        <h3>Create your workspace</h3>
+                        <p>Register an account and set up a personal space for your investment details.</p>
+                        <a href="{% url 'signup' %}">Create an account <span aria-hidden="true">↗</span></a>
+                    </li>
+                    <li>
+                        <span class="home-step-number">02</span>
+                        <h3>Bring in your holdings</h3>
+                        <p>Add a company, share quantity, buying rate, and purchase type to start organizing your portfolio.</p>
+                        <span class="home-step-note">Your information, entered by you</span>
+                    </li>
+                    <li>
+                        <span class="home-step-number">03</span>
+                        <h3>Build your everyday routine</h3>
+                        <p>Review your overview, save interesting companies, compare estimates, and refine your price targets.</p>
+                        <span class="home-step-note">A clearer place to come back to</span>
+                    </li>
+                </ol>
+            </div>
+        </section>
 
-		{% for testimonial in testonomials %}
-			<div class="testimony">
-				<p>{{testimonial.message}}</p>
-				<strong>{{testimonial.user_name}}</strong>
-			</div>
-		{% endfor %}
-	</section>
+        <section class="home-section home-about" id="about" aria-labelledby="home-about-title">
+            <div class="home-shell home-about-layout">
+                <div class="home-about-mark" aria-hidden="true">
+                    <span class="home-about-orbit"></span>
+                    <img src="{% static 'images/icon.png' %}" alt="">
+                    <span class="home-about-chip">NPR</span>
+                </div>
+                <div>
+                    <p class="home-eyebrow">About StockVault</p>
+                    <h2 id="home-about-title">
+                        Built with a little
+                        <br>
+                        <span>more intention.</span>
+                    </h2>
+                    <p>
+                        StockVault is a university final project focused on making personal portfolio tracking more organized and approachable for Nepal’s stock-market community.
+                    </p>
+                    <p>
+                        It brings the practical parts of an investment routine into one place: recording holdings, following price ranges, keeping a shortlist, and understanding estimated trade charges.
+                    </p>
+                    <div class="home-about-points">
+                        <span>
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="m5 12 4 4L19 6" />
+                            </svg>
+                            Designed around Nepal’s market</span><span>
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="m5 12 4 4L19 6" />
+                            </svg>
+                            Works across desktop and mobile</span>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-	<section class="faq" id="faq">
-		<h2>Frequently Asked Questions</h2>
-		<div class="faq-list">
-			{% for faq in faqs %}
-				<details>
-					<summary>{{faq.question}}</summary>
-					<p>{{faq.answer}}</p>
-				</details>
-			{% endfor %}
-		</div>
-	</section>
+        <section class="home-section home-faq" id="faq" aria-labelledby="home-faq-title">
+            <div class="home-shell home-faq-layout">
+                <div class="home-faq-heading">
+                    <p class="home-eyebrow">A few useful answers</p>
+                    <h2 id="home-faq-title">
+                        A clearer start
+                        <br>
+                        <span>begins here.</span>
+                    </h2>
+                    <p>Get to know the workspace before you make it your own.</p>
+                    <a class="home-text-link" href="{% url 'signup' %}">Ready to get started? <span aria-hidden="true">↗</span></a>
+                </div>
+                <div class="home-faq-list">
+                    <details>
+                        <summary>
+                            What can I keep track of in StockVault?<span aria-hidden="true">+</span>
+                        </summary>
+                        <p>
+                            You can record share holdings and purchase costs, review your portfolio overview, save companies to a wishlist, and set buy or sell price ranges. The trade calculator helps you estimate costs and sale proceeds.
+                        </p>
+                    </details>
+                    <details>
+                        <summary>
+                            What do I need to add a holding?<span aria-hidden="true">+</span>
+                        </summary>
+                        <p>
+                            Choose a listed company and enter the number of shares, buying rate per share, and purchase type: IPO or secondary market. Your portfolio brings the holding’s details together with available market-price data.
+                        </p>
+                    </details>
+                    <details>
+                        <summary>
+                            How is a wishlist different from a price target?<span aria-hidden="true">+</span>
+                        </summary>
+                        <p>
+                            A wishlist saves companies you may want to revisit. A price target adds a low and high price range with a buy or sell intent, so you can compare your plan with the available market snapshot.
+                        </p>
+                    </details>
+                    <details>
+                        <summary>
+                            How does the trade calculator work?<span aria-hidden="true">+</span>
+                        </summary>
+                        <p>
+                            Enter your share quantity and purchase price. For a sale estimate, add a selling price and the applicable holding period or investor type. The breakdown uses StockVault’s configured brokerage, SEBON fee, DP charge, and capital gains tax settings.
+                        </p>
+                    </details>
+                    <details>
+                        <summary>
+                            When are market prices updated?<span aria-hidden="true">+</span>
+                        </summary>
+                        <p>
+                            Portfolio and target pages use the market data available when you load the page. Refresh the page to request another snapshot. Availability depends on the underlying market-data source.
+                        </p>
+                    </details>
+                    <details>
+                        <summary>
+                            Which currency is used?<span aria-hidden="true">+</span>
+                        </summary>
+                        <p>Portfolio figures, price targets, and trade estimates are presented in Nepalese rupees (NPR).</p>
+                    </details>
+                    <details>
+                        <summary>
+                            Can I place trades through StockVault?<span aria-hidden="true">+</span>
+                        </summary>
+                        <p>
+                            Use StockVault to organize your holdings and plan with price ranges and cost estimates. Actual stock purchases and sales are placed through your broker.
+                        </p>
+                    </details>
+                </div>
+            </div>
+        </section>
 
-	<section class="about">
-		<h2>About Stock Vault</h2>
-		<p>
-			A cutting-edge platform developed as a university final project to help investors stay ahead in Nepal's
-			stock market. Simple, secure, and insightful.
-		</p>
-	</section>
+        <section class="home-final-cta" aria-labelledby="home-final-title">
+            <div class="home-shell">
+                <p class="home-eyebrow home-eyebrow--light">Your next chapter starts with a little clarity</p>
+                <h2 id="home-final-title">
+                    Give your portfolio
+                    <br>
+                    a clearer home.
+                </h2>
+                <p>Start with your holdings. Bring your ideas and plans together as you go.</p>
+                <div>
+                    <a class="home-button home-button--hero" href="{% url 'signup' %}">Create your account <span aria-hidden="true">↗</span></a><a class="home-final-signin" href="{% url 'login' %}">Already have an account? Sign in <span aria-hidden="true">↗</span></a>
+                </div>
+            </div>
+        </section>
+    </div>
 {% endblock %}
 
 {% block js %}
-	<script src="{% static 'js/users/index.js' %}"></script>
+    <script src="{% static 'js/users/index.js' %}?v=3" defer></script>
 {% endblock %}

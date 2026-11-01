@@ -1,0 +1,29 @@
+{% load static %}
+{% if not request.user.is_authenticated %}
+    <a class="site-skip-link" href="#workspace-content">Skip to content</a>
+    <header class="site-header">
+        <div class="site-shell site-header-inner">
+            <a class="site-brand" href="{% url 'index' %}" aria-label="StockVault home">
+                <img src="{% static 'images/icon.png' %}" alt="">
+                <span>StockVault</span>
+            </a>
+            <button type="button" id="site-menu-toggle" class="site-menu-toggle" aria-controls="site-menu" aria-expanded="false" aria-label="Open navigation">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+            <nav id="site-menu" class="site-menu" aria-label="Main navigation">
+                <div class="site-navigation-links">
+                    <a href="{% url 'index' %}#features">Features</a>
+                    <a href="{% url 'index' %}#how-it-works">How it works</a>
+                    <a href="{% url 'index' %}#about">About</a>
+                    <a href="{% url 'index' %}#faq">FAQs</a>
+                </div>
+                <div class="site-account-links">
+                    <a class="site-sign-in" href="{% url 'login' %}">Sign in</a>
+                    <a class="site-button" href="{% url 'signup' %}">Get started <span aria-hidden="true">↗</span></a>
+                </div>
+            </nav>
+        </div>
+    </header>
+{% endif %}

@@ -1,12 +1,13 @@
 window.charts = window.charts || {};
 
-
 function renderLineChart(id, title, labels, data) {
     const canvas = document.getElementById(id);
-    if (!canvas) return;
+    if(!canvas){
+        return;
+    }
 
     const existing = Chart.getChart(id);
-    if (existing){
+    if(existing){
         existing.destroy();
     }
 
@@ -42,12 +43,17 @@ function renderLineChart(id, title, labels, data) {
                 },
                 tooltip: {
                     enabled: true,
-                    callbacks: { label: (ctx) => `${ctx.parsed.y}` }
+                    callbacks: {
+                        label: (ctx) => `${ctx.parsed.y}`
+                    }
                 }
             },
             interaction: { mode: 'nearest', intersect: false },
             scales: {
-                x: { grid: { display: false, drawBorder: false, drawTicks: false }, ticks: { display: false } },
+                x: {
+                    grid: { display: false, drawBorder: false, drawTicks: false },
+                    ticks: { display: false }
+                },
                 y: { beginAtZero: false }
             }
         }
@@ -58,15 +64,19 @@ function renderLineChart(id, title, labels, data) {
     return chart;
 }
 
-
-function updateLineChartById(id, title, labels, data, { animate = false } = {}) {
+function updateLineChartById(id, title, labels, data, {
+    animate = false
+} = {}) {
     const chart = Chart.getChart(id) || (window.charts && window.charts[id]);
-    if (!chart) {
+    if(!chart){
         renderLineChart(id, title, labels, data);
         return;
     }
 
-    try { chart.stop(); } catch { }
+    try{
+        chart.stop();
+    }
+    catch{}
 
     chart.data.labels.splice(0, chart.data.labels.length, ...labels);
 
@@ -74,14 +84,12 @@ function updateLineChartById(id, title, labels, data, { animate = false } = {}) 
     const numeric = data.map(v => +String(v).replace(/,/g, ''));
     ds.data.splice(0, ds.data.length, ...numeric);
 
-    if (chart.options?.plugins?.title) {
+    if(chart.options?.plugins?.title){
         chart.options.plugins.title.text = String(title).toUpperCase();
     }
 
     chart.update(animate ? undefined : 'none');
 }
-
-
 
 window.renderLineChart = renderLineChart;
 window.updateLineChartById = updateLineChartById;

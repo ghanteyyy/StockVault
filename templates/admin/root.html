@@ -1,48 +1,54 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Admin | {{page_title}}</title>
-
-    <link rel="stylesheet" href="{% static 'css/admin/root.css' %}">
-    <link rel="icon" type="image/png" href="{% static 'images/admin.png' %}">
-    <link rel="stylesheet" href="{% static 'css/errors/error-message.css' %}">
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/admin/datatables.css' %}">
-    <link rel="stylesheet" href="{% static 'css/admin/pagination.css' %}">
-
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-
-    {% block css %}
-    {% endblock %}
-</head>
-
-<body>
-    <div class="container">
-        {% include 'admin/sidebar.html' %}
-
-        <div class="main-content">
-            {% include 'admin/hamburger.html' %}
-            {% block content %}
-            {% endblock %}
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="robots" content="noindex, nofollow">
+        <title>{{ page_title }} | StockVault Administration</title>
+        <link rel="icon" type="image/png" href="{% static 'images/icon.png' %}">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="{% static 'css/admin/root.css' %}?v=contrast-1">
+        <script src="{% static 'js/admin/root.js' %}?v=1" defer></script>
+        {% block css %}{% endblock %}
+    </head>
+    <body class="sv-admin">
+        <a class="adm-skip-link" href="#admin-content">Skip to content</a>
+        <div class="adm-shell">
+            {% include 'admin/sidebar.html' %}
+            <div class="adm-workspace">
+                <header class="adm-topbar">
+                    <div class="adm-topbar-leading">
+                        <button type="button" class="adm-menu-toggle adm-icon-button" data-admin-menu-toggle aria-label="Open navigation" aria-controls="admin-sidebar" aria-expanded="false">
+                            {% include 'admin/_icon.html' with name='menu' %}
+                        </button>
+                        <p class="adm-breadcrumb">
+                            <span>Administration</span><span aria-hidden="true">/</span><strong>{{ page_title }}</strong>
+                        </p>
+                    </div>
+                    <div class="adm-topbar-trailing">
+                        <span class="adm-topbar-date">{% now 'D, M j' %}</span><span class="adm-admin-label">
+                            {% include 'admin/_icon.html' with name='lock' %}
+                            Administrator</span><a class="adm-topbar-avatar" href="{% url 'admin-user-profile' %}?id={{ request.user.pk|urlencode }}" aria-label="Your administrator profile">{{ request.user.name|first|upper|default:'A' }}</a>
+                    </div>
+                </header>
+                <main class="adm-main" id="admin-content" tabindex="-1">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="adm-alert" role="status">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    {% block content %}{% endblock %}
+                    <footer class="adm-footer">
+                        <span>StockVault administration</span><span>Figures in NPR · {% now 'Y' %}</span>
+                    </footer>
+                </main>
+            </div>
         </div>
-    </div>
-
-    <script>
-        const page_title = "{{page_title}}";
-    </script>
-
-	{% block js %}
-	{% endblock %}
-</body>
-
+        <div class="adm-sidebar-backdrop" data-admin-menu-backdrop hidden></div>
+        <p class="adm-toast" id="admin-toast" role="status" aria-live="polite" hidden></p>
+        {% block js %}{% endblock %}
+    </body>
 </html>

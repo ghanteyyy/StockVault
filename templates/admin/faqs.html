@@ -1,118 +1,209 @@
 {% extends 'admin/root.html' %}
 {% load static %}
-
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/admin/modal.css' %}">
-    <link rel="stylesheet" href="{% static 'css/admin/users.css' %}">
-    <link rel="stylesheet" href="{% static 'css/admin/cards.css' %}">
-    <link rel="stylesheet" href="{% static 'css/admin/companies.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/companies.css' %}?v=contrast-1">
+    <link rel="stylesheet" href="{% static 'css/admin/faqs.css' %}?v=contrast-1">
 {% endblock %}
-
 {% block content %}
-    <div class="header">
-        <div class="search_bar">
-            <div class="search">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" class="search" placeholder="Search by question or answer">
-                <button class="add_button btn-add">Add FAQs</button>
+    <div class="adm-page-heading">
+        <div>
+            <p class="adm-eyebrow">Content workspace</p>
+            <h1>Question library</h1>
+            <p>Maintain the project question library and keep useful answers easy to find.</p>
+        </div>
+        <div class="adm-heading-actions">
+            <a class="adm-button adm-button--ghost" href="?{% if query_string %}{{ query_string }}&amp;{% endif %}export=csv">Export CSV <span aria-hidden="true">↗</span></a>
+            <button type="button" class="adm-button adm-button--primary" data-dialog-open="faq-create-dialog">
+                + Add question
+            </button>
+        </div>
+    </div>
+    <div class="adm-stats">
+        <div class="adm-stat">
+            <span>Library questions</span><strong>{{ total_faqs }}</strong><small>Saved in StockVault</small>
+        </div>
+        <div class="adm-stat">
+            <span>Added recently</span><strong>{{ recent_faqs }}</strong><small>In the last 30 days</small>
+        </div>
+        <div class="adm-stat">
+            <span>Needs attention</span><strong>{{ incomplete_faqs }}</strong><small>Missing a question or answer</small>
+        </div>
+        <div class="adm-stat">
+            <span>Matching questions</span><strong>{{ page_obj.paginator.count }}</strong><small>For your current filters</small>
+        </div>
+    </div>
+    <section class="adm-card" aria-labelledby="question-library-title">
+        <div class="adm-catalog-card-heading">
+            <div>
+                <h2 id="question-library-title">A clearer place for answers</h2>
+                <p>Search, review, and maintain the question library.</p>
             </div>
+            <span class="adm-badge adm-badge--purple">Content library</span>
         </div>
-    </div>
+        <form method="get" class="adm-toolbar adm-catalog-toolbar" role="search">
+            <div class="adm-field adm-catalog-search">
+                <label for="faq-search">Search questions</label>
+                <input id="faq-search" name="q" type="search" value="{{ filters.q }}" maxlength="255" placeholder="Search a question or answer">
+            </div>
+            <div class="adm-field">
+                <label for="faq-content-filter">Content</label>
+                <select id="faq-content-filter" name="content">
+                    <option value="">All questions</option>
+                    <option value="complete"{% if filters.content == 'complete' %} selected{% endif %}>Complete entries</option>
+                    <option value="incomplete"{% if filters.content == 'incomplete' %} selected{% endif %}>Needs attention</option>
+                </select>
+            </div>
+            <div class="adm-field">
+                <label for="faq-sort">Sort by</label>
+                <select id="faq-sort" name="sort">
+                    <option value="newest"{% if filters.sort == 'newest' %} selected{% endif %}>Recently added</option>
+                    <option value="oldest"{% if filters.sort == 'oldest' %} selected{% endif %}>Oldest first</option>
+                    <option value="question"{% if filters.sort == 'question' %} selected{% endif %}>Question A–Z</option>
+                </select>
+            </div>
+            <div class="adm-field adm-page-size">
+                <label for="faq-page-size">Per page</label>
+                <select name="per_page" id="faq-page-size">
+                    <option value="20"{% if page_obj.paginator.per_page == 20 %} selected{% endif %}>20</option>
+                    <option value="50"{% if page_obj.paginator.per_page == 50 %} selected{% endif %}>50</option>
+                    <option value="100"{% if page_obj.paginator.per_page == 100 %} selected{% endif %}>100</option>
+                </select>
+            </div>
+            <div class="adm-filter-actions">
+                <button class="adm-button adm-button--primary" type="submit">Apply filters</button>
+                <a class="adm-button adm-button--ghost" href="{% url 'admin-faqs' %}">Reset</a>
+            </div>
+        </form>
+        <div class="adm-faq-grid">
+            {% for faq in faqs %}
+                <article class="adm-faq-card">
+                    <div class="adm-faq-card-top">
+                        <span class="adm-faq-number">Q{{ forloop.counter0|add:page_obj.start_index|stringformat:'02d' }}</span>
+                        {% if not faq.question or not faq.answer %}
+                            <span class="adm-badge adm-badge--warning">Needs attention</span>
 
-    <div class="cards">
-        {% for faq in faqs %}
-            <div class="card">
-                <div class="card_row">
-                    <span>Question:</span>
-                    <span class="question">{{faq.question}}</span>
-                </div>
-
-                <div class="card_row">
-                    <span>Answer:</span>
-                    <span class="answer">{{faq.answer}}</span>
-                </div>
-
-                <div class="actions">
-                    <button type="button" class="btn btn-edit"
-                            data-faq_id="{{faq.id}}"
-                            data-faq_question="{{faq.question}}"
-                            data-faq_answer="{{faq.answer}}"
-                            data-submit_href="faq/edit">
-                        <i class='bx bx-edit'></i>
+                        {% else %}
+                            <span class="adm-badge adm-badge--success">Complete</span>
+                        {% endif %}
+                    </div>
+                    <h3>{{ faq.question|default:'Untitled question' }}</h3>
+                    <p class="adm-faq-answer">{{ faq.answer|default:'No answer yet.'|linebreaksbr }}</p>
+                    <div class="adm-faq-card-bottom">
+                        <time datetime="{{ faq.created_at|date:'c' }}">{{ faq.created_at|date:'M j, Y' }}</time>
+                        <div class="adm-row-actions">
+                            <button type="button" class="adm-button adm-button--ghost" data-faq-edit data-id="{{ faq.pk }}" data-dialog-open="faq-edit-dialog">
+                                Edit
+                            </button>
+                            <button type="button" class="adm-button adm-button--danger" data-faq-delete data-id="{{ faq.pk }}" data-dialog-open="faq-delete-dialog">
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                </article>{% empty %}
+                <div class="adm-empty">
+                    <span class="adm-empty-symbol" aria-hidden="true">?</span>
+                    <h3>No questions found</h3>
+                    <p>Try another search or add a question to start building the library.</p>
+                    <button type="button" class="adm-button adm-button--primary" data-dialog-open="faq-create-dialog">
+                        Add a question
                     </button>
-                    <button type="button" class="btn btn-delete"
-                        data-faq_id="{{ faq.id }}"><i class="bx bx-trash"></i>
-                    </button>
+                </div>
+            {% endfor %}
+        </div>
+        {% include 'admin/_pagination.html' %}
+    </section>
+    <p class="adm-catalog-note">Library changes are saved here. Homepage copy is curated separately.</p>
+    {{ faq_records|json_script:'faq-records' }}
+    <dialog class="adm-dialog" id="faq-create-dialog" aria-labelledby="faq-create-title">
+        <div class="adm-dialog-heading">
+            <div>
+                <p class="adm-eyebrow">Question library</p>
+                <h2 id="faq-create-title">Add a question</h2>
+            </div>
+            <button type="button" class="adm-dialog-close" data-dialog-close aria-label="Close dialog">×</button>
+        </div>
+        <form data-admin-form method="post" action="{% url 'admin-faq-add' %}" novalidate>
+            {% csrf_token %}
+            <div class="adm-form-grid">
+                <div class="adm-form-field adm-form-field--wide">
+                    <label for="faq-create-question">Question</label>
+                    <input id="faq-create-question" name="faq_question" type="text" maxlength="255" placeholder="What would you like to explain?" aria-describedby="faq-create-question-error" required>
+                    <p id="faq-create-question-error" class="adm-error" data-error-for="faq_question" hidden></p>
+                </div>
+                <div class="adm-form-field adm-form-field--wide">
+                    <label for="faq-create-answer">Answer</label>
+                    <textarea id="faq-create-answer" name="faq_answer" maxlength="255" rows="5" placeholder="Write a clear, useful answer." aria-describedby="faq-create-answer-hint faq-create-answer-error" required></textarea>
+                    <p id="faq-create-answer-hint" class="adm-form-hint">
+                        Up to 255 characters. <span data-character-count>0</span> / 255 used.
+                    </p>
+                    <p id="faq-create-answer-error" class="adm-error" data-error-for="faq_answer" hidden></p>
                 </div>
             </div>
-        {% endfor %}
-    </div>
-
-    <p class="error-message">No FAQs</p>
-
-    {% if faqs.num_pages > 1 %}
-        <div class="pagination">
-            <a
-                href="{% if faqs.has_previous %}?page={{ faqs.previous_page_number }}{% else %}#{% endif %}"
-                class="page_btn {% if not faqs.has_previous %}disabled{% endif %}">
-                « Previous Page
-            </a>
-
-            <span>Page {{ faqs.number }} of {{ faqs.paginator.num_pages }}</span>
-
-            <a
-                href="{% if faqs.has_next %}?page={{ faqs.next_page_number }}{% else %}#{% endif %}"
-                class="page_btn {% if not faqs.has_next %}disabled{% endif %}">
-                Next Page »
-            </a>
+            <p class="adm-form-status" data-form-status role="status" hidden></p>
+            <div class="adm-dialog-actions">
+                <button type="button" class="adm-button adm-button--ghost" data-dialog-close>Cancel</button>
+                <button type="submit" class="adm-button adm-button--primary">Add question</button>
+            </div>
+        </form>
+    </dialog>
+    <dialog class="adm-dialog" id="faq-edit-dialog" aria-labelledby="faq-edit-title">
+        <div class="adm-dialog-heading">
+            <div>
+                <p class="adm-eyebrow">Question library</p>
+                <h2 id="faq-edit-title">Edit question</h2>
+            </div>
+            <button type="button" class="adm-dialog-close" data-dialog-close aria-label="Close dialog">×</button>
         </div>
-    {% endif %}
-
-
-    <div id="modal" class="modal is-hidden" aria-hidden="true">
-        <div class="modal__overlay" id="overlay"></div>
-
-        <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-            <header class="modal__header">
-                <h2 id="modalTitle">FAQ Details</h2>
-                <button class="modal__close" id="closeBtn" aria-label="Close">×</button>
-            </header>
-
-            <form class="modal__content" method="POST" action="#">
-                {% csrf_token %}
-
-                <p class="modal-response-message" style="display: none;"></p>
-                <p class="modal-error-message error-message" style="display: none;">Please complete all required fields before submitting</p>
-
-                <div class="field" style="display: none;">
-                    <label for="faq_id">ID <span class="required"> *</span></label>
-                    <input type="text" name="faq_id" id="faq_id" readonly>
+        <form data-admin-form method="post" action="{% url 'admin-faq-edit' %}" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="faq_id">
+            <div class="adm-form-grid">
+                <div class="adm-form-field adm-form-field--wide">
+                    <label for="faq-edit-question">Question</label>
+                    <input id="faq-edit-question" name="faq_question" type="text" maxlength="255" placeholder="What would you like to explain?" aria-describedby="faq-edit-question-error" required>
+                    <p id="faq-edit-question-error" class="adm-error" data-error-for="faq_question" hidden></p>
                 </div>
-
-                <div class="field">
-                    <label for="question">Question <span class="required"> *</span></label>
-                    <input type="text" name="faq_question" id="question">
+                <div class="adm-form-field adm-form-field--wide">
+                    <label for="faq-edit-answer">Answer</label>
+                    <textarea id="faq-edit-answer" name="faq_answer" maxlength="255" rows="5" placeholder="Write a clear, useful answer." aria-describedby="faq-edit-answer-hint faq-edit-answer-error" required></textarea>
+                    <p id="faq-edit-answer-hint" class="adm-form-hint">
+                        Up to 255 characters. <span data-character-count>0</span> / 255 used.
+                    </p>
+                    <p id="faq-edit-answer-error" class="adm-error" data-error-for="faq_answer" hidden></p>
                 </div>
-
-                <div class="field">
-                    <label for="answer">Answer <span class="required"> *</span></label>
-                    <input id="answer" name="faq_answer" type="text"/>
-                </div>
-
-                <div class="actions">
-                    <button type="submit">Submit</button>
-                </div>
-            </form>
+            </div>
+            <p class="adm-form-status" data-form-status role="status" hidden></p>
+            <div class="adm-dialog-actions">
+                <button type="button" class="adm-button adm-button--ghost" data-dialog-close>Cancel</button>
+                <button type="submit" class="adm-button adm-button--primary">Save changes</button>
+            </div>
+        </form>
+    </dialog>
+    <dialog class="adm-dialog" id="faq-delete-dialog" aria-labelledby="faq-delete-title">
+        <div class="adm-dialog-heading">
+            <div>
+                <p class="adm-eyebrow">Question library</p>
+                <h2 id="faq-delete-title">Remove this question?</h2>
+            </div>
+            <button type="button" class="adm-dialog-close" data-dialog-close aria-label="Close dialog">×</button>
         </div>
-    </div>
+        <form data-admin-form method="post" action="{% url 'admin-faq-delete' %}">
+            {% csrf_token %}
+            <input type="hidden" name="faq_id">
+            <p class="adm-dialog-description">
+                <strong data-delete-faq-question></strong>
+            </p>
+            <div class="adm-alert adm-alert--warning">
+                This permanently removes the question and its answer from the library. This cannot be undone.
+            </div>
+            <p class="adm-form-status" data-form-status role="status" hidden></p>
+            <div class="adm-dialog-actions">
+                <button type="button" class="adm-button adm-button--ghost" data-dialog-close>Keep question</button>
+                <button type="submit" class="adm-button adm-button--danger">Remove question</button>
+            </div>
+        </form>
+    </dialog>
 {% endblock %}
-
 {% block js %}
-    <script>
-        search_lists = ['question', 'answer'];
-    </script>
-
-    <script src="{% static 'js/admin/modal.js' %}"></script>
-    <script src="{% static 'js/admin/faqs.js' %}"></script>
-    <script src="{% static 'js/admin/search.js' %}"></script>
+    <script src="{% static 'js/admin/faqs.js' %}?v=3" defer></script>
 {% endblock %}

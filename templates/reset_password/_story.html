@@ -1,0 +1,59 @@
+<aside class="auth-story recovery-story" aria-label="Password recovery steps">
+    <div class="auth-story-top">
+        <p class="auth-eyebrow">
+            <span aria-hidden="true"></span> A little help getting back
+        </p>
+        <h2>
+            A fresh start.
+            <br>
+            <span>Same workspace.</span>
+        </h2>
+        <p class="auth-story-description">
+            Reset your password in a few steps and get back to your holdings, ideas, and plans.
+        </p>
+    </div>
+    <div class="recovery-illustration" aria-hidden="true">
+        <div class="recovery-orbit"></div>
+        <span class="recovery-mail-card">
+            <svg viewBox="0 0 160 120">
+                <rect x="12" y="15" width="136" height="90" rx="14" />
+                <path d="m15 25 57 44a13 13 0 0 0 16 0l57-44M14 99l43-35M146 99l-43-35" />
+            </svg>
+        </span><span class="recovery-key-badge">
+            <svg viewBox="0 0 24 24">
+                <circle cx="8" cy="8" r="5" />
+                <path d="m12 12 9 9M17 17l3-3M14 14l3-3" />
+            </svg>
+        </span>
+    </div>
+    <ol class="recovery-steps">
+        <li class="recovery-step {% if recovery_stage == 'request' %}is-current{% else %}is-complete{% endif %}"{% if recovery_stage == 'request' %} aria-current="step"{% endif %}>
+            <span class="recovery-step-number">01</span>
+            <div>
+                <strong>Your account email</strong><small>Where we’ll send the reset link</small>
+            </div>
+        </li>
+        <li class="recovery-step {% if recovery_stage == 'sent' %}is-current{% elif recovery_stage == 'confirm' or recovery_stage == 'complete' %}is-complete{% endif %}"{% if recovery_stage == 'sent' %} aria-current="step"{% endif %}>
+            <span class="recovery-step-number">02</span>
+            <div>
+                <strong>Your reset link</strong><small>Open the link from your inbox</small>
+            </div>
+        </li>
+        <li class="recovery-step {% if recovery_stage == 'confirm' %}is-current{% elif recovery_stage == 'complete' %}is-complete{% endif %}"{% if recovery_stage == 'confirm' %} aria-current="step"{% endif %}>
+            <span class="recovery-step-number">03</span>
+            <div>
+                <strong>Your new password</strong><small>Choose it and sign back in</small>
+            </div>
+        </li>
+    </ol>
+    <div class="auth-story-bottom">
+        <span class="auth-story-marker" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+                <path d="M7 3H3v4M17 3h4v4M3 17v4h4M21 17v4h-4M7 12l3 3 7-7" />
+            </svg>
+        </span>
+        <div>
+            <strong>Your workspace stays familiar.</strong><small>Holdings, price targets, and ideas together.</small>
+        </div>
+    </div>
+</aside>

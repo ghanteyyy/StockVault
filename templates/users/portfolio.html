@@ -2,84 +2,329 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/users/portfolio.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/users/portfolio.css' %}?v=contrast-1">
 {% endblock %}
 
 {% block content %}
-    <div class="content">
-        <div class="card">
-            <form onsubmit="return validateStockSearchingForm()" action="" method="POST">
-                {% csrf_token %}
-                {% include 'users/stock_searching.html' %}
-            </form>
+    <div class="sv-portfolio content" data-delete-url="{% url 'portfolio-delete' %}">
+        <header class="portfolio-intro">
+            <div>
+                <p class="portfolio-eyebrow">
+                    <span></span> StockVault / Portfolio
+                </p>
+                <h1>
+                    Your holdings<span>.</span>
+                </h1>
+                <p class="portfolio-subtitle">A little more clarity. A lot more control over your investments.</p>
+            </div>
+            <a class="overview-link" href="{% url 'dashboard' %}">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3" y="3" width="7" height="7" rx="2" />
+                    <rect x="14" y="3" width="7" height="7" rx="2" />
+                    <rect x="3" y="14" width="7" height="7" rx="2" />
+                    <rect x="14" y="14" width="7" height="7" rx="2" />
+                </svg>
+                View overview <span aria-hidden="true">↗</span>
+            </a>
+        </header>
 
-            {% include 'errors/backend_error.html' %}
-        </div>
+        <div class="portfolio-workspace">
+            <aside class="portfolio-rail" aria-labelledby="add-holding-title">
+                <section class="holding-composer" id="add-holding">
+                    <div class="composer-heading">
+                        <span class="composer-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 5v14M5 12h14" />
+                            </svg>
+                        </span>
+                        <p class="composer-eyebrow">Make your next move</p>
+                        <h2 id="add-holding-title">Add a holding</h2>
+                        <p>
+                            Bring your investments together,
+                            <br>
+                            one stock at a time.
+                        </p>
+                    </div>
 
-        <div class="card">
-            {% if not portfolio_datasets %}
-                <p class="error-message" style="display: block;">The dataset is currently empty or incomplete.</p>
-            {% else %}
+                    <form class="holding-form input-wrapper" onsubmit="return validateStockSearchingForm()" action="{% url 'portfolio' %}" method="POST">
+                        {% csrf_token %}
+                        <div class="holding-field stock-field">
+                            <label for="stock-input">Company</label>
+                            <div class="field-control">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle cx="10.5" cy="10.5" r="6.5" />
+                                    <path d="m16 16 4.5 4.5" />
+                                </svg>
+                                <input type="text" id="stock-input" name="company" class="autocomplete-input" placeholder="Search for a company" value="{{ request.POST.company }}" autocomplete="off" aria-controls="suggestions" required>
+                            </div>
+                            <div id="suggestions" class="suggestions" aria-label="Company suggestions"></div>
+                        </div>
+                        <div class="holding-field">
+                            <label for="share-quantity">Number of shares</label>
+                            <div class="field-control">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="m12 3 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 16l9 5 9-5" />
+                                </svg>
+                                <input id="share-quantity" type="text" inputmode="numeric" pattern="[0-9]+" class="share_quantity share_numbering" name="share_quantity" placeholder="e.g. 100" value="{{ request.POST.share_quantity }}" required>
+                            </div>
+                        </div>
+                        <div class="holding-field">
+                            <label for="buying-rate">
+                                Buying rate <span>NPR / share</span>
+                            </label>
+                            <div class="field-control">
+                                <span class="field-currency" aria-hidden="true">Rs.</span>
+                                <input id="buying-rate" type="text" inputmode="numeric" pattern="[0-9]+" class="buying_rate share_numbering" name="buying_rate" placeholder="e.g. 250" value="{{ request.POST.buying_rate }}" required>
+                            </div>
+                        </div>
+                        <div class="holding-field purchase-type-field">
+                            <label for="buy-type">Purchase type</label>
+                            <div class="field-control">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <rect x="3" y="5" width="18" height="14" rx="3" />
+                                    <path d="M3 10h18M7 15h4" />
+                                </svg>
+                                <select name="buy-type" id="buy-type" required>
+                                    <option value="" disabled selected>Select purchase type</option>
+                                    <option value="ipo">IPO</option>
+                                    <option value="secondary">Secondary market</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p class="error-message" role="alert"></p>
+                        {% if errors %}
+                            <div class="portfolio-form-errors" role="alert">
+                                {% for error in errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <button type="submit" id="add-btn" class="add-btn">
+                            <span aria-hidden="true">+</span> Add to portfolio <span aria-hidden="true">→</span>
+                        </button>
+                        <p class="form-note">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="5" y="10" width="14" height="11" rx="2" />
+                                <path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3" />
+                            </svg>
+                            Saved to your personal portfolio
+                        </p>
+                    </form>
+                </section>
+                <div class="portfolio-tip">
+                    <span class="tip-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M9 18h6M10 21h4M8 14a6 6 0 1 1 8 0c-1 1-1 2-1 2H9s0-1-1-2Z" />
+                        </svg>
+                    </span>
+                    <div>
+                        <h3>The details make a difference.</h3>
+                        <p>Open a holding’s details to explore market prices and estimated sale charges.</p>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="holdings-collection" aria-labelledby="holdings-title">
+                <div class="holdings-heading">
+                    <div>
+                        <h2 id="holdings-title">
+                            My holdings <span id="holdings-count">{{ portfolio_datasets|length }}</span>
+                        </h2>
+                        <p>Your positions, with the numbers that matter.</p>
+                    </div>
+                    <span class="snapshot-label"><span aria-hidden="true"></span> Market snapshot</span>
+                </div>
+                <div class="holdings-toolbar">
+                    <div class="holdings-search">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="10.5" cy="10.5" r="6.5" />
+                            <path d="m16 16 4.5 4.5" />
+                        </svg>
+                        <label class="visually-hidden" for="holdings-search">Search your holdings</label>
+                        <input id="holdings-search" type="search" placeholder="Find a holding…" autocomplete="off">
+                    </div>
+                    <label class="visually-hidden" for="sector-filter">Filter by sector</label>
+                    <select id="sector-filter">
+                        <option value="">All sectors</option>
+                    </select>
+                </div>
+                <div id="portfolio-notice" class="portfolio-notice" role="status" aria-live="polite" hidden></div>
+
                 <div class="portfolio-list">
                     {% for data in portfolio_datasets %}
-                        <div class="portfolio-item">
-                            <div class="portfolio-header">
-                                <span class="company-name">{{ data.company_name }}</span>
-                                <span class="company-sector">{{ data.company_sector }}</span>
-
-                                <i class="fas fa-trash" data-company-id="{{data.company_id}}"></i>
-                            </div>
-
+                        <article class="portfolio-item" data-company-name="{{ data.company_name }}" data-sector="{{ data.company_sector }}">
+                            <header class="holding-header">
+                                <span class="company-monogram" aria-hidden="true">{{ data.company_name|slice:':2'|upper }}</span>
+                                <div class="company-identity">
+                                    <h3>{{ data.company_name }}</h3>
+                                    <span class="company-sector">{{ data.company_sector }}</span>
+                                </div>
+                                <button class="holding-remove" type="button" data-company-id="{{ data.company_id }}" aria-label="Remove {{ data.company_name }} from portfolio" title="Remove holding">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" />
+                                    </svg>
+                                </button>
+                            </header>
                             {% if data.error %}
-                                <p class="no-market-price">{{data.error}}</p>
+                                <p class="no-market-price">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <circle cx="12" cy="12" r="9" />
+                                        <path d="M12 7v6M12 16h.01" />
+                                    </svg>
+                                    {{ data.error }}
+                                </p>
 
                             {% else %}
-                                <div class="portfolio-details">
+                                <div class="holding-quote">
+                                    <div>
+                                        <p class="metric-label">Last traded price</p>
+                                        <p class="quote-price">
+                                            <span>Rs.</span> {{ data.tail.lastTradedPrice.0|default:'—' }}
+                                        </p>
+                                    </div>
                                     {% for label, value in data.tail.items %}
-                                        {% if label == "percentchange" %}
-                                            <p class="portfolio-values">
-                                                <span class="strong">Change (%):</span>
-                                                <span class="{% if value.0|slice:':1' == '-' %}negative{% else %}positive{% endif %} values">
-                                                    {{ value.0 }}
-                                                </span>
-                                            </p>
+                                        {% if label == 'percentchange' %}
+                                            <div class="daily-movement">
+                                                <span class="movement {% if value.0|slice:':1' == '-' %}negative{% else %}positive{% endif %}"><span aria-hidden="true">
+                                                        {% if value.0|slice:':1' == '-' %}
+                                                            ↘
 
-                                        {% else %}
-                                            <p class="portfolio-values">
-                                                <span class="strong">{{ value.1 }}</span>
-                                                <span class="values">{{ value.0 }}</span>
-                                            </p>
+                                                        {% else %}
+                                                            ↗
+                                                        {% endif %}
+                                                    </span> {{ value.0 }}</span><span class="movement-label">vs. previous close</span>
+                                            </div>
                                         {% endif %}
-
                                     {% endfor %}
                                 </div>
                             {% endif %}
-
-                            <div class="when-to-sell">
+                            <dl class="position-metrics">
                                 {% for label, value in data.when_to_sell.items %}
-                                    <p class="portfolio-values">
-                                        <span class="strong">{{ label }}</span>
-
-                                        {% if label == 'PROFIT / LOSS' %}
-                                            <span class="{% if value|slice:':1' == '-' %}negative{% else %}positive{% endif %} values">{{ value }}</span>
-                                        {% else %}
-                                            <span class="values">{{ value }}</span>
-                                        {% endif %}
-                                    </p>
+                                    {% if label == 'NUMBER OF SHARES' %}
+                                        <div>
+                                            <dt>Shares held</dt>
+                                            <dd>
+                                                {{ value }}
+                                            </dd>
+                                        </div>
+                                    {% endif %}
+                                    {% if label == 'BOUGHT AT' %}
+                                        <div>
+                                            <dt>Invested amount</dt>
+                                            <dd>
+                                                <span>Rs.</span> {{ value }}
+                                            </dd>
+                                        </div>
+                                    {% endif %}
+                                    {% if label == 'SOLD AT' %}
+                                        <div>
+                                            <dt>Market value</dt>
+                                            <dd>
+                                                <span>Rs.</span> {{ value }}
+                                            </dd>
+                                        </div>
+                                    {% endif %}
                                 {% endfor %}
-                            </div>
-                        </div>
-                    {% empty %}
-                        <p class="error-message" style="display: block;">The dataset is currently empty or incomplete</p>
+                            </dl>
+                            {% if data.when_to_sell %}
+                                <div class="holding-outcome">
+                                    {% for label, value in data.when_to_sell.items %}
+                                        {% if label == 'CASH IN HAND' %}
+                                            <div>
+                                                <span>Estimated net proceeds</span><strong>Rs. {{ value }}</strong>
+                                            </div>
+                                        {% endif %}
+                                        {% if label == 'PROFIT / LOSS' %}
+                                            <div class="outcome-profit">
+                                                <span>Estimated profit / loss</span><strong class="{% if value|slice:':1' == '-' %}negative{% else %}positive{% endif %}">Rs. {{ value }}</strong>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <details class="holding-details">
+                                <summary>
+                                    <span>
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M4 19V9M10 19V5M16 19v-6M22 19V3" />
+                                        </svg>
+                                        Market &amp; sale details</span><span class="details-chevron" aria-hidden="true">⌄</span>
+                                </summary>
+                                <div class="holding-details-body">
+                                    <p class="detail-overline">
+                                        Market prices <span>NPR</span>
+                                    </p>
+                                    <dl class="market-metrics">
+                                        {% for label, value in data.tail.items %}
+                                            {% if label != 'percentchange' and label != 'lastTradedPrice' %}
+                                                <div>
+                                                    <dt>{{ value.1 }}</dt>
+                                                    <dd>
+                                                        {{ value.0 }}
+                                                    </dd>
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </dl>
+                                    {% for label, value in data.when_to_sell.items %}
+                                        {% if label != 'NUMBER OF SHARES' and label != 'BOUGHT AT' and label != 'SOLD AT' and label != 'CASH IN HAND' and label != 'PROFIT / LOSS' %}
+                                            <div class="trade-charges">
+                                                <span>Estimated sale charges</span>
+                                                <p>{{ label|title }}</p>
+                                                <strong>{{ value }}</strong>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <p class="estimate-note">Sale estimates include trade charges and may differ from the final transaction.</p>
+                                </div>
+                            </details>
+                        </article>
                     {% endfor %}
                 </div>
-            {% endif %}
+
+                <div id="holdings-empty" class="holdings-empty" {% if portfolio_datasets %}hidden{% endif %}>
+                    <span class="empty-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <rect x="3" y="7" width="18" height="14" rx="3" />
+                            <path d="M8 7V3h8v4M3 12h18M10 12v3h4v-3" />
+                        </svg>
+                    </span>
+                    <p class="empty-eyebrow">Room to grow</p>
+                    <h3>Your portfolio starts here.</h3>
+                    <p>
+                        Add your first stock to see your holdings,
+                        <br>
+                        market prices, and performance in one place.
+                    </p>
+                    <a href="#stock-input" class="empty-action">Add your first holding <span aria-hidden="true">↗</span></a>
+                </div>
+                <div id="holdings-no-results" class="holdings-empty" hidden>
+                    <span class="empty-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="10.5" cy="10.5" r="6.5" />
+                            <path d="m16 16 4.5 4.5" />
+                        </svg>
+                    </span>
+                    <h3>No matching holdings</h3>
+                    <p>Try another company name or choose a different sector.</p>
+                    <button type="button" id="clear-holdings-filters" class="empty-action">
+                        Clear filters <span aria-hidden="true">↗</span>
+                    </button>
+                </div>
+                <p class="collection-footer">
+                    <span id="holdings-visible-count" aria-live="polite">{{ portfolio_datasets|length }} holding{{ portfolio_datasets|length|pluralize }}</span><span>All amounts in NPR</span>
+                </p>
+            </section>
         </div>
     </div>
 {% endblock %}
 
-{% block js%}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% block js %}
+    <script>const urlName = "{{ request.resolver_match.url_name }}";</script>
+    <script id="companies" type="application/json">{{ companies|safe }}</script>
     <script defer src="{% static 'js/users/portfolio.js' %}"></script>
-    <script src="{% static 'js/users/stock_searching.js' %}" defer></script>
+    <script defer src="{% static 'js/users/stock_searching.js' %}"></script>
 {% endblock %}

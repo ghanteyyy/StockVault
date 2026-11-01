@@ -1,89 +1,382 @@
 {% extends 'users/root.html' %}
-{% load static %}
+{% load static l10n %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/users/target.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/users/target.css' %}?v=contrast-1">
 {% endblock %}
 
 {% block content %}
-    <div class="content">
-        <div class="card">
-            <form onsubmit="return validateStockSearchingForm()" action="" method="POST">
-                {% include 'users/stock_searching.html' %}
-                {% csrf_token %}
-            </form>
+    <div class="sv-targets">
+        <header class="targets-intro">
+            <div>
+                <p class="targets-eyebrow">
+                    <span aria-hidden="true"></span> StockVault / Price targets
+                </p>
+                <h1>
+                    A plan for <span>every price.</span>
+                </h1>
+                <p class="targets-subtitle">Set your range. Follow the market. Keep your next move in sight.</p>
+            </div>
+            <a class="targets-portfolio-link" href="{% url 'portfolio' %}">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3" y="7" width="18" height="14" rx="3" />
+                    <path d="M8 7V3h8v4M3 12h18M10 12v3h4v-3" />
+                </svg>
+                My portfolio <span aria-hidden="true">↗</span></a>
+        </header>
 
-            {% include 'errors/backend_error.html' %}
+        <div class="targets-summary" aria-label="Target summary">
+            <div class="target-summary-item">
+                <span class="summary-symbol summary-symbol--all" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="9" />
+                        <circle cx="12" cy="12" r="5" />
+                        <circle cx="12" cy="12" r="1" />
+                    </svg>
+                </span>
+                <div>
+                    <span>Total targets</span><strong id="target-total-count">{{ targets|length }}</strong>
+                </div>
+            </div>
+            <div class="target-summary-item">
+                <span class="summary-symbol summary-symbol--range" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M7 3H3v4M17 3h4v4M3 17v4h4M21 17v4h-4M7 12l3 3 7-7" />
+                    </svg>
+                </span>
+                <div>
+                    <span>In your range</span><strong id="target-in-range-count">—</strong>
+                </div>
+            </div>
+            <div class="target-summary-item">
+                <span class="summary-symbol summary-symbol--buy" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M7 17 17 7M7 7h10v10" />
+                    </svg>
+                </span>
+                <div>
+                    <span>Buy targets</span><strong id="target-buy-count">—</strong>
+                </div>
+            </div>
+            <div class="target-summary-item">
+                <span class="summary-symbol summary-symbol--sell" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M7 17 17 7M7 7v10h10" />
+                    </svg>
+                </span>
+                <div>
+                    <span>Sell targets</span><strong id="target-sell-count">—</strong>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div class="card targets-list">
-        {% if targets %}
+        {% if target_notice %}
+            <p class="target-notice" role="status">{{ target_notice }}</p>
+        {% endif %}
+        {% if errors %}
+            <div class="target-backend-errors" role="alert">
+                {% for error in errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="target-composer" aria-labelledby="new-target-title">
+            <div class="target-composer-heading">
+                <span class="composer-target-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="11" cy="13" r="8" />
+                        <circle cx="11" cy="13" r="4" />
+                        <path d="m11 13 9-9M16 3v5h5" />
+                    </svg>
+                </span>
+                <div>
+                    <h2 id="new-target-title">Set a new target</h2>
+                    <p>A price range to keep an eye on.</p>
+                </div>
+                <span class="composer-caption">Your next opportunity starts with a plan</span>
+            </div>
+            <form id="target-form" action="{% url 'target' %}" method="POST" novalidate>
+                {% csrf_token %}
+                <div class="target-form-grid">
+                    <div class="target-field company-search-field">
+                        <label for="stock-input">Company</label>
+                        <div class="target-field-control">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="10.5" cy="10.5" r="6.5" />
+                                <path d="m16 16 4.5 4.5" />
+                            </svg>
+                            <input type="text" id="stock-input" name="company" placeholder="Search for a company" value="{{ request.POST.company }}" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggestions" autocomplete="off" required>
+                        </div>
+                        <div id="suggestions" class="target-suggestions" role="listbox" aria-label="Company suggestions" hidden></div>
+                    </div>
+                    <fieldset class="target-intent">
+                        <legend>Target type</legend>
+                        <div class="target-intent-options">
+                            <label>
+                                <input type="radio" name="target_type" value="buy" {% if request.POST.target_type != 'sell' %}checked{% endif %}>
+                                <span>
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M7 17 17 7M7 7h10v10" />
+                                    </svg>
+                                    Buy</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="target_type" value="sell" {% if request.POST.target_type == 'sell' %}checked{% endif %}>
+                                <span>
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M7 17 17 7M7 7v10h10" />
+                                    </svg>
+                                    Sell</span>
+                            </label>
+                        </div>
+                    </fieldset>
+                    <div class="target-field">
+                        <label for="low-target">
+                            Low target <span>NPR</span>
+                        </label>
+                        <div class="target-field-control">
+                            <span class="target-currency" aria-hidden="true">Rs.</span>
+                            <input type="text" inputmode="decimal" id="low-target" class="low_target" name="low_target" placeholder="e.g. 250.00" value="{{ request.POST.low_target }}" required>
+                        </div>
+                    </div>
+                    <div class="target-field">
+                        <label for="high-target">
+                            High target <span>NPR</span>
+                        </label>
+                        <div class="target-field-control">
+                            <span class="target-currency" aria-hidden="true">Rs.</span>
+                            <input type="text" inputmode="decimal" id="high-target" class="high_target" name="high_target" placeholder="e.g. 300.00" value="{{ request.POST.high_target }}" required>
+                        </div>
+                    </div>
+                    <button type="submit" id="add-btn" class="create-target-button">
+                        <span aria-hidden="true">+</span> Create target
+                    </button>
+                </div>
+                <p id="target-form-error" class="target-form-error" role="alert" hidden></p>
+            </form>
+        </section>
+
+        <section class="targets-collection" aria-labelledby="targets-heading">
+            <div class="targets-collection-heading">
+                <div>
+                    <h2 id="targets-heading">Your target watchlist</h2>
+                    <p>Where the market stands against your plan.</p>
+                </div>
+                <span class="targets-snapshot"><span aria-hidden="true"></span> Market snapshot</span>
+            </div>
+            <div class="targets-toolbar">
+                <div class="target-filters" role="group" aria-label="Filter targets">
+                    <button type="button" data-target-filter="all" aria-pressed="true">All targets</button>
+                    <button type="button" data-target-filter="buy" aria-pressed="false">Buy</button>
+                    <button type="button" data-target-filter="sell" aria-pressed="false">Sell</button>
+                    <button type="button" data-target-filter="in-range" aria-pressed="false">In range</button>
+                </div>
+                <div class="target-search-control">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="10.5" cy="10.5" r="6.5" />
+                        <path d="m16 16 4.5 4.5" />
+                    </svg>
+                    <label for="target-search" class="visually-hidden">Search your targets</label>
+                    <input type="search" id="target-search" placeholder="Find a company or symbol…" autocomplete="off">
+                </div>
+            </div>
+
             <div class="target-cards">
                 {% for target in targets %}
-                    <div class="target-card">
-                        <div class="target-header">
-                            <span class="company-name">{{ target.company_name }}</span>
-                            {% if target.show_buy_sell %}
-                                <span class="target-type {{ target.target_type }}">
-                                    {{ target.target_type|title }}
+                    <article class="target-card" data-company-name="{{ target.company_name }}" data-abbreviation="{{ target.abbreviation }}" data-target-type="{{ target.target_type }}" data-low-target="{{ target.low_target|unlocalize }}" data-high-target="{{ target.high_target|unlocalize }}" data-market-price="{{ target.market_price|default_if_none:''|unlocalize }}">
+                        <header class="target-card-heading">
+                            <span class="target-company-symbol">{{ target.abbreviation }}</span>
+                            <div class="target-company-name">
+                                <h3>{{ target.company_name }}</h3>
+                                <span class="target-purpose {{ target.target_type }}">
+                                    {% if target.target_type == 'buy' %}
+                                        ↗ Buy target
+
+                                    {% else %}
+                                        ↙ Sell target
+                                    {% endif %}
                                 </span>
-                            {% endif %}
+                            </div>
+                            <div class="target-card-actions">
+                                <button class="target-edit" type="button" data-target-id="{{ target.id }}" data-company-name="{{ target.company_name }}" data-abbreviation="{{ target.abbreviation }}" data-low-target="{{ target.low_target|unlocalize }}" data-high-target="{{ target.high_target|unlocalize }}" data-target-type="{{ target.target_type }}" aria-label="Edit {{ target.target_type }} target for {{ target.company_name }}" title="Edit target">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="m15 5 4 4M4 20l5-1L21 7a2.8 2.8 0 0 0-4-4L5 15l-1 5Z" />
+                                    </svg>
+                                </button>
+                                <button class="target-delete" type="button" data-target-id="{{ target.id }}" data-company-name="{{ target.company_name }}" data-target-type="{{ target.target_type }}" data-delete-url="{% url 'delete-target' target.company_id %}" aria-label="Remove {{ target.target_type }} target for {{ target.company_name }}" title="Remove target">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </header>
+                        <div class="target-market-row">
+                            <div>
+                                <p class="target-metric-label">Current market price</p>
+                                <p class="target-market-price">
+                                    {% if target.market_price != None %}
+                                        <span>Rs.</span> <strong data-format-price="{{ target.market_price|unlocalize }}">{{ target.market_price|floatformat:2 }}</strong>
+
+                                    {% else %}
+                                        <strong class="unavailable-price">Unavailable</strong>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <span class="target-status">
+                                {% if target.market_price == None %}
+                                    Price unavailable
+
+                                {% elif target.show_buy_sell %}
+                                    In range
+
+                                {% elif target.market_price < target.low_target %}
+                                    Below range
+
+                                {% else %}
+                                    Above range
+                                {% endif %}
+                            </span>
                         </div>
-                        <div class="target-details">
-                            <p><strong>Low Target:</strong> {{ target.low_target }}</p>
-                            <p><strong>High Target:</strong> {{ target.high_target }}</p>
-                            <p><strong>Current Market Price:</strong> {{ target.market_price }}</p>
+                        <div class="target-range">
+                            <div class="target-range-track" aria-hidden="true">
+                                <span class="target-range-fill"></span><span class="target-range-position"></span>
+                            </div>
+                            <div class="target-range-labels">
+                                <div>
+                                    <span>Low target</span><strong>Rs. <span data-format-price="{{ target.low_target|unlocalize }}">{{ target.low_target|floatformat:2 }}</span></strong>
+                                </div>
+                                <span class="range-direction" aria-hidden="true">→</span>
+                                <div>
+                                    <span>High target</span><strong>Rs. <span data-format-price="{{ target.high_target|unlocalize }}">{{ target.high_target|floatformat:2 }}</span></strong>
+                                </div>
+                            </div>
                         </div>
-
-                        <div class="target-actions">
-                            <button
-                                class="edit-btn"
-                                data-company_name="{{target.company_name}}"
-                                data-abbreviation="{{target.abbreviation}}"
-                                data-low_target="{{target.low_target}}"
-                                data-high_target="{{target.high_target}}"
-                                data-target_type="{{target.target_type}}"
-                                onclick="displayEditTargetForm(this)"
-                                aria-label="Edit target for {{target.company_name}}">
-                                <i class="fas fa-edit"></i>
-                            </button>
-
-                            <a href="{% url 'delete-target' target.company_id %}" class="delete-btn" aria-label="Delete target for {{target.company_name}}">
-                                <i class="fas fa-trash-alt"></i>
-                            </a>
-                        </div>
-
-
-                    </div>
+                        <footer class="target-card-footer">
+                            <span class="target-range-caption">Your target price range</span>
+                            {% if target.created_date %}<span>Added {{ target.created_date }}</span>{% endif %}
+                        </footer>
+                    </article>
                 {% endfor %}
             </div>
 
-            <!-- Edit form remains unchanged -->
-            <div class="edit_target">
-                <form action="{% url 'edit-target' %}" onsubmit="return validateEditTargetForm()" class="edit" method="POST">
-                    {% csrf_token %}
-                    <span class="close-btn" onclick="hideEditTargetForm()">&times;</span>
-
-                    <h2>Edit Target</h2>
-                    <p class="company_title"></p>
-                    <p class="edit-error-message" style="display:none;"></p>
-
-                    <input type="text" name="company_abbr" id="edit_company_abbr" hidden>
-                    <input type="text" id="edit_low_target" placeholder="Low Target" name="edit_low_target">
-                    <input type="text" id="edit_high_target" placeholder="High Target" name="edit_high_target">
-                    <button type="submit">Update</button>
-                </form>
+            <div id="targets-empty" class="targets-empty" {% if targets %}hidden{% endif %}>
+                <span class="targets-empty-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="11" cy="13" r="8" />
+                        <circle cx="11" cy="13" r="4" />
+                        <path d="m11 13 9-9M16 3v5h5" />
+                    </svg>
+                </span>
+                <p class="empty-target-eyebrow">A little direction goes a long way</p>
+                <h3>Put your next move on the map.</h3>
+                <p>
+                    Create your first price target to start following
+                    <br>
+                    the companies you have your eye on.
+                </p>
+                <a href="#stock-input">Set your first target <span aria-hidden="true">↗</span></a>
             </div>
+            <div id="targets-no-results" class="targets-empty" hidden>
+                <span class="targets-empty-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="10.5" cy="10.5" r="6.5" />
+                        <path d="m16 16 4.5 4.5" />
+                    </svg>
+                </span>
+                <h3>No matching targets</h3>
+                <p>Try another company, symbol, or target filter.</p>
+                <button type="button" id="clear-target-filters">
+                    Clear filters <span aria-hidden="true">↗</span>
+                </button>
+            </div>
+            <p class="targets-collection-footer">
+                <span id="target-visible-count" aria-live="polite">{{ targets|length }} target{{ targets|length|pluralize }}</span><span>All prices in NPR / share</span>
+            </p>
+        </section>
 
-        {% else %}
-            <p class="error-message" style="display: block;">No Targets Added Yet</p>
-        {% endif %}
+        <dialog id="edit-target-dialog" class="target-dialog" aria-labelledby="edit-target-title">
+            <form id="edit-target-form" action="{% url 'edit-target' %}" method="POST" novalidate>
+                {% csrf_token %}
+                <input type="hidden" id="edit-target-id" name="target_id">
+                <input type="hidden" name="company_abbr" id="edit_company_abbr">
+                <header class="target-dialog-heading">
+                    <span class="target-dialog-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="m15 5 4 4M4 20l5-1L21 7a2.8 2.8 0 0 0-4-4L5 15l-1 5Z" />
+                        </svg>
+                    </span>
+                    <button type="button" class="target-dialog-close" data-close-dialog aria-label="Close edit target">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="m6 6 12 12M6 18 18 6" />
+                        </svg>
+                    </button>
+                </header>
+                <p class="target-dialog-eyebrow" id="edit-target-type"></p>
+                <h2 id="edit-target-title">Refine your price range.</h2>
+                <p id="edit-company-name" class="dialog-company-name"></p>
+                <div class="dialog-price-fields">
+                    <div class="target-field">
+                        <label for="edit_low_target">
+                            Low target <span>NPR</span>
+                        </label>
+                        <div class="target-field-control">
+                            <span class="target-currency" aria-hidden="true">Rs.</span>
+                            <input type="text" inputmode="decimal" id="edit_low_target" name="edit_low_target" required>
+                        </div>
+                    </div>
+                    <div class="target-field">
+                        <label for="edit_high_target">
+                            High target <span>NPR</span>
+                        </label>
+                        <div class="target-field-control">
+                            <span class="target-currency" aria-hidden="true">Rs.</span>
+                            <input type="text" inputmode="decimal" id="edit_high_target" name="edit_high_target" required>
+                        </div>
+                    </div>
+                </div>
+                <p id="edit-target-error" class="target-form-error" role="alert" hidden></p>
+                <div class="target-dialog-actions">
+                    <button type="button" class="dialog-cancel" data-close-dialog>Cancel</button>
+                    <button type="submit" class="dialog-save">
+                        Save changes <span aria-hidden="true">→</span>
+                    </button>
+                </div>
+            </form>
+        </dialog>
+        <dialog id="delete-target-dialog" class="target-dialog delete-target-dialog" aria-labelledby="delete-target-title">
+            <form id="delete-target-form" method="POST">
+                {% csrf_token %}
+                <input type="hidden" id="delete-target-id" name="target_id">
+                <header class="target-dialog-heading">
+                    <span class="target-dialog-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" />
+                        </svg>
+                    </span>
+                    <button type="button" class="target-dialog-close" data-close-dialog aria-label="Close remove target">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="m6 6 12 12M6 18 18 6" />
+                        </svg>
+                    </button>
+                </header>
+                <p id="delete-target-type" class="target-dialog-eyebrow"></p>
+                <h2 id="delete-target-title">Remove this target?</h2>
+                <p id="delete-company-name" class="dialog-company-name"></p>
+                <p class="delete-target-description">This price range will be removed from your target watchlist.</p>
+                <div class="target-dialog-actions">
+                    <button type="button" class="dialog-cancel" data-close-dialog>Keep target</button>
+                    <button type="submit" class="dialog-remove">Remove target</button>
+                </div>
+            </form>
+        </dialog>
+        {{ target_companies|json_script:'target-companies' }}
     </div>
-
 {% endblock %}
 
-{% block js%}
-    <script src="{% static 'js/users/target.js' %}" defer></script>
-    <script src="{% static 'js/users/stock_searching.js' %}" defer></script>
+{% block js %}
+    <script src="{% static 'js/users/target.js' %}?v=2" defer></script>
 {% endblock %}

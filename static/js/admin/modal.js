@@ -2,7 +2,6 @@ const modal = document.getElementById('modal');
 const closeBtn = document.getElementById('closeBtn');
 const overlay = modal.querySelector('.modal__overlay');
 
-
 function openModal() {
     modal.classList.remove('is-hidden');
     modal.setAttribute('aria-hidden', 'false');
@@ -13,10 +12,12 @@ function openModal() {
     document.body.classList.add('modal-open');
 }
 
-
 function closeModal() {
     const error = modal.querySelector('.error-message');
-    if (error) error.style.display = 'none';
+
+    if(error){
+        error.style.display = 'none';
+    }
 
     modal.classList.add('is-hidden');
     modal.setAttribute('aria-hidden', 'true');
@@ -28,7 +29,7 @@ function closeModal() {
 }
 
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !modal.classList.contains('is-hidden')) {
+    if(e.key === 'Escape' && !modal.classList.contains('is-hidden')){
         closeModal();
     }
 });

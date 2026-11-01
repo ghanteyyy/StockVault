@@ -1,4 +1,4 @@
-function validateTestonomialsForm(){
+function validateTestonomialsForm() {
     form_error = document.querySelector('.form-error-message');
     testonomial = document.querySelector('.testonomial-input').value.trim();
 

@@ -1,100 +1,83 @@
-const form = document.querySelector('.modal__content');
-const add_button = document.querySelector('.btn-add');
-const edit_buttons = document.querySelectorAll('.btn-edit');
-const delete_buttons = document.querySelectorAll('.btn-delete');
-const modal_error = document.querySelector('.modal')
+(() => {
+    'use strict';
 
-add_button.addEventListener('click', (e) => {
-    const question_field = document.querySelector('#question');
-    const answer_field = document.querySelector('#answer');
+    function initialize() {
+        const create = document.querySelector('#faq-create-dialog form');
+        const edit = document.querySelector('#faq-edit-dialog form');
+        const remove = document.querySelector('#faq-delete-dialog form');
+        const payload = document.querySelector('#faq-records');
 
-    answer_field.value = '';
-    question_field.value = '';
+        if(!create || !edit || !remove || !payload || create.dataset.catalogReady === 'true'){
+            return
+        };
 
-    form.action = `${window.location.origin}/admin/faq/add`;
-    openModal();
-});
+        let records;
 
+        try{
+            records = JSON.parse(payload.textContent);
+        }
+        catch{
+            return;
+        }
 
-delete_buttons.forEach((delete_button) => {
-    delete_button.addEventListener('click', async (e) => {
-        const url = new URL('/admin/faq/delete', location.origin);
-        url.searchParams.set('faq_id', delete_button.dataset.faq_id);
+        create.dataset.catalogReady = 'true';
 
-        // ajax request
-        const res = await fetch(url, {
-            method: 'GET',
-            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        function updateCount(form) {
+            const answer = form.elements.namedItem('faq_answer');
+            const count = form.querySelector('[data-character-count]');
+
+            if(answer && count){
+                count.textContent = String(answer.value.length)
+            };
+        }
+
+        [create, edit].forEach(form => {
+            form.elements.namedItem('faq_answer').addEventListener('input', () => updateCount(form));
+            updateCount(form);
         });
 
-        response = await (res.headers.get('content-type')?.includes('json') ? res.json() : res.text());
+        document.querySelectorAll('[data-dialog-open="faq-create-dialog"]').forEach(button => {
+            button.addEventListener('click', () => {
+                create.reset();
+                updateCount(create);
+            });
+        });
 
-        alert(response.message);
+        document.querySelectorAll('[data-faq-edit]').forEach(button => {
+            button.addEventListener('click', () => {
+                const record = records[button.dataset.id];
 
-        window.location.reload();
+                if(!record){
+                    return
+                };
 
-    });
-})
+                edit.elements.namedItem('faq_id').value = button.dataset.id;
+                edit.elements.namedItem('faq_question').value = record.question;
+                edit.elements.namedItem('faq_answer').value = record.answer;
 
+                updateCount(edit);
+            });
+        });
 
-edit_buttons.forEach((button, index) => {
-    button.addEventListener('click', () => {
-        const question_field = document.querySelector('#question');
-        const answer_field = document.querySelector('#answer');
-        const faq_id_field = document.querySelector('#faq_id');
+        document.querySelectorAll('[data-faq-delete]').forEach(button => {
+            button.addEventListener('click', () => {
+                const record = records[button.dataset.id];
 
-        form.action = `${window.location.origin}/admin/faq/edit`;
+                if(!record){
+                    return
+                };
 
-        faq_id_field.value = button.dataset.submit_href == 'faq/edit' ? button.dataset.faq_id : '';
-        answer_field.value = button.dataset.submit_href == 'faq/edit' ? button.dataset.faq_answer : '';
-        question_field.value = button.dataset.submit_href == 'faq/edit' ? button.dataset.faq_question : '';
-
-        openModal();
-    });
-});
-
-
-form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const question_field = document.querySelector('#question');
-    const answer_field = document.querySelector('#answer');
-
-    const modal_empy_field_error = document.querySelector('.modal-error-message');
-    const modal_response_message = document.querySelector('.modal-response-message');
-
-    if(!question_field.value || !answer_field.value){
-        modal_empy_field_error.style.display = 'block';
-
-        setTimeout(function() {
-            $(modal_empy_field_error).fadeOut('fast');
-        }, 2000);
-
-        return false;
+                remove.elements.namedItem('faq_id').value = button.dataset.id;
+                remove.querySelector('[data-delete-faq-question]').textContent = record.question || 'Untitled question';
+            });
+        });
     }
 
-    // ajax request
-    const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-    const res = await fetch(form.action, {
-        method: 'POST',
-        body: new FormData(e.target),
-        headers: { 'X-CSRFToken': csrf, 'X-Requested-With': 'XMLHttpRequest' }
-    });
-
-    response = await (res.headers.get('content-type')?.includes('json') ? res.json() : res.text());
-
-    modal_type = response.status ? 'success-message' : 'error-message';
-    modal_response_message.innerHTML = response.message;
-    modal_response_message.classList.add(modal_type)
-    modal_response_message.style.display = 'block';
-
-    if(form.action.split('/').slice(-2).join('/') == 'faq/add'){
-        question_field.value = '';
-        answer_field.value = '';
+    if(document.readyState === 'loading'){
+        document.addEventListener('DOMContentLoaded', initialize, { once: true });
     }
 
-    setTimeout(function() {
-        $(modal_response_message).fadeOut('fast');
-    }, 2000);
-});
+    else{
+        initialize();
+    }
+})();

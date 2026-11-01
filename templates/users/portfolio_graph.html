@@ -2,8 +2,8 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/users/dashboard.css' %}">
-    <link rel="stylesheet" href="{% static 'css/users/portfolio_graph.css' %}">
+    <link rel="stylesheet" href="{% static 'css/users/dashboard.css' %}?v=contrast-1">
+    <link rel="stylesheet" href="{% static 'css/users/portfolio_graph.css' %}?v=contrast-1">
 {% endblock %}
 
 {% block content %}
@@ -12,7 +12,7 @@
             <option selected disabled hidden>Graph Data Type</option>
 
             {% for graph_option in graph_options %}
-                <option value="{{graph_option}}">{{graph_option}}</option>
+                <option value="{{graph_option}}">{{ graph_option }}</option>
             {% endfor %}
         </select>
     </div>

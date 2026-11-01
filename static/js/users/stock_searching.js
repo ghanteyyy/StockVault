@@ -7,10 +7,9 @@ const error_searching_stocks = document.querySelector('.error-message');
 const companiesElement = document.querySelector('#companies');
 const stockData = JSON.parse(companiesElement.textContent);
 
-
-function validateStockSearchingForm(){
+function validateStockSearchingForm() {
     input_value = input.value;
-    result = {"message": '', 'success': false}
+    result = { "message": '', 'success': false }
 
     if(!input_value){
         result.message = 'Please complete all required fields before submitting'
@@ -43,13 +42,11 @@ function validateStockSearchingForm(){
     return result.success;
 }
 
-
-function checkValidCompany(query){
+function checkValidCompany(query) {
     return stockData.filter(stock =>
         stock.toLowerCase() == query.toLowerCase()
     );
 }
-
 
 function filterSuggestions(query) {
     return stockData.filter(stock =>
@@ -57,12 +54,11 @@ function filterSuggestions(query) {
     );
 }
 
-
 function showSuggestions(suggestionList) {
     suggestions.innerHTML = '';
     const wrapperRect = inputWrapper.getBoundingClientRect();
 
-    if (suggestionList.length > 0) {
+    if(suggestionList.length > 0){
         suggestionList.forEach(stock => {
             const div = document.createElement('div');
 
@@ -79,28 +75,29 @@ function showSuggestions(suggestionList) {
 
         suggestions.style.display = 'block';
 
-    } else {
+    }
+
+    else{
         suggestions.style.display = 'none';
     }
 }
 
-
 input.addEventListener('input', () => {
     const query = input.value.trim();
-    if (query) {
+    if(query){
         const filtered = filterSuggestions(query);
         showSuggestions(filtered);
-    } else {
+    }
+
+    else{
         suggestions.style.display = 'none';
     }
 });
-
 
 document.addEventListener('click', (event) => {
-    if (!inputWrapper.contains(event.target)) {
+    if(!inputWrapper.contains(event.target)){
         suggestions.style.display = 'none';
     }
 });
-
 
 window.validateStockSearchingForm = validateStockSearchingForm;

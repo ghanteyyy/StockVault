@@ -2,41 +2,225 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/users/wishlist.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/users/wishlist.css' %}?v=contrast-1">
 {% endblock %}
 
 {% block content %}
-    <div class="content">
-        <div class="card">
-            <form onsubmit="return validateStockSearchingForm()" action="" method="POST">
+    <div class="sv-wishlist">
+        <header class="wishlist-intro">
+            <div>
+                <p class="wishlist-eyebrow">
+                    <span aria-hidden="true"></span> StockVault / Wishlist
+                </p>
+                <h1>
+                    Good ideas, <span>kept close.</span>
+                </h1>
+                <p class="wishlist-subtitle">A place for the companies you’d like to come back to.</p>
+            </div>
+            <a class="wishlist-portfolio-link" href="{% url 'portfolio' %}">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3" y="7" width="18" height="14" rx="3" />
+                    <path d="M8 7V3h8v4M3 12h18M10 12v3h4v-3" />
+                </svg>
+                My portfolio <span aria-hidden="true">↗</span></a>
+        </header>
+
+        {% if wishlist_notice %}
+            <p class="wishlist-notice" role="status">{{ wishlist_notice }}</p>
+        {% endif %}
+        {% if errors %}
+            <div class="wishlist-backend-errors" role="alert">
+                {% for error in errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="wishlist-composer" id="save-company" aria-labelledby="wishlist-composer-title">
+            <div class="wishlist-composer-copy">
+                <span class="wishlist-composer-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 3h12v18l-6-4-6 4V3Z" />
+                        <path d="M9 8h6M12 5v6" />
+                    </svg>
+                </span>
+                <p class="wishlist-composer-eyebrow">Worth keeping an eye on</p>
+                <h2 id="wishlist-composer-title">Room for your next idea.</h2>
+                <p>
+                    Save a company today.
+                    <br>
+                    Pick up where you left off, anytime.
+                </p>
+            </div>
+            <form id="wishlist-form" class="wishlist-add-form" action="{% url 'wishlist' %}" method="POST" novalidate>
                 {% csrf_token %}
-                {% include 'users/stock_searching.html' %}
-            </form>
-
-            {% include 'errors/backend_error.html' %}
-        </div>
-
-        <div class="card company-list">
-            {% for data in saved_companies %}
-                <div class="company">
-                    <p>{{ data.company_name }}</p>
-
-                    <a href="{% url 'wishlist' %}?company_id={{data.id}}&action=delete" class="delete-btn">
-                        <i class="fas fa-trash-alt"></i>
-                    </a>
+                <input type="hidden" name="action" value="add">
+                <label for="stock-input">Add to your shortlist</label>
+                <div class="wishlist-add-controls">
+                    <div class="wishlist-company-search">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="10.5" cy="10.5" r="6.5" />
+                            <path d="m16 16 4.5 4.5" />
+                        </svg>
+                        <input type="text" id="stock-input" name="company" placeholder="Search company name or symbol" value="{{ request.POST.company }}" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggestions" aria-describedby="wishlist-availability-text wishlist-form-error" autocomplete="off" {% if not available_company_count %}disabled{% endif %} required>
+                        <div id="suggestions" class="wishlist-suggestions" role="listbox" aria-label="Company suggestions" hidden></div>
+                    </div>
+                    <button type="submit" id="add-btn" class="wishlist-add-button" {% if not available_company_count %}disabled{% endif %}>
+                        <span aria-hidden="true">+</span> Save company
+                    </button>
                 </div>
-            {% empty %}
-                <p class="error-message" style="display: block;">No wishlist</p>
-            {% endfor %}
-        </div>
+                <p class="wishlist-availability" id="wishlist-availability-text">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M12 11v6M12 7h.01" />
+                    </svg>
+                    {% if available_company_count %}
+                        {{ available_company_count }} compan{{ available_company_count|pluralize:'y,ies' }} available to add
+
+                    {% else %}
+                        No companies available to add right now.
+                    {% endif %}
+                </p>
+                <p id="wishlist-form-error" class="wishlist-form-error" role="alert" hidden></p>
+            </form>
+        </section>
+
+        <section class="wishlist-collection" aria-labelledby="wishlist-collection-title">
+            <div class="wishlist-collection-heading">
+                <div>
+                    <h2 id="wishlist-collection-title">
+                        Your shortlist <span id="wishlist-total-count">{{ saved_company_count }}</span>
+                    </h2>
+                    <p>The companies you’ve saved, ready when you are.</p>
+                </div>
+                <span class="wishlist-sector-summary">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="m12 3 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 16l9 5 9-5" />
+                    </svg>
+                    <strong id="wishlist-sector-count">{{ wishlist_sector_count }}</strong> sector{{ wishlist_sector_count|pluralize }}</span>
+            </div>
+            <div class="wishlist-toolbar">
+                <div class="wishlist-search-control">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="10.5" cy="10.5" r="6.5" />
+                        <path d="m16 16 4.5 4.5" />
+                    </svg>
+                    <label class="visually-hidden" for="wishlist-search">Search saved companies</label>
+                    <input type="search" id="wishlist-search" placeholder="Find a saved company…" autocomplete="off">
+                </div>
+                <div class="wishlist-toolbar-selects">
+                    <label class="visually-hidden" for="wishlist-sector-filter">Filter saved companies by sector</label>
+                    <select id="wishlist-sector-filter">
+                        <option value="">All sectors</option>
+                    </select>
+                    <label class="visually-hidden" for="wishlist-sort">Sort saved companies</label>
+                    <select id="wishlist-sort">
+                        <option value="asc">Name: A–Z</option>
+                        <option value="desc">Name: Z–A</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="wishlist-grid" class="wishlist-grid">
+                {% for company in saved_companies %}
+                    <article class="wishlist-card" data-company-name="{{ company.company_name }}" data-abbreviation="{{ company.abbreviation }}" data-sector="{{ company.sector }}">
+                        <div class="wishlist-card-top">
+                            <span class="wishlist-company-symbol">{{ company.abbreviation }}</span><span class="wishlist-saved-mark" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M6 3h12v18l-6-4-6 4V3Z" />
+                                </svg>
+                            </span>
+                        </div>
+                        <h3>{{ company.company_name }}</h3>
+                        <div class="wishlist-card-footer">
+                            <span class="wishlist-company-sector"><span aria-hidden="true"></span>{{ company.sector|default:'Uncategorized' }}</span>
+                            <button type="button" class="wishlist-remove" data-wishlist-id="{{ company.id }}" data-company-name="{{ company.company_name }}" data-abbreviation="{{ company.abbreviation }}" aria-label="Remove {{ company.company_name }} from wishlist" title="Remove saved company">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+
+            <div id="wishlist-empty" class="wishlist-empty" {% if saved_companies %}hidden{% endif %}>
+                <span class="wishlist-empty-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 3h12v18l-6-4-6 4V3Z" />
+                        <path d="M9 8h6M12 5v6" />
+                    </svg>
+                </span>
+                <p class="wishlist-empty-eyebrow">A little space for possibility</p>
+                <h3>Your next idea belongs here.</h3>
+                <p>
+                    Save a company to build a shortlist
+                    <br>
+                    you can return to whenever you’re ready.
+                </p>
+                {% if available_company_count %}
+                    <button type="button" class="wishlist-empty-action">
+                        Save your first company <span aria-hidden="true">↗</span>
+                    </button>
+                {% endif %}
+            </div>
+            <div id="wishlist-no-results" class="wishlist-empty" hidden>
+                <span class="wishlist-empty-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="10.5" cy="10.5" r="6.5" />
+                        <path d="m16 16 4.5 4.5" />
+                    </svg>
+                </span>
+                <h3>No matching companies</h3>
+                <p>Try another name, symbol, or sector.</p>
+                <button type="button" id="clear-wishlist-filters">
+                    Clear filters <span aria-hidden="true">↗</span>
+                </button>
+            </div>
+            <p class="wishlist-collection-footer">
+                <span id="wishlist-visible-count" aria-live="polite">{{ saved_company_count }} saved compan{{ saved_company_count|pluralize:'y,ies' }}</span><span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 3h12v18l-6-4-6 4V3Z" />
+                    </svg>
+                    Your personal collection</span>
+            </p>
+        </section>
+
+        <dialog id="remove-wishlist-dialog" class="wishlist-dialog" aria-labelledby="remove-wishlist-title">
+            <form id="remove-wishlist-form" action="{% url 'wishlist' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" id="wishlist-remove-id" name="wishlist_id">
+                <header class="wishlist-dialog-heading">
+                    <span class="wishlist-dialog-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M6 3h12v18l-6-4-6 4V3Z" />
+                            <path d="M9 9h6" />
+                        </svg>
+                    </span>
+                    <button type="button" class="wishlist-dialog-close" data-close-dialog aria-label="Close remove company dialog">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="m6 6 12 12M6 18 18 6" />
+                        </svg>
+                    </button>
+                </header>
+                <p id="wishlist-remove-symbol" class="wishlist-dialog-eyebrow"></p>
+                <h2 id="remove-wishlist-title">Remove from your shortlist?</h2>
+                <p id="wishlist-remove-company" class="wishlist-dialog-company"></p>
+                <p class="wishlist-dialog-description">You can save this company again whenever you like.</p>
+                <div class="wishlist-dialog-actions">
+                    <button type="button" class="wishlist-dialog-cancel" data-close-dialog>Keep company</button>
+                    <button type="submit" class="wishlist-dialog-confirm">Remove company</button>
+                </div>
+            </form>
+        </dialog>
+        {{ wishlist_companies|json_script:'wishlist-companies' }}
     </div>
 {% endblock %}
 
 {% block js %}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{% static 'js/users/stock_searching.js' %}" defer></script>
-
-    <script id="companies" type="application/json">
-        {{ companies|safe }}
-    </script>
+    <script src="{% static 'js/users/wishlist.js' %}?v=2" defer></script>
 {% endblock %}

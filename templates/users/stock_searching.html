@@ -1,7 +1,7 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/users/stock_searching.css' %}">
+    <link rel="stylesheet" href="{% static 'css/users/stock_searching.css' %}?v=contrast-1">
 {% endblock %}
 
 <div class="input-wrapper">
@@ -54,7 +54,7 @@
                 <option selected disabled hidden>Graph Data Type</option>
 
                 {% for graph_option in graph_options %}
-                    <option value="{{graph_option}}">{{graph_option}}</option>
+                    <option value="{{graph_option}}">{{ graph_option }}</option>
                 {% endfor %}
             </select>
 
@@ -62,7 +62,7 @@
                 <option selected disabled hidden>Algorithm</option>
 
                 {% for algorithm_option in algorithm_options %}
-                    <option value="{{algorithm_option}}">{{algorithm_option}}</option>
+                    <option value="{{algorithm_option}}">{{ algorithm_option }}</option>
                 {% endfor %}
             </select>
         {% endif %}
@@ -73,7 +73,7 @@
 
         <div id="suggestions" class="suggestions"></div>
     </div>
-    <p class="error-message"> </p>
+    <p class="error-message"></p>
 </div>
 
 {% block js %}

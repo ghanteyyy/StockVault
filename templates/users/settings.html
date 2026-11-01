@@ -2,71 +2,275 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/users/settings.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/users/settings.css' %}?v=contrast-1">
 {% endblock %}
 
 {% block content %}
-    <meta name="csrf-token" content="{{ csrf_token }}">
-
-    <div class="content">
-        <div class="profile-section">
-            <div class="profile-image-container">
-                <img id="image-preview" class="profile-image" src="{{request.user.profile_image.url}}" alt="Profile Image" onclick="document.getElementById('profile_image').click()">
+    <div class="sv-settings" data-settings-url="{% url 'settings' %}">
+        <header class="settings-intro">
+            <div>
+                <p class="settings-eyebrow">
+                    <span aria-hidden="true"></span> StockVault / Settings
+                </p>
+                <h1>
+                    A space that’s <span>yours.</span>
+                </h1>
+                <p class="settings-subtitle">Your profile, your details, and the way you keep your account secure.</p>
             </div>
+            <a href="{% url 'portfolio' %}" class="settings-portfolio-link">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3" y="7" width="18" height="14" rx="3" />
+                    <path d="M8 7V3h8v4M3 12h18M10 12v3h4v-3" />
+                </svg>
+                My portfolio <span aria-hidden="true">↗</span></a>
+        </header>
 
-            <p>Profile picture PNG, JPEG under 15MB</p>  <!-- This line -->
-
-            <input type="file" id="profile_image" accept="image/png, image/jpeg" onchange="previewImage()">
-        </div>
-
-
-        <div class="form-group-container">
-            <div class="form-group">
-                <label>Full name</label>
-
-                <div class="name-group">
-                    <div class="form-group">
-                        <p class="no_form_type">{{request.user.name}}</p>
+        <div class="settings-workspace">
+            <aside class="settings-rail" aria-label="Your profile and account overview">
+                <section class="settings-profile-card" aria-labelledby="profile-card-title">
+                    <div class="profile-card-cover">
+                        <span class="profile-cover-detail" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z" />
+                                <path d="m8 12 3 3 5-6" />
+                            </svg>
+                        </span>
                     </div>
-                </div>
+                    <div class="profile-card-body">
+                        <div class="settings-avatar">
+                            <span id="photo-placeholder" {% if settings_profile_image_url %}hidden{% endif %}><span id="profile-initials">{{ request.user.name|slice:':2'|upper|default:'SV' }}</span></span>
+                            <img id="image-preview" {% if settings_profile_image_url %}src="{{ settings_profile_image_url }}"{% else %}hidden{% endif %} alt="Your profile photo">
+                        </div>
+                        <p class="profile-card-eyebrow" id="profile-card-title">Your personal account</p>
+                        <h2 id="profile-display-name">{{ request.user.name }}</h2>
+                        <p class="profile-card-email">{{ request.user.email }}</p>
+                        <form id="photo-form" class="photo-form" action="{% url 'settings' %}" method="POST" enctype="multipart/form-data" novalidate>
+                            {% csrf_token %}
+                            <input type="hidden" name="change_profile" value="change_profile">
+                            <input type="file" id="profile_image" name="profile_image" accept="image/png,image/jpeg" hidden>
+                            <button type="button" id="choose-photo" class="choose-photo-button">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M8 6 9.5 3h5L16 6h4a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h4Z" />
+                                    <circle cx="12" cy="13" r="4" />
+                                </svg>
+                                Choose photo
+                            </button>
+                            <p class="photo-upload-hint">JPG or PNG. Up to 5 MB.</p>
+                            <p id="photo-file-name" class="photo-file-name" aria-live="polite"></p>
+                            <div class="photo-save-actions">
+                                <button type="submit" id="save-photo" class="photo-save-button" disabled>Save photo</button>
+                                <button type="button" id="cancel-photo" class="photo-cancel-button" hidden>Cancel</button>
+                            </div>
+                            <p id="photo-feedback" class="settings-feedback" role="status" aria-live="polite" hidden></p>
+                        </form>
+                    </div>
+                </section>
+
+                <section class="settings-account-card" aria-labelledby="account-overview-title">
+                    <div class="account-card-heading">
+                        <span aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="8" r="4" />
+                                <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
+                            </svg>
+                        </span>
+                        <h2 id="account-overview-title">Account overview</h2>
+                    </div>
+                    <dl class="account-overview-list">
+                        <div>
+                            <dt>Member since</dt>
+                            <dd>
+                                {{ request.user.date_joined|date:'F j, Y'|default:'Not available' }}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt>Last sign-in</dt>
+                            <dd>
+                                {% if request.user.last_login %}
+                                    {{ request.user.last_login|date:'M j, Y' }}<span>{{ request.user.last_login|date:'g:i A T' }}</span>
+
+                                {% else %}
+                                    Not recorded
+                                {% endif %}
+                            </dd>
+                        </div>
+                    </dl>
+                    <p class="account-overview-note">Your account details, all in one place.</p>
+                </section>
+
+                <nav class="settings-jump-links" aria-label="Settings sections">
+                    <a href="#personal-details"><span>Personal details</span><span aria-hidden="true">↗</span></a><a href="#account-security"><span>Password &amp; security</span><span aria-hidden="true">↗</span></a>
+                </nav>
+            </aside>
+
+            <div class="settings-main">
+                <section class="settings-section" id="personal-details" aria-labelledby="personal-details-title">
+                    <header class="settings-section-heading">
+                        <div>
+                            <p class="settings-section-eyebrow">Make yourself at home</p>
+                            <h2 id="personal-details-title">Personal details</h2>
+                            <p>A few details that make this account yours.</p>
+                        </div>
+                        <span class="settings-section-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="8" r="4" />
+                                <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
+                            </svg>
+                        </span>
+                    </header>
+                    <form id="profile-details-form" action="{% url 'settings' %}" method="POST" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="update_details" value="update_details">
+                        <div class="settings-fields">
+                            <div class="settings-field settings-field--full">
+                                <label for="profile-name">Full name</label>
+                                <input type="text" id="profile-name" name="name" value="{{ request.user.name }}" maxlength="100" autocomplete="name" aria-describedby="profile-name-error" required>
+                                <p id="profile-name-error" class="settings-field-error" hidden></p>
+                            </div>
+                            <div class="settings-field settings-field--full">
+                                <span class="settings-field-label" id="settings-email-label">Sign-in email</span>
+                                <div class="settings-email-display" aria-labelledby="settings-email-label">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <rect x="3" y="5" width="18" height="14" rx="3" />
+                                        <path d="m3 7 9 6 9-6" />
+                                    </svg>
+                                    <span>{{ request.user.email }}</span><span class="email-account-label">Account email</span>
+                                </div>
+                                <p class="settings-field-help">Used to sign in and recover access to your account.</p>
+                            </div>
+                            <div class="settings-field">
+                                <label for="profile-gender">Gender</label>
+                                <select id="profile-gender" name="gender" aria-describedby="profile-gender-error" required>
+                                    <option value="" disabled {% if not request.user.gender %}selected{% endif %}>Select gender</option>
+                                    <option value="male" {% if request.user.gender == 'male' %}selected{% endif %}>Male</option>
+                                    <option value="female" {% if request.user.gender == 'female' %}selected{% endif %}>Female</option>
+                                    <option value="others" {% if request.user.gender == 'others' %}selected{% endif %}>Other</option>
+                                </select>
+                                <p id="profile-gender-error" class="settings-field-error" hidden></p>
+                            </div>
+                            <div class="settings-field">
+                                <label for="profile-birth-date">
+                                    Date of birth <span>Optional</span>
+                                </label>
+                                <input type="date" id="profile-birth-date" name="date_of_birth" value="{{ request.user.date_of_birth|date:'Y-m-d' }}" max="{{ settings_today }}" autocomplete="bday" aria-describedby="profile-birth-date-error">
+                                <p id="profile-birth-date-error" class="settings-field-error" hidden></p>
+                            </div>
+                        </div>
+                        <p id="profile-feedback" class="settings-feedback" role="status" aria-live="polite" hidden></p>
+                        <footer class="settings-form-footer">
+                            <span id="profile-save-state" class="profile-save-state" aria-live="polite">All changes saved</span>
+                            <div class="settings-form-actions">
+                                <button type="button" id="reset-profile-details" class="settings-secondary-button">Cancel</button>
+                                <button type="submit" id="save-profile" class="settings-primary-button">
+                                    Save details <span aria-hidden="true">→</span>
+                                </button>
+                            </div>
+                        </footer>
+                    </form>
+                </section>
+
+                <section class="settings-section settings-security-section" id="account-security" aria-labelledby="account-security-title">
+                    <header class="settings-section-heading">
+                        <div>
+                            <p class="settings-section-eyebrow">A little peace of mind</p>
+                            <h2 id="account-security-title">Password &amp; security</h2>
+                            <p>Keep your account protected with a password that’s unique to you.</p>
+                        </div>
+                        <span class="settings-section-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="5" y="10" width="14" height="11" rx="3" />
+                                <path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3" />
+                            </svg>
+                        </span>
+                    </header>
+                    <form id="password-form" action="{% url 'settings' %}" method="POST" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="change_password" value="change_password">
+                        <div class="settings-fields password-fields">
+                            <div class="settings-field settings-field--full">
+                                <label for="current-password">Current password</label>
+                                <div class="settings-password-control">
+                                    <input type="password" id="current-password" name="current_password" autocomplete="current-password" aria-describedby="current-password-error" required>
+                                    <button type="button" data-toggle-password="current-password" aria-label="Show current password" aria-pressed="false">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                        <span class="password-toggle-label">Show</span>
+                                    </button>
+                                </div>
+                                <p id="current-password-error" class="settings-field-error" hidden></p>
+                            </div>
+                            <div class="settings-field">
+                                <label for="new-password">New password</label>
+                                <div class="settings-password-control">
+                                    <input type="password" id="new-password" name="new_password" autocomplete="new-password" aria-describedby="password-guidelines new-password-error" required>
+                                    <button type="button" data-toggle-password="new-password" aria-label="Show new password" aria-pressed="false">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                        <span class="password-toggle-label">Show</span>
+                                    </button>
+                                </div>
+                                <p id="new-password-error" class="settings-field-error" hidden></p>
+                            </div>
+                            <div class="settings-field">
+                                <label for="confirm-password">Confirm new password</label>
+                                <div class="settings-password-control">
+                                    <input type="password" id="confirm-password" name="confirm_password" autocomplete="new-password" aria-describedby="confirm-password-error" required>
+                                    <button type="button" data-toggle-password="confirm-password" aria-label="Show confirmation password" aria-pressed="false">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                        <span class="password-toggle-label">Show</span>
+                                    </button>
+                                </div>
+                                <p id="confirm-password-error" class="settings-field-error" hidden></p>
+                            </div>
+                        </div>
+                        <div class="password-guidelines" id="password-guidelines">
+                            <p>A strong start for your new password</p>
+                            <ul>
+                                <li data-password-rule="length">
+                                    <span aria-hidden="true"></span> At least 8 characters
+                                </li>
+                                <li data-password-rule="upper">
+                                    <span aria-hidden="true"></span> An uppercase letter
+                                </li>
+                                <li data-password-rule="number">
+                                    <span aria-hidden="true"></span> A number
+                                </li>
+                                <li data-password-rule="symbol">
+                                    <span aria-hidden="true"></span> A symbol: ! @ # $ % ^ &amp; *
+                                </li>
+                            </ul>
+                        </div>
+                        <p id="password-feedback" class="settings-feedback" role="status" aria-live="polite" hidden></p>
+                        <footer class="settings-form-footer">
+                            <a class="password-reset-link" href="{% url 'reset_password' %}">Forgot your current password? <span aria-hidden="true">↗</span></a>
+                            <button type="submit" id="save-password" class="settings-primary-button">
+                                Update password <span aria-hidden="true">→</span>
+                            </button>
+                        </footer>
+                    </form>
+                </section>
+                <p class="settings-bottom-note">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z" />
+                        <path d="m8 12 3 3 5-6" />
+                    </svg>
+                    Small updates. A profile that stays up to date.
+                </p>
             </div>
-
-            <div class="form-group">
-                <label>Contact email</label>
-                <p class="no_form_type">{{request.user.email}}</p>
-            </div>
-
-            <div class="form-group change-password">
-                <label>Password</label>
-                <p>Change your current password.</p>
-
-                <div class="password-group">
-                    <div class="form-group">
-                        <label for="current-password">Current Password</label>
-                        <input type="password" id="current-password">
-                        <div id="current-password-error" class="error-message">Current password is required</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="new-password">New Password</label>
-                        <input type="password" id="new-password">
-                        <div id="new-password-error" class="error-message">Password must be at least 8 characters with 1 capital, 1 symbol, and 1 number.b </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="confirm-password">Confirm New Password</label>
-                        <input type="password" id="confirm-password">
-                        <div id="confirm-password-error" class="error-message">Passwords do not match</div>
-                    </div>
-                </div>
-            </div>
-
-            <button class="save-button">Save Changes</button>
         </div>
     </div>
 {% endblock %}
 
 {% block js %}
-    <script src="{% static 'js/users/settings.js' %}" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/users/settings.js' %}?v=2" defer></script>
 {% endblock %}

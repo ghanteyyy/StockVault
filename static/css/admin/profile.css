@@ -1,188 +1,345 @@
-.content {
-    gap: 40px;
-    display: flex;
-    padding: 0 20px;
-    flex-wrap: wrap;
-    max-width: 700px;
-    margin: 40px auto;
-    border-radius: 12px;
-    flex-direction: column;
-}
-
-.user_contents {
-    gap: 16px;
-    display: flex;
-    flex-wrap: wrap;
+.adm-back-link {
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
-}
-
-.user_contents a {
-    flex: 1;
-    color: #f5f7fa;
-    padding: 14px 0;
+    gap: 8px;
+    margin-bottom: 17px;
+    color: #5b3e9e;
+    font-size: 11px;
     font-weight: 600;
-    text-align: center;
-    border-radius: 14px;
-    letter-spacing: 0.4px;
     text-decoration: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    background: linear-gradient(135deg, #1e293b, #334155);
 }
 
-.user_contents a:hover {
-    color: #ffffff;
-    transform: translateY(-5px);
-    box-shadow: 0 6px 14px rgba(37, 99, 235, 0.35);
+.adm-back-link:hover {
+    color: #5b3e9e;
 }
 
-.profile-section {
-    flex: 1 1 220px;
-    user-select: none;
+.adm-profile-layout {
+    display: grid;
+    grid-template-columns: minmax(230px, .65fr) minmax(0, 1.6fr);
+    align-items: start;
+    gap: 23px;
+}
+
+.adm-profile-summary {
+    padding: 29px 25px;
     text-align: center;
 }
 
-.profile-image-container {
-    position: relative;
-    width: 180px;
-    height: 180px;
-    cursor: pointer;
+.adm-profile-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 86px;
+    height: 86px;
+    margin: 0 auto 17px;
     overflow: hidden;
-    border-radius: 50%;
-    margin: 0 auto 18px;
-    transition: box-shadow 0.3s ease;
-    box-shadow: 0 6px 18px rgba(255, 138, 101, 0.5);
+    border: 1px solid #b2bac8;
+    border-radius: 24px;
+    background: #f3edfb;
+    color: #5b3e9e;
+    font-size: 30px;
+    font-weight: 800;
 }
 
-.profile-image-container:hover {
-    box-shadow: 0 10px 30px rgba(255, 138, 101, 0.75);
-}
-
-.profile-image {
+.adm-profile-avatar img {
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 50%;
+}
+
+.adm-profile-summary h2 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -.035em;
+}
+
+.adm-profile-email {
+    margin-top: 7px;
+    color: #475569;
+    font-size: 12px;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+
+.adm-profile-meta {
+    margin: 24px 0 0;
+    text-align: left;
+}
+
+.adm-profile-meta>div {
+    padding: 13px 0;
+    border-top: 1px solid #b2bac8;
+}
+
+.adm-profile-meta dt {
+    color: #475569;
+    font-size: 11px;
+}
+
+.adm-profile-meta dd {
+    margin: 5px 0 0;
+    color: #1f2937;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.8;
+}
+
+.adm-account-status {
+    margin-top: 16px;
+    padding-top: 22px;
+    border-top: 1px solid #b2bac8;
+    text-align: left;
+}
+
+.adm-account-status h3 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 12px;
+}
+
+.adm-account-status p,
+.adm-profile-protected {
+    margin: 9px 0 18px;
+    color: #475569;
+    font-size: 11px;
+    line-height: 1.85;
+}
+
+.adm-account-status .adm-button {
+    width: 100%;
+    justify-content: center;
+}
+
+.adm-profile-protected {
+    margin-bottom: 0;
+    padding: 17px 14px;
+    border: 1px solid #b2bac8;
+    border-radius: 9px;
+    background: #faf7fe;
+    text-align: left;
+}
+
+.adm-profile-sections {
+    display: grid;
+    gap: 23px;
+    min-width: 0;
+}
+
+.adm-profile-card {
+    padding: 25px 28px;
+}
+
+.adm-profile-card .adm-section-heading {
+    padding: 0;
+}
+
+.adm-profile-card .adm-user-form {
+    margin-top: 23px;
+}
+
+.adm-photo-upload {
+    display: flex;
+    align-items: center;
+    gap: 19px;
+    padding: 19px;
+    border: 1.5px dashed #7c8496;
+    border-radius: 12px;
+    background: #fcf9ff;
+}
+
+.adm-photo-preview {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 67px;
+    width: 67px;
+    height: 67px;
+    overflow: hidden;
+    border: 1px solid #b2bac8;
+    border-radius: 17px;
+    background: #f4edfc;
+    color: #5b3e9e;
+}
+
+.adm-photo-preview svg {
+    width: 29px;
+    height: 29px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+}
+
+.adm-photo-preview img {
     display: block;
-    transition: transform 0.3s ease;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.profile-image-container:hover .profile-image {
-    transform: scale(1.05);
+.adm-photo-upload .adm-form-field {
+    flex: 1;
+    min-width: 0;
 }
 
-.profile-section p {
-    font-size: 0.8rem;
-    color: #ff7043;
-    margin-top: 8px;
+.adm-photo-upload input[type=file] {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    padding: 8px;
+    color: #1f2937;
+    font: inherit;
+    font-size: 11px;
+}
+
+.adm-photo-upload input::file-selector-button {
+    margin-right: 10px;
+    padding: 8px 11px;
+    border: 1.5px solid #7c8496;
+    border-radius: 7px;
+    background: white;
+    color: #1f2937;
+    font: inherit;
     font-weight: 600;
-}
-
-#profile_image {
-    display: none;
-}
-
-.form-group-container {
-    flex: 2 1 440px;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-label {
-    font-weight: 600;
-    color: #555;
-    font-size: 1rem;
-}
-
-.no_form_type {
-    background: #f5f5f5;
-    padding: 10px 14px;
-    border-radius: 8px;
-    color: #444;
-    font-weight: 600;
-    user-select: text;
-}
-
-.change-password p {
-    color: #666;
-    font-size: 0.95rem;
-    margin-bottom: 12px;
-}
-
-.password-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-
-.password-group .form-group {
-    flex: 1 1 200px;
-}
-
-input[type="password"] {
-    padding: 10px 14px;
-    font-size: 1rem;
-    border: 1.5px solid #ccc;
-    border-radius: 8px;
-    transition: border-color 0.25s ease;
-}
-
-input[type="password"]:focus {
-    border-color: #999;
-    outline: none;
-    box-shadow: 0 0 6px rgba(150, 150, 150, 0.3);
-}
-
-.error-message {
-    margin-left: 0 !important;
-}
-
-.save-button {
-    align-self: flex-start;
-    padding: 12px 36px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    background: #888;
-    border: none;
-    border-radius: 8px;
-    color: white;
     cursor: pointer;
-    transition: background-color 0.3s ease;
 }
 
-.save-button:hover {
-    background: #666;
+.adm-member-records a.adm-stat {
+    color: #475569;
+    text-decoration: none;
+    transition: border-color .2s, transform .2s;
 }
 
-@media (max-width: 720px) {
-    .content {
-        flex-direction: column;
-        max-width: 100%;
+.adm-member-records a.adm-stat:hover {
+    border-color: #b2bac8;
+    transform: translateY(-2px);
+}
+
+.adm-member-records a.adm-stat small {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.adm-readonly-details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 23px;
+    margin-top: 23px;
+}
+
+.adm-readonly-details dt {
+    color: #475569;
+    font-size: 11px;
+}
+
+.adm-readonly-details dd {
+    margin: 7px 0 0;
+    color: #1f2937;
+    font-size: 12px;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+
+.adm-password-help {
+    margin-top: 14px;
+    color: #475569;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+@media (max-width: 1050px) {
+    .adm-profile-layout {
+        grid-template-columns: minmax(0, 1fr);
     }
 
-    .profile-section,
-    .form-group-container {
-        flex: 1 1 100%;
+    .adm-profile-summary {
+        display: grid;
+        grid-template-columns: 90px minmax(0, 1fr);
+        column-gap: 22px;
+        text-align: left;
     }
 
-    .password-group {
-        flex-direction: column;
+    .adm-profile-avatar {
+        grid-column: 1;
+        grid-row: 1 / 3;
+        margin: 0;
     }
 
-    .password-group .form-group {
-        flex: 0 0 auto;
+    .adm-profile-summary h2 {
+        grid-column: 2;
+        align-self: end;
     }
 
-    .change-password {
+    .adm-profile-email {
+        grid-column: 2;
+        margin: 4px 0 0;
+    }
+
+    .adm-profile-meta,
+    .adm-account-status,
+    .adm-profile-protected {
+        grid-column: 1 / -1;
+    }
+
+    .adm-profile-meta {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 15px;
+    }
+
+    .adm-account-status .adm-button {
+        width: auto;
+    }
+}
+
+@media (max-width: 600px) {
+    .adm-profile-card {
+        padding: 22px 18px;
+    }
+
+    .adm-profile-summary {
+        padding: 22px 18px;
+        grid-template-columns: 64px minmax(0, 1fr);
+        gap: 0 15px;
+    }
+
+    .adm-profile-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 18px;
+        font-size: 25px;
+    }
+
+    .adm-profile-meta {
+        grid-template-columns: minmax(0, 1fr);
         gap: 0;
     }
 
+    .adm-photo-upload {
+        align-items: flex-start;
+        gap: 13px;
+        padding: 13px;
+        flex-wrap: wrap;
+    }
+
+    .adm-photo-upload .adm-form-field {
+        flex-basis: 100%;
+    }
+
+    .adm-readonly-details {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .adm-member-records a.adm-stat {
+        transition: none;
+    }
+}
+
+.adm-profile-sections>.adm-card+.adm-card {
+    margin-top: 0;
 }

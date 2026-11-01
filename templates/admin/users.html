@@ -1,161 +1,194 @@
 {% extends 'admin/root.html' %}
 {% load static %}
-
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/admin/modal.css' %}">
-    <link rel="stylesheet" href="{% static 'css/admin/users.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/users.css' %}?v=contrast-1">
 {% endblock %}
-
 {% block content %}
-    <div class="header">
-        <div class="searching__filtering">
-            <div class="search_bar">
-                <div class="search">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" class="search" placeholder="Search by name or email">
-                </div>
+    <div class="adm-page-heading">
+        <div>
+            <p class="adm-eyebrow">Community management</p>
+            <h1>People behind the portfolios.</h1>
+            <p>Find members, review their workspace, and keep account details in order.</p>
+        </div>
+        <div class="adm-heading-actions">
+            <a class="adm-button adm-button--ghost" href="?{{ export_query }}">Export CSV <span aria-hidden="true">↓</span></a>
+            <button type="button" class="adm-button adm-button--primary" data-dialog-open="create-user-dialog">
+                Add member <span aria-hidden="true">+</span>
+            </button>
+        </div>
+    </div>
+    <div class="adm-stats">
+        <div class="adm-stat">
+            <span>Total accounts</span><strong>{{ user_stats.total|default:0 }}</strong><small>Your StockVault community</small>
+        </div>
+        <div class="adm-stat">
+            <span>Active accounts</span><strong>{{ user_stats.active|default:0 }}</strong><small>Members who can sign in</small>
+        </div>
+        <div class="adm-stat">
+            <span>Inactive accounts</span><strong>{{ user_stats.inactive|default:0 }}</strong><small>Records remain available</small>
+        </div>
+        <div class="adm-stat">
+            <span>Administrators</span><strong>{{ user_stats.admins|default:0 }}</strong><small>Protected management accounts</small>
+        </div>
+    </div>
+    <section class="adm-card" aria-labelledby="directory-title">
+        <div class="adm-section-heading">
+            <div>
+                <h2 id="directory-title">Account directory</h2>
+                <p>{{ page_obj.paginator.count }} account{{ page_obj.paginator.count|pluralize }} matching your filters</p>
+            </div>
+            <span class="adm-badge adm-badge--purple">Member management</span>
+        </div>
+        <form method="get" class="adm-toolbar" role="search">
+            <div class="adm-field adm-search-field">
+                <label for="user-search">Find a member</label>
+                <input type="search" id="user-search" name="q" value="{{ filters.q }}" placeholder="Search by name or email">
+            </div>
+            <div class="adm-field">
+                <label for="user-status">Status</label>
+                <select name="status" id="user-status">
+                    <option value="">All statuses</option>
+                    <option value="active"{% if filters.status == 'active' %} selected{% endif %}>Active</option>
+                    <option value="inactive"{% if filters.status == 'inactive' %} selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+            <div class="adm-field">
+                <label for="user-role">Account type</label>
+                <select name="role" id="user-role">
+                    <option value="">All accounts</option>
+                    <option value="member"{% if filters.role == 'member' %} selected{% endif %}>Members</option>
+                    <option value="admin"{% if filters.role == 'admin' %} selected{% endif %}>Administrators</option>
+                </select>
+            </div>
+            <div class="adm-field">
+                <label for="user-sort">Sort by</label>
+                <select name="sort" id="user-sort">
+                    <option value="newest"{% if filters.sort == 'newest' %} selected{% endif %}>Newest joined</option>
+                    <option value="oldest"{% if filters.sort == 'oldest' %} selected{% endif %}>Oldest joined</option>
+                    <option value="name"{% if filters.sort == 'name' %} selected{% endif %}>Name A–Z</option>
+                    <option value="email"{% if filters.sort == 'email' %} selected{% endif %}>Email A–Z</option>
+                </select>
+            </div>
+            <button class="adm-button adm-button--primary" type="submit">Apply filters</button>
+            <a class="adm-button adm-button--ghost" href="{% url 'admin-users' %}">Reset</a>
+        </form>
+        {% if user_details %}
+            <div class="adm-table-wrap">
+                <table class="adm-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Member</th>
+                            <th scope="col">Account type</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Joined</th>
+                            <th scope="col">Last sign in</th>
+                            <th scope="col">
+                                <span class="adm-sr-only">Actions</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in user_details %}
+                            <tr>
+                                <td>
+                                    <a class="adm-member-cell" href="{% url 'admin-user-profile' %}?user={{ member.email|urlencode }}"><span class="adm-member-avatar" aria-hidden="true">{{ member.name|first|upper }}</span><span><strong>{{ member.name|default:'Unnamed member' }}</strong><small>{{ member.email }}</small></span></a>
+                                </td>
+                                <td>
+                                    {% if member.is_staff or member.is_superuser %}
+                                        <span class="adm-badge adm-badge--purple">Administrator</span>
+
+                                    {% else %}
+                                        <span class="adm-badge">Member</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if member.is_active %}
+                                        <span class="adm-badge adm-badge--success">Active</span>
+
+                                    {% else %}
+                                        <span class="adm-badge adm-badge--warning">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ member.date_joined|date:'M j, Y' }}</td>
+                                <td>{{ member.last_login|date:'M j, Y'|default:'Not yet' }}</td>
+                                <td>
+                                    <a class="adm-row-link" href="{% url 'admin-user-profile' %}?user={{ member.email|urlencode }}">View profile <span aria-hidden="true">↗</span></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
 
-            <div class="filter">
-                <div class="gender_filter">
-                    <select name="gender_filter" id="gender_filter">
-                        <option value="All genders">All genders</option>
-                        <option value="male">Male</option>
+        {% else %}
+            <div class="adm-empty">
+                <span aria-hidden="true">◎</span>
+                <h3>No accounts found.</h3>
+                <p>Try another name, email, or account status.</p>
+                <a class="adm-button adm-button--ghost" href="{% url 'admin-users' %}">Clear filters</a>
+            </div>
+        {% endif %}
+        {% include 'admin/_pagination.html' %}
+    </section>
+    <dialog id="create-user-dialog" class="adm-dialog" aria-labelledby="create-user-title">
+        <div class="adm-dialog-heading">
+            <div>
+                <p class="adm-eyebrow">A new workspace</p>
+                <h2 id="create-user-title">Add a member.</h2>
+            </div>
+            <button type="button" class="adm-dialog-close" data-dialog-close aria-label="Close add member">×</button>
+        </div>
+        <p class="adm-dialog-description">Create a regular member account. Administrator access is not granted here.</p>
+        <form method="post" action="{% url 'admin-user-add' %}" data-admin-form class="adm-user-form" novalidate>
+            {% csrf_token %}
+            <div class="adm-form-grid">
+                <div class="adm-form-field">
+                    <label for="create-name">Full name</label>
+                    <input id="create-name" name="name" autocomplete="name" minlength="3" maxlength="100" required aria-describedby="create-name-error">
+                    <p id="create-name-error" class="adm-error" data-error-for="name" hidden></p>
+                </div>
+                <div class="adm-form-field">
+                    <label for="create-email">Email address</label>
+                    <input type="email" id="create-email" name="email" autocomplete="email" maxlength="254" required aria-describedby="create-email-error">
+                    <p id="create-email-error" class="adm-error" data-error-for="email" hidden></p>
+                </div>
+                <div class="adm-form-field">
+                    <label for="create-gender">Gender</label>
+                    <select id="create-gender" name="gender" required aria-describedby="create-gender-error">
+                        <option value="">Select gender</option>
                         <option value="female">Female</option>
-                        <option value="other">Other</option>
+                        <option value="male">Male</option>
+                        <option value="others">Other</option>
                     </select>
+                    <p id="create-gender-error" class="adm-error" data-error-for="gender" hidden></p>
                 </div>
-
-                <div class="sort">
-                    <select name="" id="sort_by">
-                        <option value="default" selected disabled>Sort By</option>
-                        <option value="a-z">Name (A-Z)</option>
-                        <option value="z-a">Name (Z-A)</option>
-                        <option value="dob_newest">DOB (newest)</option>
-                        <option value="dob_oldest">DOB (oldest)</option>
-                        <option value="joined_newest">Joined (newest)</option>
-                        <option value="joined_oldest">Joined (oldest)</option>
-                    </select>
+                <div class="adm-form-field">
+                    <label for="create-dob">
+                        Date of birth <span class="adm-optional">Optional</span>
+                    </label>
+                    <input type="date" id="create-dob" name="dob" data-user-dob aria-describedby="create-dob-error">
+                    <p id="create-dob-error" class="adm-error" data-error-for="dob" hidden></p>
                 </div>
-
-                <p class="add_button">Add User</p>
+                <div class="adm-form-field adm-form-field--wide">
+                    <label for="create-password">Initial password</label>
+                    <div class="adm-password-wrap">
+                        <input type="password" id="create-password" name="password" autocomplete="new-password" minlength="8" required aria-describedby="create-password-hint create-password-error">
+                        <button type="button" data-user-password-toggle aria-controls="create-password" aria-pressed="false" aria-label="Show initial password">
+                            Show
+                        </button>
+                    </div>
+                    <small id="create-password-hint">Use at least 8 characters. Avoid common passwords and personal details.</small>
+                    <p id="create-password-error" class="adm-error" data-error-for="password" hidden></p>
+                </div>
             </div>
-        </div>
-    </div>
-
-    <div class="cards">
-        {% for user_detail in user_details %}
-            <a class="card" href="{% url 'admin-user-profile' %}?user={{user_detail.email}}">
-                <div class="avatar">
-                    <img src="{{ user_detail.profile_image.url }}">
-                </div>
-
-                <div class="card_details">
-                    <span class="user_name">{{user_detail.name}}</span>
-
-                    <div class="card_row">
-                        <span class="email">Email:</span>
-                        <span class="value">{{user_detail.email}}</span>
-                    </div>
-
-                    <div class="card_row">
-                        <span class="gender">Gender:</span>
-                        <span class="value">{{user_detail.gender|title}}</span>
-                    </div>
-
-                    <div class="card_row">
-                        <span class="dob">DOB:</span>
-                        <span class="value">{{user_detail.date_of_birth|date:"Y-m-d"}}</span>
-                    </div>
-
-                    <div class="card_row">
-                        <span class="joined">Joined:</span>
-                        <span class="value">{{user_detail.date_joined|date:"Y-m-d h:i:s A"}}</span>
-                    </div>
-                </div>
-            </a>
-        {% endfor %}
-    </div>
-
-    <p class="error-message" style="display: none;">No search results available</p>
-
-    {% if user_details.paginator.num_pages > 1%}
-        <div class="pagination">
-            <a
-                href="{% if user_details.has_previous %}?page={{ user_details.previous_page_number }}{% else %}#{% endif %}"
-                class="page_btn {% if not user_details.has_previous %}disabled{% endif %}">
-                « Previous Page
-            </a>
-
-            <span>Page {{ user_details.number }} of {{ user_details.paginator.num_pages }}</span>
-
-            <a
-                href="{% if user_details.has_next %}?page={{ user_details.next_page_number }}{% else %}#{% endif %}"
-                class="page_btn {% if not user_details.has_next %}disabled{% endif %}">
-                Next Page »
-            </a>
-        </div>
-    {% endif %}
-
-    <div id="modal" class="modal is-hidden" aria-hidden="true">
-        <div class="modal__overlay" id="overlay"></div>
-
-        <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-            <header class="modal__header">
-                <h2 id="modalTitle">User Details</h2>
-                <button class="modal__close" id="closeBtn" aria-label="Close">×</button>
-            </header>
-
-            <form class="modal__content" method="POST" action="#">
-                {% csrf_token %}
-
-                <p class="modal-response-message" style="display: none;"></p>
-                <p class="modal-error-message error-message" style="display: none;">Please complete all required fields before submitting</p>
-
-                <div class="field email-field" style="display: none;">
-                    <label for="email">Email <span class="required"> *</span></label>
-                    <input type="email" name="email" id="email">
-                </div>
-
-                <div class="field">
-                    <label for="name">Name <span class="required"> *</span></label>
-                    <input id="name" name="name" type="text"/>
-                </div>
-
-                <div class="field">
-                    <label for="gender">Gender <span class="required"> *</span></label>
-                    <select id="gender" name="gender">
-                        <option value="" selected disabled>Select gender</option>
-                        <option>Female</option>
-                        <option>Male</option>
-                        <option>Other</option>
-                        <option>Prefer not to say</option>
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label for="dob">Date of Birth <span class="required"> *</span></label>
-                    <input id="dob" name="dob" type="date"/>
-                </div>
-
-                <div class="field">
-                    <label for="password">Password <span class="required password"> *</span></label>
-                    <input type="password" id="password" name="password">
-                </div>
-                <div class="actions">
-                    <button type="submit">Submit</button>
-                </div>
-            </form>
-        </div>
-    </div>
+            <p class="adm-alert" data-form-status role="status" aria-live="polite" hidden></p>
+            <div class="adm-dialog-actions">
+                <button type="button" class="adm-button adm-button--ghost" data-dialog-close>Cancel</button>
+                <button class="adm-button adm-button--primary" type="submit">Create member</button>
+            </div>
+        </form>
+    </dialog>
 {% endblock %}
-
 {% block js %}
-    <script>
-        const baseUserUrl = "{% url 'admin-user-profile' %}";
-        user_json = JSON.parse('{{ user_json|escapejs }}');
-    </script>
-
-    <script src="{% static 'js/admin/modal.js' %}"></script>
-    <script src="{% static 'js/admin/users.js' %}"></script>
+    <script src="{% static 'js/admin/users.js' %}?v=2" defer></script>
 {% endblock %}

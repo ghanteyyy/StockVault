@@ -1,0 +1,302 @@
+{% extends 'users/root.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/users/dashboard.css' %}?v=contrast-1">
+{% endblock %}
+
+{% block content %}
+    {{ data_per_company_sector|json_script:"sector-data" }}
+    {{ total_investment|json_script:"investment-data" }}
+    {{ total_sales|json_script:"sales-data" }}
+
+    <div class="sv-dashboard">
+        <header class="dashboard-intro">
+            <div class="dashboard-title-row">
+                <div class="dashboard-heading">
+                    <div class="dashboard-eyebrow">StockVault / Dashboard</div>
+                    <h1>
+                        Portfolio <span>overview.</span>
+                    </h1>
+                    <p class="dashboard-subtitle">A clearer picture of your investments, all in one place.</p>
+                </div>
+                <div class="dashboard-status">
+                    <span class="dashboard-status-dot" aria-hidden="true"></span>
+                    Portfolio snapshot
+                </div>
+            </div>
+        </header>
+
+        <section aria-labelledby="metrics-heading">
+            <div class="section-heading">
+                <h2 id="metrics-heading">At a glance</h2>
+                <span class="section-overline">Financial summary</span>
+            </div>
+
+            <div class="portfolio-summary">
+                <article class="summary-card invested-card">
+                    <div class="card-top">
+                        <span class="card-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M4 16.5 10 10.5l4 4L21 7.5" />
+                                <path d="M15.5 7.5H21V13" />
+                            </svg>
+                        </span>
+                        <span class="card-tag">Invested capital</span>
+                    </div>
+                    <p class="card-label">Total Invested</p>
+                    <h2 class="card-amount">
+                        <span class="currency">Rs.</span> {{ total_investment|floatformat:2 }}
+                    </h2>
+                    <p class="card-description">Total amount committed to shares</p>
+                </article>
+
+                <article class="summary-card sales-card">
+                    <div class="card-top">
+                        <span class="card-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="3" y="5" width="18" height="14" rx="3" />
+                                <path d="M3 9h18" />
+                                <path d="M7 14h4" />
+                            </svg>
+                        </span>
+                        <span class="card-tag">Realized proceeds</span>
+                    </div>
+                    <p class="card-label">Total Sale Proceeds</p>
+                    <h2 class="card-amount">
+                        <span class="currency">Rs.</span> {{ total_sales|floatformat:2 }}
+                    </h2>
+                    <p class="card-description">Total amount received from share sales</p>
+                </article>
+
+                <article class="summary-card change-card {% if percentage_change > 0 %}is-positive{% elif percentage_change < 0 %}is-negative{% else %}is-neutral{% endif %}">
+                    <div class="card-top">
+                        <span class="card-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M3 16.5 9 10.5l4 4 8-8" />
+                                <path d="M15.5 6.5H21V12" />
+                            </svg>
+                        </span>
+                        <span class="card-tag">Value movement</span>
+                    </div>
+                    <p class="card-label">Portfolio Change</p>
+                    <h2 class="card-amount">{{ percentage_change|default_if_none:0|floatformat:2 }}%</h2>
+                    <p class="card-description">Percentage change in portfolio value</p>
+                </article>
+            </div>
+        </section>
+
+        <section aria-labelledby="analytics-heading">
+            <div class="section-heading">
+                <h2 id="analytics-heading">Portfolio analytics</h2>
+                <span class="section-overline">Explore the details</span>
+            </div>
+
+            <div class="dashboard-charts">
+                <article class="chart-card" aria-labelledby="sector-heading">
+                    <div class="chart-header">
+                        <div>
+                            <h2 id="sector-heading">Sector distribution</h2>
+                            <p>How your portfolio holdings are distributed</p>
+                        </div>
+                        <span class="chart-head-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="9" />
+                                <path d="M12 3v9l6.5 6.5" />
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="chart-body chart-body--donut">
+                        <div class="donut-wrap">
+                            <div class="chart-container">
+                                <canvas id="sectorChart" role="img" aria-label="Doughnut chart of holdings by sector"></canvas>
+                            </div>
+                            <div class="donut-center" aria-hidden="true">
+                                <strong id="sector-total">0</strong>
+                                <span>Holdings</span>
+                            </div>
+                        </div>
+                        <div id="sector-legend" class="sector-legend" aria-label="Breakdown of holdings by sector"></div>
+                    </div>
+                </article>
+
+                <article class="chart-card" aria-labelledby="capital-heading">
+                    <div class="chart-header">
+                        <div>
+                            <h2 id="capital-heading">Capital overview</h2>
+                            <p>Invested capital compared with proceeds from sales</p>
+                        </div>
+                        <span class="chart-head-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M4 20V11M10 20V5M16 20v-9M22 20v-15" />
+                                <path d="M2 20h22" />
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="chart-body chart-body--bar">
+                        <div class="chart-container">
+                            <canvas id="investmentChart" role="img" aria-label="Bar chart comparing total investment with total sale proceeds in Nepali rupees"></canvas>
+                        </div>
+                        <p class="chart-note">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="12" cy="12" r="9" />
+                                <path d="M12 11v6M12 7.5h.01" />
+                            </svg>
+                            Sale proceeds are not the same as current market value.
+                        </p>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script>
+(() => {
+    'use strict';
+
+    const getData = (id, fallback) => {
+        const el = document.getElementById(id);
+        if (!el) return fallback;
+        try { return JSON.parse(el.textContent); }
+        catch (error) { console.error(`Invalid data in ${id}`, error); return fallback; }
+    };
+
+    const safeAmount = (value) => {
+        const amount = Number(value);
+        return Number.isFinite(amount) ? amount : 0;
+    };
+
+    const sectorData = getData('sector-data', {});
+    const invested = safeAmount(getData('investment-data', 0));
+    const sales = safeAmount(getData('sales-data', 0));
+    const palette = ['#6548b4', '#13856d', '#b7791f', '#4f6fc3', '#b84e7c', '#187c8a', '#8763c4', '#bc672f', '#3e826c', '#64748b'];
+    const currency = new Intl.NumberFormat('en-NP', { maximumFractionDigits: 2 });
+    const compact = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+
+    const sectors = Object.entries(sectorData && typeof sectorData === 'object' && !Array.isArray(sectorData) ? sectorData : {})
+        .map(([name, value]) => ({ name, count: safeAmount(value) }))
+        .filter(item => item.count > 0)
+        .sort((a, b) => b.count - a.count);
+    const holdingCount = sectors.reduce((sum, sector) => sum + sector.count, 0);
+
+    document.getElementById('sector-total').textContent = currency.format(holdingCount);
+
+    const legend = document.getElementById('sector-legend');
+    if (!sectors.length) {
+        const empty = document.createElement('p');
+        empty.className = 'legend-empty';
+        empty.textContent = 'No sector holdings yet. Your breakdown will appear here.';
+        legend.appendChild(empty);
+    }
+    sectors.forEach((sector, index) => {
+        const row = document.createElement('div');
+        row.className = 'legend-row';
+        const swatch = document.createElement('span');
+        swatch.className = 'legend-swatch';
+        swatch.style.backgroundColor = palette[index % palette.length];
+        swatch.setAttribute('aria-hidden', 'true');
+        const name = document.createElement('span');
+        name.className = 'legend-name';
+        name.textContent = sector.name;
+        name.title = sector.name;
+        const amount = document.createElement('span');
+        amount.className = 'legend-amount';
+        amount.textContent = currency.format(sector.count);
+        row.append(swatch, name, amount);
+        legend.appendChild(row);
+    });
+
+    if (typeof Chart === 'undefined') {
+        console.warn('Chart.js was unavailable; portfolio summary cards and sector list still work.');
+        return;
+    }
+
+    Chart.defaults.font.family = "'Plus Jakarta Sans', Inter, sans-serif";
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = '#475569';
+    Chart.defaults.animation = reducedMotion ? false : { duration: 800, easing: 'easeOutQuart' };
+
+    new Chart(document.getElementById('sectorChart'), {
+        type: 'doughnut',
+        data: {
+            labels: sectors.length ? sectors.map(item => item.name) : ['No holdings'],
+            datasets: [{
+                data: sectors.length ? sectors.map(item => item.count) : [1],
+                backgroundColor: sectors.length ? sectors.map((_, i) => palette[i % palette.length]) : ['#eef0f6'],
+                borderWidth: 0,
+                spacing: sectors.length > 1 ? 3 : 0,
+                hoverOffset: sectors.length ? 5 : 0,
+                borderRadius: sectors.length > 1 ? 5 : 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '78%',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    enabled: sectors.length > 0,
+                    backgroundColor: '#17223c',
+                    padding: 12,
+                    displayColors: true,
+                    callbacks: { label: context => ` ${currency.format(context.raw)} holdings` }
+                }
+            }
+        }
+    });
+
+    new Chart(document.getElementById('investmentChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Total invested', 'Sale proceeds'],
+            datasets: [{
+                label: 'Amount (NPR)',
+                data: [invested, sales],
+                backgroundColor: ['#6548b4', '#13856d'],
+                hoverBackgroundColor: ['#51378f', '#11634f'],
+                borderRadius: 10,
+                borderSkipped: false,
+                maxBarThickness: 83,
+                barPercentage: 0.6,
+                categoryPercentage: 0.8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { top: 6, right: 5 } },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#17223c',
+                    padding: 12,
+                    displayColors: false,
+                    callbacks: { label: context => `Rs. ${currency.format(context.parsed.y)}` }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    border: { display: false },
+                    ticks: { color: '#475569', font: { weight: 650 }, padding: 12 }
+                },
+                y: {
+                    beginAtZero: true,
+                    border: { display: false, dash: [4, 4] },
+                    grid: { color: '#d1d7e1', drawTicks: false },
+                    ticks: { color: '#475569', padding: 10, maxTicksLimit: 5, callback: value => compact.format(value) }
+                }
+            }
+        }
+    });
+})();
+    </script>
+{% endblock %}

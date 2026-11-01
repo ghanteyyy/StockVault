@@ -1,110 +1,146 @@
 {% extends 'users/root.html' %}
 {% load static %}
 
+{% block public_body_class %}sv-auth-page sv-register-page{% endblock %}
+{% block global_assets %}{% endblock %}
+{% block meta %}
+    <meta name="description" content="Create a StockVault account and bring your holdings, price targets, and saved companies into one personal workspace.">
+{% endblock %}
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/auth/signup.css' %}">
+    <link rel="stylesheet" href="{% static 'css/auth/auth.css' %}?v=contrast-1">
+    <link rel="stylesheet" href="{% static 'css/auth/signup.css' %}?v=contrast-1">
 {% endblock %}
 
 {% block content %}
-    <div class="signup-container">
-        {% include 'errors/backend_error.html' %}
-
-        <div style="text-align: right; margin-bottom: 16px;">
-            <a href="{% url 'login' %}">Sign In</a>
-        </div>
-
-        <form id="submit-form" action="{% url 'signup' %}" method="POST" novalidate enctype="multipart/form-data">
-            {% csrf_token %}
-
-            <div class="form-group">
-                <div class="form-item">
-                    <label for="fullName">FULL NAME</label>
-                    <i class="bx bx-user"></i>
-                    <input type="text" id="fullName" name="fullName" placeholder="Enter your full name">
+    <section class="auth-section" aria-labelledby="auth-title">
+        <div class="auth-layout">
+            {% include 'auth/_story.html' with auth_mode='signup' %}
+            <div class="auth-form-panel signup-container">
+                <div class="auth-form-header">
+                    <p class="auth-eyebrow">A place to make your own</p>
+                    <h1 id="auth-title">Create your account.</h1>
+                    <p>A few details, then a little more clarity. Let’s get your workspace ready.</p>
                 </div>
-
-                <div id="name-error" class="error-message">Please enter your full name.</div>
-            </div>
-
-            <div class="form-group">
-                <div class="form-item">
-                    <label for="email">E MAIL</label>
-                    <i class="bx bx-envelope"></i>
-                    <input type="email" id="email" name="email" placeholder="Enter your email here">
-                </div>
-
-                <div id="email-error" class="error-message">Please enter a valid email (e.g., user@example.com).</div>
-            </div>
-
-            <div class="form-group">
-                <div class="form-item">
-                    <label for="password">PASSWORD</label>
-                    <i class="bx bx-lock"></i>
-                    <input type="password" id="password" name="password" placeholder="••••••••">
-                </div>
-
-                <div id="password-error" class="error-message">Password must be at least 8 characters with 1 capital, 1 symbol, and 1 number.</div>
-            </div>
-
-            <div class="form-group">
-                <div class="form-item">
-                    <label for="dob">DATE OF BIRTH</label>
-                    <i class="bx bx-calendar"></i>
-                    <input type="date" id="dob" name="dob" placeholder="YYYY/MM/DD">
-                    <i class="fa-regular fa-calendar"></i>
-                </div>
-
-                <div id="dob-error" class="error-message">Please enter a valid date in YYYY/MM/DD format (e.g., 2025/05/25) and ensure you are not older than 110 years.</div>
-            </div>
-
-            <div class="form-group">
-                <div class="form-item">
-                    <label for="gender">GENDER</label>
-                    <i class='bx bx-male-female'></i>
-
-                    <select id="gender" name="gender">
-                        <option value="" disabled selected>Select your gender</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                        <option value="prefer_not_to_say">Prefer not to say</option>
-                    </select>
-                </div>
-
-                <div id="gender-error" class="error-message">Please select a gender.</div>
-            </div>
-
-            <div class="form-group">
-                <div class="form-item">
-                    <label for="profilePicture">PROFILE PICTURE</label>
-                    <input type="file" id="profilePicture" name="profilePicture" accept="image/*">
-                </div>
-
-                <div id="profile-error" class="error-message">Please upload a profile image.</div>
-            </div>
-
-            <div class="form-group">
-                <div class="form-item">
-                    <label for="captcha-input">CAPTCHA</label>
-
-                    <div class="captcha-inner">
-                        <div class="captcha-img">
-                            <img id="captcha-image" src="{{ captcha_image_url }}" alt="captcha" width="150" height="50">
-                            <i class="fa-solid fa-rotate-right"></i>
-                        </div>
-
-                        <input type="hidden" name="captcha_0" value="{{ captcha_key }}">
-                        <input id="captcha-input" name="captcha_1" type="text" placeholder="Captcha text">
+                {% include 'auth/_alerts.html' %}
+                <form id="submit-form" class="auth-form" data-auth-form="signup" data-captcha-refresh-url="{% url 'generate-captcha' %}" data-captcha-verify-url="{% url 'verify-captcha' %}" action="{% url 'signup' %}" method="post" novalidate enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="auth-form-section-heading">
+                        <span>01</span>
+                        <h2>Your account</h2>
                     </div>
-                </div>
-                <div id="captcha-error" class="error-message"></div>
+                    <div class="auth-form-grid">
+                        <div class="auth-field">
+                            <label for="fullName">Full name</label>
+                            <div class="auth-input-wrap">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle cx="12" cy="8" r="4" />
+                                    <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
+                                </svg>
+                                <input type="text" id="fullName" name="fullName" value="{{ form_values.name }}" placeholder="Your full name" autocomplete="name" minlength="3" maxlength="100" aria-describedby="name-error" required>
+                            </div>
+                            <p id="name-error" class="error-message" hidden>Enter your full name (at least 3 characters).</p>
+                        </div>
+                        <div class="auth-field">
+                            <label for="email">Email address</label>
+                            <div class="auth-input-wrap">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <rect x="3" y="5" width="18" height="14" rx="3" />
+                                    <path d="m3 7 9 6 9-6" />
+                                </svg>
+                                <input type="email" id="email" name="email" value="{{ form_values.email }}" placeholder="you@example.com" autocomplete="email" inputmode="email" maxlength="254" aria-describedby="email-error" required>
+                            </div>
+                            <p id="email-error" class="error-message" hidden>Enter a valid email address.</p>
+                        </div>
+                        <div class="auth-field auth-field--wide">
+                            <label for="password">Password</label>
+                            <div class="auth-input-wrap">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <rect x="4" y="10" width="16" height="11" rx="3" />
+                                    <path d="M8 10V6a4 4 0 0 1 8 0v4M12 14v3" />
+                                </svg>
+                                <input type="password" id="password" name="password" placeholder="Create a password" autocomplete="new-password" minlength="8" aria-describedby="password-hint password-error" required>
+                                <button type="button" class="auth-password-toggle" data-password-toggle aria-controls="password" aria-pressed="false" aria-label="Show password">
+                                    <span data-password-label>Show</span>
+                                </button>
+                            </div>
+                            <div class="auth-password-rules" id="password-hint" aria-label="Password requirements">
+                                <span data-password-rule="length">8+ characters</span><span data-password-rule="uppercase">One uppercase</span><span data-password-rule="number">One number</span><span data-password-rule="symbol">One symbol (!@#$%^&amp;*)</span>
+                            </div>
+                            <p id="password-error" class="error-message" hidden>
+                                Use at least 8 characters, an uppercase letter, a number, and a symbol (!@#$%^&amp;*).
+                            </p>
+                        </div>
+                    </div>
+                    <div class="auth-form-section-heading">
+                        <span>02</span>
+                        <h2>A little about you</h2>
+                    </div>
+                    <div class="auth-form-grid">
+                        <div class="auth-field">
+                            <label for="dob">Date of birth</label>
+                            <div class="auth-input-wrap">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <rect x="3" y="5" width="18" height="16" rx="3" />
+                                    <path d="M7 3v4M17 3v4M3 11h18" />
+                                </svg>
+                                <input type="date" id="dob" name="dob" value="{{ form_values.dob }}" autocomplete="bday" aria-describedby="dob-hint dob-error" required>
+                            </div>
+                            <p id="dob-hint" class="auth-hint">You must be at least 13 to register.</p>
+                            <p id="dob-error" class="error-message" hidden>Enter a valid date of birth (ages 13–110).</p>
+                        </div>
+                        <div class="auth-field">
+                            <label for="gender">Gender</label>
+                            <div class="auth-input-wrap">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle cx="12" cy="8" r="4" />
+                                    <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
+                                </svg>
+                                <select id="gender" name="gender" autocomplete="sex" aria-describedby="gender-error" required>
+                                    <option value="" disabled{% if not form_values.gender %} selected{% endif %}>Select gender</option>
+                                    <option value="male"{% if form_values.gender == 'male' %} selected{% endif %}>Male</option>
+                                    <option value="female"{% if form_values.gender == 'female' %} selected{% endif %}>Female</option>
+                                    <option value="others"{% if form_values.gender == 'others' %} selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                            <p id="gender-error" class="error-message" hidden>Choose an option from the list.</p>
+                        </div>
+                        <div class="auth-field auth-field--wide auth-upload">
+                            <label for="profilePicture">Profile photo</label>
+                            <div class="auth-upload-control">
+                                <input type="file" class="auth-file-input" id="profilePicture" name="profilePicture" accept=".jpg,.jpeg,.png,image/jpeg,image/png" aria-describedby="profile-hint profile-error" required>
+                                <label for="profilePicture">
+                                    <span class="auth-upload-avatar">
+                                        <img data-profile-preview hidden alt="Selected profile photo">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true" data-profile-placeholder>
+                                            <circle cx="12" cy="8" r="4" />
+                                            <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
+                                        </svg>
+                                    </span><span><strong>Add a personal touch</strong><small data-profile-name>Choose a photo for your workspace</small></span><span class="auth-upload-action">Choose photo <span aria-hidden="true">↗</span></span>
+                                </label>
+                            </div>
+                            <p id="profile-hint" class="auth-hint">JPG or PNG, up to 5 MB. You can change it later in settings.</p>
+                            <p id="profile-error" class="error-message" hidden>Please choose a profile photo.</p>
+                        </div>
+                        {% include 'auth/_captcha.html' %}
+                    </div>
+                    <button type="submit" class="auth-submit" data-auth-submit data-submit-label-default="Create account" data-submit-label-busy="Creating account…">
+                        <span data-submit-label>Create account</span>
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M5 12h14M13 6l6 6-6 6" />
+                        </svg>
+                    </button>
+                    <p class="auth-status" data-auth-status role="status" aria-live="polite"></p>
+                </form>
+                <p class="auth-form-switch">
+                    Already have an account? <a href="{% url 'login' %}">Sign in <span aria-hidden="true">↗</span></a>
+                </p>
+                <p class="auth-form-footnote">A workspace for your holdings, ideas, and next move.</p>
             </div>
-
-            <button type="submit">SIGN UP</button>
-        </form>
-    </div>
+        </div>
+    </section>
 {% endblock %}
 
 {% block js %}
-    <script src="{% static 'js/auth/signup.js' %}"></script>
+    <script src="{% static 'js/auth/auth.js' %}?v=1" defer></script>
+    <script src="{% static 'js/auth/signup.js' %}?v=3" defer></script>
 {% endblock %}

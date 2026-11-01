@@ -1,120 +1,260 @@
 {% extends 'admin/root.html' %}
 {% load static %}
-
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/admin/modal.css' %}">
-    <link rel="stylesheet" href="{% static 'css/admin/cards.css' %}">
-    <link rel="stylesheet" href="{% static 'css/admin/companies.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/companies.css' %}?v=contrast-1">
 {% endblock %}
-
 {% block content %}
-    {% if companies %}
-        <div class="header">
-            <div class="search_bar">
-                <div class="search">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" class="search" placeholder="Search by company name, abbreviation or investment type">
-                    <button class="add_button btn-add" data-name="" data-sector="" data-company_id="" data-company_abbreviation="" data-submit_href="company/add">Add Company</button>
-                </div>
-            </div>
+    <div class="adm-page-heading">
+        <div>
+            <p class="adm-eyebrow">Market directory</p>
+            <h1>Listed companies</h1>
+            <p>Keep company names, symbols, and sectors organized across StockVault.</p>
         </div>
-
-        <div class="cards">
-            {% for company in companies %}
-                <div class="card">
-                    <div class="details">
-                        <span class="company">{{company.name}}</span>
-                        <span class="sector">{{company.sector}}</span>
-                    </div>
-
-                    <div class="actions">
-                        <button type="button" class="btn btn-edit"
-                                data-name="{{ company.name }}"
-                                data-sector="{{ company.sector }}"
-                                data-company_id="{{company.id}}"
-                                data-company_abbreviation="{{company.abbreviation}}"
-                                data-submit_href="company/edit">
-                            <i class='bx bx-edit'></i>
-                        </button>
-
-                        <button type="button" class="btn btn-delete"
-                            data-company_id="{{ company.id }}"><i class="bx bx-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
-    <p class="error-message">No portfolios</p>
-
-    {% if companies.paginator.num_pages > 1 %}
-        <div class="pagination">
-            <a
-                href="{% if companies.has_previous %}?page={{ companies.previous_page_number }}{% else %}#{% endif %}"
-                class="page_btn {% if not companies.has_previous %}disabled{% endif %}">
-                « Previous Page
-            </a>
-
-            <span>Page {{ companies.number }} of {{ companies.paginator.num_pages }}</span>
-
-            <a
-                href="{% if companies.has_next %}?page={{ companies.next_page_number }}{% else %}#{% endif %}"
-                class="page_btn {% if not companies.has_next %}disabled{% endif %}">
-                Next Page »
-            </a>
-        </div>
-    {% endif %}
-
-    <div id="modal" class="modal is-hidden" aria-hidden="true">
-        <div class="modal__overlay" id="overlay"></div>
-
-        <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-            <header class="modal__header">
-                <h2 id="modalTitle">Company Details</h2>
-                <button class="modal__close" id="closeBtn" aria-label="Close">×</button>
-            </header>
-
-            <form class="modal__content" method="POST" action="#">
-                {% csrf_token %}
-
-                <p class="modal-response-message" style="display: none;"></p>
-                <p class="modal-error-message error-message" style="display: none;">Please complete all required fields before submitting</p>
-
-                <div class="field" style="display: none;">
-                    <label for="company_id">ID <span class="required"> *</span></label>
-                    <input type="text" name="company_id" id="company_id" readonly>
-                </div>
-
-                <div class="field">
-                    <label for="company">Company <span class="required"> *</span></label>
-                    <input type="text" name="company_name" id="company">
-                </div>
-
-                <div class="field">
-                    <label for="abbreviation">Abbreviation <span class="required"> *</span></label>
-                    <input id="abbreviation" name="company_abbreviation" type="text"/>
-                </div>
-
-                <div class="field">
-                    <label for="sector">Sector <span class="required"> *</span></label>
-                    <input id="sector" name="company_sector" type="text"/>
-                </div>
-
-                <div class="actions">
-                    <button type="submit">Submit</button>
-                </div>
-            </form>
+        <div class="adm-heading-actions">
+            <a class="adm-button adm-button--ghost" href="?{% if query_string %}{{ query_string }}&amp;{% endif %}export=csv">Export CSV <span aria-hidden="true">↗</span></a>
+            <button type="button" class="adm-button adm-button--primary" data-dialog-open="company-create-dialog">
+                + Add company
+            </button>
         </div>
     </div>
+    <div class="adm-stats">
+        <div class="adm-stat">
+            <span>Listed companies</span><strong>{{ total_companies }}</strong><small>Across the directory</small>
+        </div>
+        <div class="adm-stat">
+            <span>Market sectors</span><strong>{{ sector_count }}</strong><small>With companies listed</small>
+        </div>
+        <div class="adm-stat">
+            <span>Linked companies</span><strong>{{ linked_companies }}</strong><small>Used in account records</small>
+        </div>
+        <div class="adm-stat">
+            <span>Missing a sector</span><strong>{{ missing_sectors }}</strong><small>Directory details to review</small>
+        </div>
+    </div>
+    <section class="adm-card" aria-labelledby="company-directory-title">
+        <div class="adm-catalog-card-heading">
+            <div>
+                <h2 id="company-directory-title">Company directory</h2>
+                <p>{{ page_obj.paginator.count }} compan{{ page_obj.paginator.count|pluralize:'y,ies' }} match your filters</p>
+            </div>
+            <span class="adm-badge adm-badge--purple">Market data</span>
+        </div>
+        <form method="get" class="adm-toolbar adm-catalog-toolbar" role="search">
+            <div class="adm-field adm-catalog-search">
+                <label for="company-search">Search companies</label>
+                <input id="company-search" type="search" name="q" value="{{ filters.q }}" maxlength="255" placeholder="Name, symbol, or sector">
+            </div>
+            <div class="adm-field">
+                <label for="company-sector-filter">Sector</label>
+                <select name="sector" id="company-sector-filter">
+                    <option value="">All sectors</option>
+                    <option value="__missing__"{% if filters.sector == '__missing__' %} selected{% endif %}>Missing sector</option>
+                    {% for sector in sectors %}
+                        <option value="{{ sector }}"{% if filters.sector == sector %} selected{% endif %}>{{ sector }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="adm-field">
+                <label for="company-usage-filter">Record links</label>
+                <select name="usage" id="company-usage-filter">
+                    <option value="">All companies</option>
+                    <option value="in_use"{% if filters.usage == 'in_use' %} selected{% endif %}>Linked to records</option>
+                    <option value="unused"{% if filters.usage == 'unused' %} selected{% endif %}>No linked records</option>
+                </select>
+            </div>
+            <div class="adm-field">
+                <label for="company-sort">Sort by</label>
+                <select name="sort" id="company-sort">
+                    <option value="symbol"{% if filters.sort == 'symbol' %} selected{% endif %}>Symbol A–Z</option>
+                    <option value="name"{% if filters.sort == 'name' %} selected{% endif %}>Company A–Z</option>
+                    <option value="newest"{% if filters.sort == 'newest' %} selected{% endif %}>Recently added</option>
+                    <option value="oldest"{% if filters.sort == 'oldest' %} selected{% endif %}>Oldest first</option>
+                </select>
+            </div>
+            <div class="adm-field adm-page-size">
+                <label for="company-page-size">Per page</label>
+                <select name="per_page" id="company-page-size">
+                    <option value="20"{% if page_obj.paginator.per_page == 20 %} selected{% endif %}>20</option>
+                    <option value="50"{% if page_obj.paginator.per_page == 50 %} selected{% endif %}>50</option>
+                    <option value="100"{% if page_obj.paginator.per_page == 100 %} selected{% endif %}>100</option>
+                </select>
+            </div>
+            <div class="adm-filter-actions">
+                <button class="adm-button adm-button--primary" type="submit">Apply filters</button>
+                <a class="adm-button adm-button--ghost" href="{% url 'admin-companies' %}">Reset</a>
+            </div>
+        </form>
+        <div class="adm-table-wrap">
+            <table class="adm-table adm-company-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Company</th>
+                        <th scope="col">Sector</th>
+                        <th scope="col">Record links</th>
+                        <th scope="col">Added</th>
+                        <th scope="col">
+                            <span class="adm-sr-only">Actions</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for company in companies %}
+                        <tr>
+                            <td>
+                                <div class="adm-company-cell">
+                                    <span class="adm-company-mark" aria-hidden="true">{{ company.abbreviation|slice:':2' }}</span>
+                                    <div>
+                                        <strong>{{ company.name }}</strong><small>{{ company.abbreviation }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if company.sector %}
+                                    <span class="adm-sector-text">{{ company.sector }}</span>
+
+                                {% else %}
+                                    <span class="adm-badge adm-badge--warning">Needs a sector</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if company.in_use %}
+                                    <span class="adm-badge adm-badge--success">Linked</span>
+
+                                {% else %}
+                                    <span class="adm-badge">No links</span>
+                                {% endif %}
+                            </td>
+                            <td class="adm-date-cell">{{ company.created_at|date:'M j, Y' }}</td>
+                            <td>
+                                <div class="adm-row-actions">
+                                    <button type="button" class="adm-button adm-button--ghost" data-company-edit data-dialog-open="company-edit-dialog" data-id="{{ company.pk }}" data-name="{{ company.name }}" data-symbol="{{ company.abbreviation }}" data-sector="{{ company.sector }}">Edit</button>
+                                    <button type="button" class="adm-button adm-button--danger" data-company-delete data-dialog-open="company-delete-dialog" data-id="{{ company.pk }}" data-name="{{ company.name }}"{% if company.in_use %} disabled title="Linked companies cannot be removed."{% endif %}>
+                                        Remove
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5">
+                                <div class="adm-empty">
+                                    <span class="adm-empty-symbol" aria-hidden="true">⌕</span>
+                                    <h3>No companies found</h3>
+                                    <p>Try a different search or reset the filters to see the full directory.</p>
+                                    <a class="adm-button adm-button--ghost" href="{% url 'admin-companies' %}">Reset filters</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include 'admin/_pagination.html' %}
+    </section>
+    <p class="adm-catalog-note">
+        Companies linked to holdings, transactions, targets, or wishlists stay protected from removal.
+    </p>
+    <datalist id="catalogue-sector-options">
+        {% for sector in sectors %}
+            <option value="{{ sector }}">
+        {% endfor %}
+    </datalist>
+    <dialog class="adm-dialog" id="company-create-dialog" aria-labelledby="company-create-title">
+        <div class="adm-dialog-heading">
+            <div>
+                <p class="adm-eyebrow">Company directory</p>
+                <h2 id="company-create-title">Add a company</h2>
+            </div>
+            <button type="button" class="adm-dialog-close" data-dialog-close aria-label="Close dialog">×</button>
+        </div>
+        <form data-admin-form method="post" action="{% url 'admin-company-add' %}" novalidate>
+            {% csrf_token %}
+            <div class="adm-form-grid">
+                <div class="adm-form-field adm-form-field--wide">
+                    <label for="company-create-name">Company name</label>
+                    <input id="company-create-name" name="company_name" type="text" maxlength="255" placeholder="e.g. Nabil Bank Limited" aria-describedby="company-create-name-error" required>
+                    <p id="company-create-name-error" class="adm-error" data-error-for="company_name" hidden></p>
+                </div>
+                <div class="adm-form-field">
+                    <label for="company-create-symbol">Trading symbol</label>
+                    <input id="company-create-symbol" name="company_abbreviation" type="text" maxlength="255" placeholder="e.g. NABIL" autocapitalize="characters" aria-describedby="company-create-symbol-error" required>
+                    <p id="company-create-symbol-error" class="adm-error" data-error-for="company_abbreviation" hidden></p>
+                </div>
+                <div class="adm-form-field">
+                    <label for="company-create-sector">Sector</label>
+                    <input id="company-create-sector" name="company_sector" type="text" maxlength="255" list="catalogue-sector-options" placeholder="Choose or enter a sector" aria-describedby="company-create-sector-error" required>
+                    <p id="company-create-sector-error" class="adm-error" data-error-for="company_sector" hidden></p>
+                </div>
+            </div>
+            <p class="adm-form-hint">Symbols are saved in uppercase. Company names and symbols must be unique.</p>
+            <p class="adm-form-status" data-form-status role="status" hidden></p>
+            <div class="adm-dialog-actions">
+                <button type="button" class="adm-button adm-button--ghost" data-dialog-close>Cancel</button>
+                <button type="submit" class="adm-button adm-button--primary">Add company</button>
+            </div>
+        </form>
+    </dialog>
+    <dialog class="adm-dialog" id="company-edit-dialog" aria-labelledby="company-edit-title">
+        <div class="adm-dialog-heading">
+            <div>
+                <p class="adm-eyebrow">Company directory</p>
+                <h2 id="company-edit-title">Edit company</h2>
+            </div>
+            <button type="button" class="adm-dialog-close" data-dialog-close aria-label="Close dialog">×</button>
+        </div>
+        <form data-admin-form method="post" action="{% url 'admin-company-edit' %}" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="company_id">
+            <div class="adm-form-grid">
+                <div class="adm-form-field adm-form-field--wide">
+                    <label for="company-edit-name">Company name</label>
+                    <input id="company-edit-name" name="company_name" type="text" maxlength="255" placeholder="e.g. Nabil Bank Limited" aria-describedby="company-edit-name-error" required>
+                    <p id="company-edit-name-error" class="adm-error" data-error-for="company_name" hidden></p>
+                </div>
+                <div class="adm-form-field">
+                    <label for="company-edit-symbol">Trading symbol</label>
+                    <input id="company-edit-symbol" name="company_abbreviation" type="text" maxlength="255" placeholder="e.g. NABIL" autocapitalize="characters" aria-describedby="company-edit-symbol-error" required>
+                    <p id="company-edit-symbol-error" class="adm-error" data-error-for="company_abbreviation" hidden></p>
+                </div>
+                <div class="adm-form-field">
+                    <label for="company-edit-sector">Sector</label>
+                    <input id="company-edit-sector" name="company_sector" type="text" maxlength="255" list="catalogue-sector-options" placeholder="Choose or enter a sector" aria-describedby="company-edit-sector-error" required>
+                    <p id="company-edit-sector-error" class="adm-error" data-error-for="company_sector" hidden></p>
+                </div>
+            </div>
+            <p class="adm-form-hint">Symbols are saved in uppercase. Company names and symbols must be unique.</p>
+            <p class="adm-form-status" data-form-status role="status" hidden></p>
+            <div class="adm-dialog-actions">
+                <button type="button" class="adm-button adm-button--ghost" data-dialog-close>Cancel</button>
+                <button type="submit" class="adm-button adm-button--primary">Save changes</button>
+            </div>
+        </form>
+    </dialog>
+    <dialog class="adm-dialog" id="company-delete-dialog" aria-labelledby="company-delete-title">
+        <div class="adm-dialog-heading">
+            <div>
+                <p class="adm-eyebrow">Company directory</p>
+                <h2 id="company-delete-title">Remove company?</h2>
+            </div>
+            <button type="button" class="adm-dialog-close" data-dialog-close aria-label="Close dialog">×</button>
+        </div>
+        <form data-admin-form method="post" action="{% url 'admin-company-delete' %}">
+            {% csrf_token %}
+            <input type="hidden" name="company_id">
+            <p class="adm-dialog-description">
+                Remove <strong data-delete-company-name></strong> from the directory?
+            </p>
+            <div class="adm-alert adm-alert--warning">
+                This permanently removes an unused company. Companies linked to account records cannot be removed.
+            </div>
+            <p class="adm-form-status" data-form-status role="status" hidden></p>
+            <div class="adm-dialog-actions">
+                <button type="button" class="adm-button adm-button--ghost" data-dialog-close>Keep company</button>
+                <button type="submit" class="adm-button adm-button--danger">Remove company</button>
+            </div>
+        </form>
+    </dialog>
 {% endblock %}
-
 {% block js %}
-   <script>
-        search_lists = ['company', 'sector'];
-    </script>
-
-    <script src="{% static 'js/admin/companies.js' %}"></script>
-    <script src="{% static 'js/admin/modal.js' %}"></script>
-    <script src="{% static 'js/admin/search.js' %}"></script>
+    <script src="{% static 'js/admin/companies.js' %}?v=3" defer></script>
 {% endblock %}

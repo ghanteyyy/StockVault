@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.querySelectorAll('.nav-links a').forEach(link => {
         link.addEventListener('click', function() {
-            if (window.innerWidth <= 768) {
+            if(window.innerWidth <= 768){
                 hamburger.setAttribute('aria-expanded', 'false');
                 navLinks.classList.remove('active');
                 overlay.classList.remove('active');

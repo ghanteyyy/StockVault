@@ -1,0 +1,14 @@
+<div class="adm-stats">
+    {% for metric in metrics %}
+        <div class="adm-stat{% if metric.kind == 'money' %} adm-stat--money{% endif %}">
+            <span>{{ metric.label }}</span><strong>
+                {% if metric.kind == 'money' %}
+                    <small class="adm-currency">Rs.</small> {{ metric.value|floatformat:'2g' }}
+
+                {% else %}
+                    {{ metric.value }}
+                {% endif %}
+            </strong><small>{{ metric.hint }}</small>
+        </div>
+    {% endfor %}
+</div>

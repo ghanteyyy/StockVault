@@ -8,7 +8,7 @@ let isOpen = false;
 function render() {
     const mobile = window.innerWidth <= 900;
 
-    if (mobile) {
+    if(mobile){
         sidebar.style.width = '100%';
         sidebar.style.height = '100%';
         sidebar.style.position = 'fixed';
@@ -27,7 +27,7 @@ function render() {
         hamburger.setAttribute('aria-expanded', String(isOpen));
     }
 
-    else {
+    else{
         sidebar.style.display = 'flex';
         sidebar.style.width = '';
         sidebar.style.height = '';
@@ -43,19 +43,19 @@ function render() {
 
 hamburger.addEventListener('click', (e) => {
     e.stopPropagation();
-    if (window.innerWidth <= 900) {
+    if(window.innerWidth <= 900){
         isOpen = !isOpen;
         render();
     }
 });
 
 document.addEventListener('click', (e) => {
-    if (
+    if(
         window.innerWidth <= 900 &&
         isOpen &&
         !sidebar.contains(e.target) &&
         !hamburger.contains(e.target)
-    ) {
+    ){
         isOpen = false;
         render();
     }

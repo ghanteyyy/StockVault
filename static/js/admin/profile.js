@@ -1,90 +1,94 @@
-const profileImageInput = document.getElementById('profile_image');
-const imagePreview = document.getElementById('image-preview');
+(() => {
+    'use strict';
 
+    function initialize() {
+        const image = document.querySelector('[data-profile-existing]');
+        const fallback = document.querySelector('[data-avatar-fallback]');
 
-function previewImage() {
-    const file = profileImageInput.files[0];
-
-    if (file && (file.type === 'image/png' || file.type === 'image/jpeg') && file.size <= 15 * 1024 * 1024) {
-        const reader = new FileReader();
-        const user_email = document.querySelector('.user_email').textContent;
-
-        reader.onload = function (e) {
-            imagePreview.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-
-        const formData = new FormData();
-        formData.append('profile_image', file);
-        formData.append('change_profile', 'change_profile');
-        formData.append('user_email', user_email);
-
-        fetch('/admin/profile/change/profile-image', {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCSRFToken(),
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: formData
-        });
-
-    } else {
-        alert('Please select a PNG or JPEG file under 15MB.');
-    }
-}
-
-
-function getCSRFToken() {
-    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-}
-
-
-function changePassword() {
-    let hasErrors = false;
-    const passwordError = document.getElementById('password-error');
-    const user_email = document.querySelector('.user_email').textContent;
-    const password_field = document.getElementById('new-password');
-    const password = password_field.value.trim();
-
-    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*[0-9]).{8,}$/;
-
-    // Validation
-    if (!password || !passwordRegex.test(password)) {
-        hasErrors = true;
-    }
-
-    // Display error messages
-    passwordError.style.display = (password) ? 'none' : 'block';
-
-    if (!hasErrors) {
-        // Prepare FormData
-        const formData = new FormData();
-        formData.append('new_password', password);
-        formData.append('change_password', 'change_password');
-        formData.append('user_email', user_email);
-
-        // Send POST request
-        fetch('/admin/profile/change/password', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': getCSRFToken(),
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
+        function useFallback() {
+            if(image){
+                image.hidden = true;
             }
-        }).then(response => {
-            return response.json();
-        }).then(data => {
-            const success_message = document.querySelector('#success-message');
-            success_message.style.display = 'flex';
-            password_field.value = '';
+            if(fallback){
+                fallback.hidden = false;
+            }
+        }
 
-            setTimeout(function() {
-                $(success_message).fadeOut('fast');
-            }, 2000);
+        image?.addEventListener('error', useFallback);
+
+        if(image?.complete && !image.naturalWidth){
+            useFallback();
+        }
+
+        const input = document.querySelector('#profile-image');
+        const preview = document.querySelector('[data-photo-preview]');
+        const placeholder = document.querySelector('[data-photo-placeholder]');
+        const error = document.querySelector('#profile-image-error');
+
+        let url = null;
+
+        function refreshPreview() {
+            if(url){
+                URL.revokeObjectURL(url);
+            }
+
+            url = null;
+
+            if(!input || !preview){
+                return;
+            }
+
+            preview.hidden = true;
+            preview.removeAttribute('src');
+
+            if(placeholder){
+                placeholder.hidden = false;
+            }
+
+            const file = input.files?.[0];
+            const message = file && (!/\.(jpe?g|png)$/i.test(file.name) || file.size > 5 * 1024 * 1024 || !file.size) ?
+                'Choose a nonempty JPG or PNG image no larger than 5 MB.' : '';
+
+            if(error){
+                error.textContent = message;
+                error.hidden = !message;
+            }
+
+            if(message){
+                input.setAttribute('aria-invalid', 'true');
+            }
+
+            else{
+                input.removeAttribute('aria-invalid');
+            }
+
+            if(file && !message && typeof URL.createObjectURL === 'function'){
+                url = URL.createObjectURL(file);
+                preview.src = url;
+                preview.hidden = false;
+                if(placeholder){
+                    placeholder.hidden = true;
+                }
+            }
+        }
+
+        input?.addEventListener('change', refreshPreview);
+
+        window.addEventListener('pagehide', () => {
+            if(url){
+                URL.revokeObjectURL(url);
+            }
+            url = null;
         });
-    }
-}
 
-document.querySelector('.save-button')?.addEventListener('click', changePassword);
+        window.addEventListener('pageshow', refreshPreview);
+    }
+
+    if(document.readyState === 'loading'){
+        document.addEventListener('DOMContentLoaded', initialize, { once: true });
+    }
+
+    else{
+        initialize();
+    }
+})();

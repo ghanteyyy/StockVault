@@ -16,7 +16,6 @@ choices.addEventListener('click', (e) => {
     }
 });
 
-
 function validateForm() {
     const buyRadio = document.getElementById('buy');
     const sellRadio = document.getElementById('sell');
@@ -27,38 +26,38 @@ function validateForm() {
 
     errorMessage.textContent = '';
 
-    if (!buyRadio.checked && !sellRadio.checked) {
+    if(!buyRadio.checked && !sellRadio.checked){
         errorMessage.textContent = 'Please select either Buy or Sell';
         return false;
     }
 
-    if (companyInput.value.trim() === '') {
+    if(companyInput.value.trim() === ''){
         errorMessage.textContent = 'Please enter a company name';
         companyInput.focus();
         return false;
     }
 
-    if (shareQuantity.value.trim() === '') {
+    if(shareQuantity.value.trim() === ''){
         errorMessage.textContent = 'Please enter the number of stocks';
         shareQuantity.focus();
         return false;
     }
 
     const quantity = parseFloat(shareQuantity.value);
-    if (isNaN(quantity) || quantity <= 0) {
+    if(isNaN(quantity) || quantity <= 0){
         errorMessage.textContent = 'Please enter a valid number of stocks';
         shareQuantity.focus();
         return false;
     }
 
-    if (buyingRate.value.trim() === '') {
+    if(buyingRate.value.trim() === ''){
         errorMessage.textContent = 'Please enter the buying rate';
         buyingRate.focus();
         return false;
     }
 
     const rate = parseFloat(buyingRate.value);
-    if (isNaN(rate) || rate <= 0) {
+    if(isNaN(rate) || rate <= 0){
         errorMessage.textContent = 'Please enter a valid buying rate';
         buyingRate.focus();
         return false;

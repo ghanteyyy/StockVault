@@ -1,68 +1,322 @@
 {% extends 'admin/root.html' %}
 {% load static %}
-
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/admin/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/users.css' %}?v=contrast-1">
+    <link rel="stylesheet" href="{% static 'css/admin/profile.css' %}?v=contrast-1">
 {% endblock %}
-
 {% block content %}
-    <meta name="csrf-token" content="{{ csrf_token }}">
-    <div class="content">
+    <a class="adm-back-link" href="{% url 'admin-users' %}"><span aria-hidden="true">←</span> Account directory</a>
+    <div class="adm-page-heading">
+        <div>
+            <p class="adm-eyebrow">
+                {% if is_own_profile %}
+                    Your administrator account
 
-        <div class="profile-section">
-            <div class="profile-image-container">
-                <img id="image-preview" class="profile-image" src="{{user_profile.profile_image.url}}" alt="Profile Image" onclick="document.getElementById('profile_image').click()">
-            </div>
-
-            <p>Profile picture PNG, JPEG under 15MB</p>
-
-            <input type="file" id="profile_image" accept="image/png, image/jpeg" onchange="previewImage()">
+                {% else %}
+                    Member workspace
+                {% endif %}
+            </p>
+            <h1>{{ user_profile.name|default:'Account profile' }}</h1>
+            <p>Review account information and connected investment records.</p>
         </div>
+        <div class="adm-heading-actions">
+            {% if user_profile.is_active %}
+                <span class="adm-badge adm-badge--success">Active account</span>
 
-        <div class="user_contents">
-            <a href="{% url 'admin-portfolios' %}?user={{user_profile.email}}">Portfolios</a>
-            <a href="{% url 'admin-transactions' %}?user={{user_profile.email}}">Transactions</a>
-            <a href="{% url 'admin-targets' %}?user={{user_profile.email}}">Targets</a>
-            <a href="{% url 'admin-wishlists' %}?user={{user_profile.email}}">Wishlists</a>
-        </div>
-
-        <div class="form-group-container">
-            <div class="form-group">
-                <label>Full name</label>
-
-                <div class="name-group">
-                    <div class="form-group">
-                        <p class="no_form_type">{{user_profile.name}}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Contact email</label>
-                <p class="no_form_type user_email">{{user_profile.email}}</p>
-            </div>
-
-            <div class="form-group change-password">
-                <label style="font-size: 1.25em;">Change Password</label>
-
-                <div class="password-group">
-                    <div class="form-group">
-                        <input type="password" id="new-password" placeholder="••••••••">
-                        <div id="password-error" class="error-message">This field cannot be empty</div>
-                        <div id="success-message">Password changed successfully</div>
-                    </div>
-                </div>
-            </div>
-
-            <button class="save-button">Save Changes</button>
+            {% else %}
+                <span class="adm-badge adm-badge--warning">Inactive account</span>
+            {% endif %}
+            {% if user_profile.is_staff or user_profile.is_superuser %}
+                <span class="adm-badge adm-badge--purple">Administrator</span>
+            {% endif %}
         </div>
     </div>
-{% endblock %}
+    <div class="adm-stats adm-member-records">
+        <a class="adm-stat" href="{% url 'admin-portfolios' %}?user={{ user_profile.email|urlencode }}"><span>Holdings</span><strong>{{ member_counts.portfolios }}</strong><small>Review portfolio records <span aria-hidden="true">↗</span></small></a><a class="adm-stat" href="{% url 'admin-transactions' %}?user={{ user_profile.email|urlencode }}"><span>Transactions</span><strong>{{ member_counts.transactions }}</strong><small>Explore recorded trades <span aria-hidden="true">↗</span></small></a><a class="adm-stat" href="{% url 'admin-targets' %}?user={{ user_profile.email|urlencode }}"><span>Active price targets</span><strong>{{ member_counts.targets }}</strong><small>Review the member’s plans <span aria-hidden="true">↗</span></small></a><a class="adm-stat" href="{% url 'admin-wishlists' %}?user={{ user_profile.email|urlencode }}"><span>Saved companies</span><strong>{{ member_counts.wishlists }}</strong><small>Open the wishlist <span aria-hidden="true">↗</span></small></a>
+    </div>
+    <div class="adm-profile-layout">
+        <aside class="adm-card adm-profile-summary">
+            <div class="adm-profile-avatar">
+                <span data-avatar-fallback{% if user_profile.profile_image %} hidden{% endif %}>{{ user_profile.name|first|upper }}</span>
+                {% if user_profile.profile_image %}
+                    <img src="{{ user_profile.profile_image.url }}" alt="{{ user_profile.name }}’s profile photo" data-profile-existing>
+                {% endif %}
+            </div>
+            <h2>{{ user_profile.name }}</h2>
+            <p class="adm-profile-email">{{ user_profile.email }}</p>
+            <dl class="adm-profile-meta">
+                <div>
+                    <dt>Member since</dt>
+                    <dd>
+                        {{ user_profile.date_joined|date:'M j, Y' }}
+                    </dd>
+                </div>
+                <div>
+                    <dt>Last sign in</dt>
+                    <dd>
+                        {{ user_profile.last_login|date:'M j, Y, g:i A'|default:'Not yet' }}
+                    </dd>
+                </div>
+                <div>
+                    <dt>Account type</dt>
+                    <dd>
+                        {% if user_profile.is_staff or user_profile.is_superuser %}
+                            Administrator
 
+                        {% else %}
+                            Member
+                        {% endif %}
+                    </dd>
+                </div>
+            </dl>
+            {% if can_change_status %}
+                <div class="adm-account-status">
+                    <h3>Account access</h3>
+                    <p>
+                        {% if user_profile.is_active %}
+                            Deactivate sign-in access while keeping all investment records.
+
+                        {% else %}
+                            Restore sign-in access to this member’s existing workspace.
+                        {% endif %}
+                    </p>
+                    <button type="button" class="adm-button {% if user_profile.is_active %}adm-button--danger{% else %}adm-button--primary{% endif %}" data-dialog-open="member-status-dialog">
+                        {% if user_profile.is_active %}
+                            Deactivate account
+
+                        {% else %}
+                            Reactivate account
+                        {% endif %}
+                    </button>
+                </div>
+
+            {% else %}
+                <p class="adm-profile-protected">Administrator access is protected. Role and account status cannot be changed here.</p>
+            {% endif %}
+        </aside>
+        <div class="adm-profile-sections">
+            <section class="adm-card adm-profile-card" aria-labelledby="member-details-title">
+                <div class="adm-section-heading">
+                    <div>
+                        <h2 id="member-details-title">Personal details</h2>
+                        <p>
+                            {% if can_edit_user %}
+                                Keep this account’s information current.
+
+                            {% else %}
+                                This administrator’s details are read-only.
+                            {% endif %}
+                        </p>
+                    </div>
+                    <span class="adm-badge">
+                        {% if can_edit_user %}
+                            Editable
+
+                        {% else %}
+                            Read only
+                        {% endif %}
+                    </span>
+                </div>
+                {% if can_edit_user %}
+                    <form method="post" action="{% url 'admin-user-edit' %}" data-admin-form data-success-url="{% url 'admin-user-profile' %}?id={{ user_profile.pk|urlencode }}" class="adm-user-form" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ user_profile.pk }}">
+                        <div class="adm-form-grid">
+                            <div class="adm-form-field">
+                                <label for="member-name">Full name</label>
+                                <input id="member-name" name="name" value="{{ user_profile.name }}" minlength="3" maxlength="100" required aria-describedby="member-name-error">
+                                <p class="adm-error" id="member-name-error" data-error-for="name" hidden></p>
+                            </div>
+                            <div class="adm-form-field">
+                                <label for="member-email">Email address</label>
+                                <input type="email" id="member-email" name="email" value="{{ user_profile.email }}" maxlength="254" required aria-describedby="member-email-error">
+                                <p class="adm-error" id="member-email-error" data-error-for="email" hidden></p>
+                            </div>
+                            <div class="adm-form-field">
+                                <label for="member-gender">Gender</label>
+                                <select id="member-gender" name="gender" required aria-describedby="member-gender-error">
+                                    <option value="">Select gender</option>
+                                    <option value="female"{% if user_profile.gender == 'female' %} selected{% endif %}>Female</option>
+                                    <option value="male"{% if user_profile.gender == 'male' %} selected{% endif %}>Male</option>
+                                    <option value="others"{% if user_profile.gender == 'others' %} selected{% endif %}>Other</option>
+                                </select>
+                                <p class="adm-error" id="member-gender-error" data-error-for="gender" hidden></p>
+                            </div>
+                            <div class="adm-form-field">
+                                <label for="member-dob">
+                                    Date of birth <span class="adm-optional">Optional</span>
+                                </label>
+                                <input type="date" id="member-dob" name="dob" value="{{ user_profile.date_of_birth|date:'Y-m-d' }}" data-user-dob aria-describedby="member-dob-error">
+                                <p class="adm-error" id="member-dob-error" data-error-for="dob" hidden></p>
+                            </div>
+                        </div>
+                        <p class="adm-alert" data-form-status role="status" aria-live="polite" hidden></p>
+                        <div class="adm-form-actions">
+                            <button type="submit" class="adm-button adm-button--primary">Save details</button>
+                        </div>
+                    </form>
+
+                {% else %}
+                    <dl class="adm-readonly-details">
+                        <div>
+                            <dt>Full name</dt>
+                            <dd>
+                                {{ user_profile.name }}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt>Email</dt>
+                            <dd>
+                                {{ user_profile.email }}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt>Gender</dt>
+                            <dd>
+                                {{ user_profile.get_gender_display }}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt>Date of birth</dt>
+                            <dd>
+                                {{ user_profile.date_of_birth|date:'M j, Y'|default:'Not provided' }}
+                            </dd>
+                        </div>
+                    </dl>
+                {% endif %}
+            </section>
+            {% if can_edit_user %}
+                <section class="adm-card adm-profile-card" aria-labelledby="profile-photo-title">
+                    <div class="adm-section-heading">
+                        <div>
+                            <h2 id="profile-photo-title">Profile photo</h2>
+                            <p>A personal touch for the member’s workspace.</p>
+                        </div>
+                    </div>
+                    <form action="{% url 'admin-user-change-profile-image' %}" method="post" enctype="multipart/form-data" data-admin-form class="adm-user-form" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ user_profile.pk }}">
+                        <div class="adm-photo-upload">
+                            <span class="adm-photo-preview">
+                                <svg data-photo-placeholder viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle cx="12" cy="8" r="4" />
+                                    <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
+                                </svg>
+                                <img data-photo-preview hidden alt="Selected profile photo">
+                            </span>
+                            <div class="adm-form-field">
+                                <label for="profile-image">Choose a new image</label>
+                                <input type="file" id="profile-image" name="profile_image" accept=".jpg,.jpeg,.png,image/jpeg,image/png" aria-describedby="profile-image-hint profile-image-error">
+                                <small id="profile-image-hint">JPG or PNG, up to 5 MB. The change is saved when you select Update photo.</small>
+                                <p class="adm-error" id="profile-image-error" data-error-for="profile_image" hidden></p>
+                            </div>
+                        </div>
+                        <p class="adm-alert" data-form-status role="status" aria-live="polite" hidden></p>
+                        <div class="adm-form-actions">
+                            <button type="submit" class="adm-button adm-button--primary">Update photo</button>
+                        </div>
+                    </form>
+                </section>
+            {% endif %}
+            {% if is_own_profile %}
+                <section class="adm-card adm-profile-card" aria-labelledby="admin-password-title">
+                    <div class="adm-section-heading">
+                        <div>
+                            <h2 id="admin-password-title">Your password</h2>
+                            <p>Confirm your current password to set a new one.</p>
+                        </div>
+                        <span class="adm-badge adm-badge--purple">Your account only</span>
+                    </div>
+                    <form action="{% url 'admin-user-change-password' %}" method="post" data-admin-form class="adm-user-form" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ user_profile.pk }}">
+                        <div class="adm-form-grid">
+                            <div class="adm-form-field adm-form-field--wide">
+                                <label for="admin-old-password">Current password</label>
+                                <div class="adm-password-wrap">
+                                    <input id="admin-old-password" type="password" name="old_password" autocomplete="current-password" required aria-describedby="admin-old-password-error">
+                                    <button type="button" data-user-password-toggle aria-controls="admin-old-password" aria-pressed="false" aria-label="Show current password">
+                                        Show
+                                    </button>
+                                </div>
+                                <p id="admin-old-password-error" class="adm-error" data-error-for="old_password" hidden></p>
+                            </div>
+                            <div class="adm-form-field">
+                                <label for="admin-new-password">New password</label>
+                                <div class="adm-password-wrap">
+                                    <input id="admin-new-password" type="password" name="new_password1" autocomplete="new-password" minlength="8" required aria-describedby="admin-new-password-error">
+                                    <button type="button" data-user-password-toggle aria-controls="admin-new-password" aria-pressed="false" aria-label="Show new password">
+                                        Show
+                                    </button>
+                                </div>
+                                <p id="admin-new-password-error" class="adm-error" data-error-for="new_password1" hidden></p>
+                            </div>
+                            <div class="adm-form-field">
+                                <label for="admin-confirm-password">Confirm new password</label>
+                                <div class="adm-password-wrap">
+                                    <input id="admin-confirm-password" type="password" name="new_password2" autocomplete="new-password" required aria-describedby="admin-confirm-password-error">
+                                    <button type="button" data-user-password-toggle aria-controls="admin-confirm-password" aria-pressed="false" aria-label="Show confirmation password">
+                                        Show
+                                    </button>
+                                </div>
+                                <p id="admin-confirm-password-error" class="adm-error" data-error-for="new_password2" hidden></p>
+                            </div>
+                        </div>
+                        <p class="adm-password-help">Use at least 8 characters and avoid common passwords or details that identify you.</p>
+                        <p class="adm-alert" data-form-status role="status" aria-live="polite" hidden></p>
+                        <div class="adm-form-actions">
+                            <button type="submit" class="adm-button adm-button--primary">Update your password</button>
+                        </div>
+                    </form>
+                </section>
+            {% endif %}
+        </div>
+    </div>
+    {% if can_change_status %}
+        <dialog id="member-status-dialog" class="adm-dialog adm-status-dialog" aria-labelledby="member-status-title">
+            <div class="adm-dialog-heading">
+                <div>
+                    <p class="adm-eyebrow">Account access</p>
+                    <h2 id="member-status-title">
+                        {% if user_profile.is_active %}
+                            Deactivate
+
+                        {% else %}
+                            Reactivate
+                        {% endif %}
+                        this account?
+                    </h2>
+                </div>
+                <button type="button" class="adm-dialog-close" data-dialog-close aria-label="Close account status dialog">×</button>
+            </div>
+            <p class="adm-dialog-description">
+                {% if user_profile.is_active %}
+                    {{ user_profile.name }} will be unable to sign in. Holdings, transactions, price targets, and saved companies will be retained.
+
+                {% else %}
+                    {{ user_profile.name }} can sign in again using their existing credentials and workspace.
+                {% endif %}
+            </p>
+            <form action="{% url 'admin-user-delete' %}" method="post" data-admin-form>
+                {% csrf_token %}
+                <input type="hidden" name="user_id" value="{{ user_profile.pk }}">
+                <input type="hidden" name="active" value="{% if user_profile.is_active %}false{% else %}true{% endif %}">
+                <p class="adm-alert" data-form-status role="status" aria-live="polite" hidden></p>
+                <div class="adm-dialog-actions">
+                    <button class="adm-button adm-button--ghost" type="button" data-dialog-close>Cancel</button>
+                    <button class="adm-button {% if user_profile.is_active %}adm-button--danger{% else %}adm-button--primary{% endif %}" type="submit">
+                        {% if user_profile.is_active %}
+                            Deactivate account
+
+                        {% else %}
+                            Reactivate account
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
+        </dialog>
+    {% endif %}
+{% endblock %}
 {% block js %}
-    <script>
-        const user_email = "{{user_profile.email}}";
-    </script>
-    <script src="{% static 'js/admin/profile.js' %}" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/admin/users.js' %}?v=2" defer></script><script src="{% static 'js/admin/profile.js' %}?v=2" defer></script>
 {% endblock %}

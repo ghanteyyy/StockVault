@@ -1,0 +1,19 @@
+<div class="auth-field auth-field--wide">
+    <label class="auth-field-label" for="captcha-input">Verification</label>
+    <div class="auth-captcha-grid">
+        <div class="auth-captcha-challenge">
+            <img id="captcha-image" src="{{ captcha_image_url }}" alt="Verification challenge" width="150" height="50">
+            <button type="button" class="auth-captcha-refresh" data-captcha-refresh aria-label="Refresh verification image" title="Refresh verification image">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-2l2 2M4 17l2 2a7 7 0 0 0 12-2" />
+                </svg>
+            </button>
+        </div>
+        <div class="auth-input-wrap">
+            <input id="captcha-input" name="captcha_1" type="text" placeholder="Enter the characters" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="captcha-hint captcha-error" required>
+        </div>
+    </div>
+    <input type="hidden" name="captcha_0" value="{{ captcha_key }}">
+    <p id="captcha-hint" class="auth-hint">Type the characters from the image. Refresh it if you need a new one.</p>
+    <p id="captcha-error" class="error-message" hidden></p>
+</div>

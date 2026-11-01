@@ -1,18 +1,53 @@
 {% load static %}
-
-{% block css %}
-    <link rel="stylesheet" href="{% static 'css/admin/sidebar.css' %}">
-{% endblock %}
-
-<div class="sidebar">
-    <div class="nav-links">
-        <a class="{% if request.resolver_match.url_name in 'admin-index, admin-user-profile, admin-portfolios, admin-transactions, admin-targets, admin-wishlists' %}active{% endif %}" href="{% url 'admin-index' %}"><i class="bx bx-user"></i><span>Users</span></a>
-        <a class="{% if request.resolver_match.url_name == 'admin-companies' %}active{% endif %}" href="{% url 'admin-companies' %}"><i class="bx bx-buildings"></i><span>Listed Companies</span></a>
-        <a class="{% if request.resolver_match.url_name == 'admin-faqs' %}active{% endif %}" href="{% url 'admin-faqs' %}"><i class="bx bx-help-circle"></i><span>FAQs</span></a>
-        <a class="" href="{% url 'logout' %}"><i class='bx bx-log-out'></i><span>Logout</span></a>
+<aside class="adm-sidebar" id="admin-sidebar" aria-label="Administration navigation">
+    <div class="adm-sidebar-heading">
+        <a class="adm-brand" href="{% url 'admin-index' %}">
+            <img src="{% static 'images/icon.png' %}" alt="">
+            <span>StockVault<small>Administration</small></span></a>
+        <button type="button" class="adm-sidebar-close adm-icon-button" data-admin-menu-close aria-label="Close navigation">
+            {% include 'admin/_icon.html' with name='close' %}
+        </button>
     </div>
-</div>
-
-{% block js %}
-    <script src="{% static 'js/admin/sidebar.js' %}" defer></script>
-{% endblock %}
+    <nav class="adm-navigation" aria-label="Main navigation">
+        <div class="adm-nav-group">
+            <p>Workspace</p>
+            <a href="{% url 'admin-index' %}" class="adm-nav-link{% if nav_section == 'overview' or admin_section == 'overview' %} is-active{% endif %}"{% if nav_section == 'overview' or admin_section == 'overview' %} aria-current="page"{% endif %}>
+                {% include 'admin/_icon.html' with name='overview' %}
+                <span>Overview</span></a><a href="{% url 'admin-users' %}" class="adm-nav-link{% if nav_section == 'users' or admin_section == 'users' %} is-active{% endif %}"{% if nav_section == 'users' or admin_section == 'users' %} aria-current="page"{% endif %}>
+                {% include 'admin/_icon.html' with name='users' %}
+                <span>Members</span></a><a href="{% url 'admin-companies' %}" class="adm-nav-link{% if nav_section == 'companies' or admin_section == 'companies' %} is-active{% endif %}"{% if nav_section == 'companies' or admin_section == 'companies' %} aria-current="page"{% endif %}>
+                {% include 'admin/_icon.html' with name='companies' %}
+                <span>Companies</span></a>
+        </div>
+        <div class="adm-nav-group">
+            <p>Investment records</p>
+            <a href="{% url 'admin-portfolios' %}" class="adm-nav-link{% if nav_section == 'portfolios' or admin_section == 'portfolios' %} is-active{% endif %}"{% if nav_section == 'portfolios' or admin_section == 'portfolios' %} aria-current="page"{% endif %}>
+                {% include 'admin/_icon.html' with name='portfolios' %}
+                <span>Holdings</span></a><a href="{% url 'admin-transactions' %}" class="adm-nav-link{% if nav_section == 'transactions' or admin_section == 'transactions' %} is-active{% endif %}"{% if nav_section == 'transactions' or admin_section == 'transactions' %} aria-current="page"{% endif %}>
+                {% include 'admin/_icon.html' with name='transactions' %}
+                <span>Transactions</span></a><a href="{% url 'admin-targets' %}" class="adm-nav-link{% if nav_section == 'targets' or admin_section == 'targets' %} is-active{% endif %}"{% if nav_section == 'targets' or admin_section == 'targets' %} aria-current="page"{% endif %}>
+                {% include 'admin/_icon.html' with name='targets' %}
+                <span>Price targets</span></a><a href="{% url 'admin-wishlists' %}" class="adm-nav-link{% if nav_section == 'wishlists' or admin_section == 'wishlists' %} is-active{% endif %}"{% if nav_section == 'wishlists' or admin_section == 'wishlists' %} aria-current="page"{% endif %}>
+                {% include 'admin/_icon.html' with name='wishlists' %}
+                <span>Wishlists</span></a>
+        </div>
+        <div class="adm-nav-group">
+            <p>Operations</p>
+            <a href="{% url 'admin-faqs' %}" class="adm-nav-link{% if nav_section == 'faqs' or admin_section == 'faqs' %} is-active{% endif %}"{% if nav_section == 'faqs' or admin_section == 'faqs' %} aria-current="page"{% endif %}>
+                {% include 'admin/_icon.html' with name='faqs' %}
+                <span>Question library</span></a><a href="{% url 'admin-activity' %}" class="adm-nav-link{% if nav_section == 'activity' or admin_section == 'activity' %} is-active{% endif %}"{% if nav_section == 'activity' or admin_section == 'activity' %} aria-current="page"{% endif %}>
+                {% include 'admin/_icon.html' with name='activity' %}
+                <span>Activity log</span></a>
+        </div>
+    </nav>
+    <div class="adm-sidebar-bottom">
+        <a class="adm-admin-profile" href="{% url 'admin-user-profile' %}?id={{ request.user.pk|urlencode }}"><span class="adm-avatar">{{ request.user.name|first|upper|default:'A' }}</span><span><strong>{{ request.user.name|default:'Administrator' }}</strong><small>Administrator account</small></span><span aria-hidden="true">↗</span></a>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button class="adm-sign-out" type="submit">
+                {% include 'admin/_icon.html' with name='logout' %}
+                Sign out
+            </button>
+        </form>
+    </div>
+</aside>

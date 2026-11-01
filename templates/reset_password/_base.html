@@ -1,0 +1,34 @@
+{% extends 'users/root.html' %}
+{% load static %}
+
+{% block body_class %}
+    {% if request.user.is_authenticated %}has-user-sidebar{% endif %}
+    sv-auth-page sv-recovery-page
+    {% block recovery_body_class %}{% endblock %}
+{% endblock %}
+{% block global_assets %}{% endblock %}
+{% block meta %}
+    <meta name="description" content="Reset your StockVault password and return to your personal investment workspace.">
+{% endblock %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/auth/auth.css' %}?v=contrast-1">
+    <link rel="stylesheet" href="{% static 'css/reset_password/recovery.css' %}?v=contrast-1">
+    {% block recovery_css %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+    <section class="auth-section" aria-labelledby="recovery-title">
+        <div class="auth-layout">
+            {% block recovery_story %}
+                {% include 'reset_password/_story.html' with recovery_stage='request' %}
+            {% endblock %}
+            <div class="auth-form-panel recovery-panel">
+                {% block recovery_panel %}{% endblock %}
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block js %}
+    {% block recovery_js %}{% endblock %}
+{% endblock %}

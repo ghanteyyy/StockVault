@@ -1,4 +1,4 @@
-function remove_error_message(error, timeout=2000){
+function remove_error_message(error, timeout = 2000) {
     setTimeout(function() {
         $(error).fadeOut('fast');
     }, timeout);

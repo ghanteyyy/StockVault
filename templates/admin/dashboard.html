@@ -1,0 +1,249 @@
+{% extends 'admin/root.html' %}
+{% block content %}
+    <div class="adm-page-heading">
+        <div>
+            <p class="adm-eyebrow">StockVault control center</p>
+            <h1>Platform overview.</h1>
+            <p>A little more visibility into your people, companies, and day-to-day activity.</p>
+        </div>
+        <a class="adm-button adm-button--ghost" href="{% url 'admin-activity' %}">
+            {% include 'admin/_icon.html' with name='activity' %}
+            View activity</a>
+    </div>
+    <section class="adm-overview-hero" aria-labelledby="overview-intro">
+        <div>
+            <h2 id="overview-intro">
+                Your platform.
+                <br>
+                <span>A clearer perspective.</span>
+            </h2>
+            <p>Keep the details organized, the directory complete, and your community moving.</p>
+            <div class="adm-hero-actions">
+                <a class="adm-button adm-button--light" href="{% url 'admin-users' %}">Manage members <span aria-hidden="true">↗</span></a><a class="adm-button adm-button--light" href="{% url 'admin-companies' %}">Company directory <span aria-hidden="true">↗</span></a>
+            </div>
+        </div>
+        <div class="adm-hero-tools" aria-hidden="true">
+            <div>
+                {% include 'admin/_icon.html' with name='users' %}
+                Your community
+            </div>
+            <div>
+                {% include 'admin/_icon.html' with name='companies' %}
+                Your company directory
+            </div>
+            <div>
+                {% include 'admin/_icon.html' with name='activity' %}
+                Your management history
+            </div>
+        </div>
+    </section>
+    {% include 'admin/_metrics.html' %}
+    <div class="adm-dashboard-grid">
+        <section class="adm-card">
+            <div class="adm-section-heading">
+                <div>
+                    <h2>Recently joined</h2>
+                    <p>The newest accounts in your community</p>
+                </div>
+                <a href="{% url 'admin-users' %}">All members ↗</a>
+            </div>
+            {% if recent_users %}
+                <div class="adm-table-wrap">
+                    <table class="adm-table adm-compact-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Member</th>
+                                <th scope="col">Joined</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for member in recent_users %}
+                                <tr>
+                                    <td>
+                                        <a class="adm-person-link" href="{% url 'admin-user-profile' %}?id={{ member.pk|urlencode }}"><span class="adm-mini-avatar" aria-hidden="true">{{ member.name|first|upper|default:'M' }}</span><span><strong>{{ member.name|default:'Member' }}</strong><small>{{ member.email }}</small></span></a>
+                                    </td>
+                                    <td>{{ member.date_joined|date:'M j' }}</td>
+                                    <td>
+                                        {% if member.is_active %}
+                                            <span class="adm-badge adm-badge--success">Active</span>
+
+                                        {% else %}
+                                            <span class="adm-badge">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            {% else %}
+                <div class="adm-empty">
+                    <h3>Your community starts here.</h3>
+                    <p>New accounts will appear here as members join.</p>
+                    <a class="adm-button adm-button--ghost" href="{% url 'admin-users' %}">Open member directory</a>
+                </div>
+            {% endif %}
+        </section>
+        <section class="adm-card">
+            <div class="adm-section-heading">
+                <div>
+                    <h2>Holdings by sector</h2>
+                    <p>Distribution of positive holding positions</p>
+                </div>
+                <span class="adm-badge adm-badge--purple">{{ totals.positive_holdings }} positions</span>
+            </div>
+            {% if sector_breakdown %}
+                <div class="adm-sector-list">
+                    {% for sector in sector_breakdown %}
+                        <div class="adm-sector-item">
+                            <div>
+                                <span>{{ sector.name }}</span><strong>{{ sector.count }} · {{ sector.percentage }}%</strong>
+                            </div>
+                            <div class="adm-sector-track" aria-hidden="true">
+                                <span style="--share:{{ sector.percentage }}%"></span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+            {% else %}
+                <div class="adm-empty">
+                    <h3>No holdings to summarize.</h3>
+                    <p>Sector distribution becomes available when members record holdings.</p>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+    <section class="adm-card">
+        <div class="adm-section-heading">
+            <div>
+                <h2>A few details to keep in focus</h2>
+                <p>Records that may benefit from a closer look</p>
+            </div>
+            <span class="adm-badge">Directory &amp; data quality</span>
+        </div>
+        <div class="adm-quality-grid">
+            {% for signal in quality_signals %}
+                <a class="adm-quality-item" href="{{ signal.url }}"><strong>{{ signal.value }}</strong>
+                    <h3>{{ signal.label }}</h3>
+                    <p>{{ signal.hint }}</p>
+                </a>
+            {% endfor %}
+        </div>
+    </section>
+    <section class="adm-card">
+        <div class="adm-section-heading">
+            <div>
+                <h2>Latest recorded transactions</h2>
+                <p>Member activity, presented as stored in StockVault</p>
+            </div>
+            <a href="{% url 'admin-transactions' %}">All transactions ↗</a>
+        </div>
+        {% if recent_transactions %}
+            <div class="adm-table-wrap">
+                <table class="adm-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Member</th>
+                            <th scope="col">Company</th>
+                            <th scope="col">Type</th>
+                            <th scope="col" class="adm-numeric">Shares</th>
+                            <th scope="col" class="adm-numeric">Recorded value · NPR</th>
+                            <th scope="col">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in recent_transactions %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'admin-user-profile' %}?id={{ record.user_id.pk|urlencode }}">{{ record.user_id.name|default:record.user_id.email }}</a>
+                                </td>
+                                <td>
+                                    <strong>{{ record.company_id.abbreviation }}</strong><small>{{ record.company_id.name }}</small>
+                                </td>
+                                <td>
+                                    <span class="adm-badge{% if record.transaction_type|lower == 'buy' %} adm-badge--success{% else %} adm-badge--purple{% endif %}">{{ record.transaction_type|default:'Unspecified'|title }}</span>
+                                </td>
+                                <td class="adm-numeric">{{ record.number_of_shares|default_if_none:0 }}</td>
+                                <td class="adm-numeric">{{ record.transacted_price|default_if_none:0|floatformat:'2g' }}</td>
+                                <td>{{ record.transaction_date|date:'j M Y' }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        {% else %}
+            <div class="adm-empty">
+                <h3>No transactions recorded yet.</h3>
+                <p>Recorded buy and sell activity will appear here.</p>
+            </div>
+        {% endif %}
+    </section>
+    <div class="adm-dashboard-grid adm-dashboard-grid--last">
+        <section class="adm-card">
+            <div class="adm-section-heading">
+                <div>
+                    <h2>Recent management activity</h2>
+                    <p>A clear history of administrative changes</p>
+                </div>
+                <a href="{% url 'admin-activity' %}">Activity log ↗</a>
+            </div>
+            {% if recent_activity %}
+                <div class="adm-activity-list">
+                    {% for entry in recent_activity %}
+                        <div class="adm-activity-item">
+                            <span class="adm-activity-dot" aria-hidden="true"></span>
+                            <div>
+                                <strong>{{ entry.object_repr }}</strong>
+                                <p>{{ entry.get_change_message }}</p>
+                                <small>{{ entry.user.name|default:entry.user.email }} · {{ entry.action_time|date:'j M, H:i' }}</small>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+            {% else %}
+                <div class="adm-empty">
+                    <h3>No changes recorded yet.</h3>
+                    <p>Administrative changes will appear here with their author and time.</p>
+                </div>
+            {% endif %}
+        </section>
+        <section class="adm-card">
+            <div class="adm-section-heading">
+                <div>
+                    <h2>Your community this week</h2>
+                    <p>New accounts over the last seven days</p>
+                </div>
+                <span class="adm-badge adm-badge--success">{{ totals.new_users_30d }} in 30 days</span>
+            </div>
+            <div class="adm-week-grid">
+                {% for day in daily_signups %}
+                    <div>
+                        <span>{{ day.date|date:'D' }}</span><strong>{{ day.count }}</strong><small>{{ day.date|date:'M j' }}</small>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="adm-snapshot-grid">
+                <div>
+                    <span>Active price targets</span><strong>{{ totals.active_targets }}</strong>
+                </div>
+                <div>
+                    <span>Wishlist entries</span><strong>{{ totals.wishlist_entries }}</strong>
+                </div>
+                <div>
+                    <span>Holdings with shares</span><strong>{{ totals.positive_holdings }}</strong>
+                </div>
+                <div>
+                    <span>Inactive accounts</span><strong>{{ totals.inactive_users }}</strong>
+                </div>
+            </div>
+        </section>
+    </div>
+    <p class="adm-money-note">
+        Overview metrics use stored records at the time this page is loaded. Recorded capital is purchase cost, rather than a live market valuation.
+    </p>
+{% endblock %}

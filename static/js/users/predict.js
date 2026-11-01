@@ -1,4 +1,3 @@
-
 const add_button = document.getElementById('add-btn');
 add_button.innerHTML = 'Submit';
 
@@ -45,4 +44,3 @@ company_prediction_form.addEventListener('submit', async (e) => {
 
     company_prediction.style.display = 'block';
 });
-

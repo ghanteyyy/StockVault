@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let is_result_available = 0;
             const query = e.target.value.trim().toLowerCase();
 
-            if (pagination) {
+            if(pagination){
                 pagination.style.display = query ? 'none' : 'flex';
             }
 
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     elements.forEach((el) => {
                         const text = (el.textContent || '').toLowerCase();
 
-                        if (text.includes(query)) {
+                        if(text.includes(query)){
                             show_card = true;
                             is_result_available++;
                         }

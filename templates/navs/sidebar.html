@@ -1,28 +1,113 @@
 {% load static %}
 
-{% block css %}
-    <link rel="stylesheet" href="{% static 'css/navs/sidebar.css' %}">
-{% endblock %}
+<a class="sv-skip-link" href="#workspace-content">Skip to content</a>
 
-<button class="hamburger" id="hamburger-btn">☰</button>
+<header class="sv-mobile-nav">
+    <a class="sv-mobile-brand" href="{% url 'dashboard' %}" aria-label="StockVault dashboard">
+        <img src="{% static 'images/icon.png' %}" alt="">
+        <span>StockVault</span></a>
+    <button class="hamburger sv-sidebar-toggle" id="hamburger-btn" type="button" aria-label="Open navigation" aria-controls="workspace-sidebar" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+</header>
 
-<div class="sidebar">
-    <a class="logo" href="{% url 'portfolio' %}">
-        <img src="{% static 'images/icon.png' %}" alt="Stock Vault Logo" id="logo-image">
-        <p id="logo-name">Stock Vault</p>
-    </a>
-    <div>
-        <ul>
-            <li class="{% if request.resolver_match.url_name == 'portfolio' or request.resolver_match.url_name == 'portfolio-graph' %}active{% endif %}"><a class='sidebar-links' href="{% url 'portfolio' %}">💹 Portfolio</a></li>
-            <li class="{% if request.resolver_match.url_name == 'trade-calculator' %}active{% endif %}"><a class="sidebar-links" href="{% url 'trade-calculator' %}">🧮 Calculator</a></li>
-            <li class="{% if request.resolver_match.url_name == 'wishlist' %}active{% endif %}"><a class='sidebar-links' href="{% url 'wishlist' %}">⭐ Wishlist</a></li>
-            <li class="{% if request.resolver_match.url_name == 'target' %}active{% endif %}"><a class='sidebar-links' href="{% url 'target' %}">🎯 Target</a></li>
-            <li class="{% if request.resolver_match.url_name == 'settings' %}active{% endif %}"><a class='sidebar-links' href="{% url 'settings' %}">⚙️ Settings</a></li>
-            <li><a class='sidebar-links' href="{% url 'logout' %}">🚪 Logout</a></li>
-        </ul>
+<div id="sidebar-backdrop" class="sv-sidebar-backdrop" hidden></div>
+
+<aside class="sidebar sv-sidebar" id="workspace-sidebar" aria-label="StockVault workspace">
+    <div class="sv-sidebar-heading">
+        <a class="sv-sidebar-brand" href="{% url 'dashboard' %}" aria-label="StockVault dashboard"><span class="sv-sidebar-brand-icon">
+                <img src="{% static 'images/icon.png' %}" alt="">
+            </span><span class="sv-sidebar-wordmark">StockVault<span>Your investment workspace</span></span></a>
+        <button type="button" id="sidebar-close" class="sv-sidebar-close" aria-label="Close navigation">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m6 6 12 12M6 18 18 6" />
+            </svg>
+        </button>
     </div>
-</div>
 
-{% block js %}
-    <script src="{% static 'js/navs/sidebar.js' %}"></script>
-{% endblock %}
+    <nav class="sv-sidebar-navigation" aria-label="Main navigation">
+        <div class="sv-nav-group">
+            <p class="sv-nav-group-label" id="workspace-nav-label">Workspace</p>
+            <ul aria-labelledby="workspace-nav-label">
+                <li>
+                    <a class="sv-nav-link {% if request.resolver_match.url_name == 'dashboard' %}is-active{% endif %}" href="{% url 'dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' %}aria-current="page"{% endif %}><span class="sv-nav-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="3" y="3" width="7" height="7" rx="2" />
+                                <rect x="14" y="3" width="7" height="7" rx="2" />
+                                <rect x="3" y="14" width="7" height="7" rx="2" />
+                                <rect x="14" y="14" width="7" height="7" rx="2" />
+                            </svg>
+                        </span><span>Dashboard</span><span class="sv-nav-current-dot" aria-hidden="true"></span></a>
+                </li>
+                <li>
+                    <a class="sv-nav-link {% if request.resolver_match.url_name == 'portfolio' or request.resolver_match.url_name == 'portfolio-graph' %}is-active{% endif %}" href="{% url 'portfolio' %}" {% if request.resolver_match.url_name == 'portfolio' or request.resolver_match.url_name == 'portfolio-graph' %}aria-current="page"{% endif %}><span class="sv-nav-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="3" y="7" width="18" height="14" rx="3" />
+                                <path d="M8 7V3h8v4M3 12h18M10 12v3h4v-3" />
+                            </svg>
+                        </span><span>Portfolio</span><span class="sv-nav-current-dot" aria-hidden="true"></span></a>
+                </li>
+                <li>
+                    <a class="sv-nav-link {% if request.resolver_match.url_name == 'wishlist' %}is-active{% endif %}" href="{% url 'wishlist' %}" {% if request.resolver_match.url_name == 'wishlist' %}aria-current="page"{% endif %}><span class="sv-nav-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M6 3h12v18l-6-4-6 4V3Z" />
+                                <path d="M9 8h6" />
+                            </svg>
+                        </span><span>Wishlist</span><span class="sv-nav-current-dot" aria-hidden="true"></span></a>
+                </li>
+                <li>
+                    <a class="sv-nav-link {% if request.resolver_match.url_name == 'target' %}is-active{% endif %}" href="{% url 'target' %}" {% if request.resolver_match.url_name == 'target' %}aria-current="page"{% endif %}><span class="sv-nav-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="11" cy="13" r="8" />
+                                <circle cx="11" cy="13" r="4" />
+                                <path d="m11 13 9-9M16 3v5h5" />
+                            </svg>
+                        </span><span>Price targets</span><span class="sv-nav-current-dot" aria-hidden="true"></span></a>
+                </li>
+            </ul>
+        </div>
+        <div class="sv-nav-group">
+            <p class="sv-nav-group-label" id="tools-nav-label">Tools</p>
+            <ul aria-labelledby="tools-nav-label">
+                <li>
+                    <a class="sv-nav-link {% if request.resolver_match.url_name == 'trade-calculator' %}is-active{% endif %}" href="{% url 'trade-calculator' %}" {% if request.resolver_match.url_name == 'trade-calculator' %}aria-current="page"{% endif %}><span class="sv-nav-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="5" y="2" width="14" height="20" rx="3" />
+                                <path d="M8 6h8M8 10h1M15 10h1M8 14h1M15 14h1M8 18h1M15 18h1" />
+                            </svg>
+                        </span><span>Trade calculator</span><span class="sv-nav-current-dot" aria-hidden="true"></span></a>
+                </li>
+            </ul>
+        </div>
+        <div class="sv-nav-group">
+            <p class="sv-nav-group-label" id="account-nav-label">Account</p>
+            <ul aria-labelledby="account-nav-label">
+                <li>
+                    <a class="sv-nav-link {% if request.resolver_match.url_name == 'settings' %}is-active{% endif %}" href="{% url 'settings' %}" {% if request.resolver_match.url_name == 'settings' %}aria-current="page"{% endif %}><span class="sv-nav-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="m9 3-1 3-3 1-2 4 2 2v3l4 3 3-1 3 1 4-3v-3l2-2-2-4-3-1-1-3H9Z" />
+                                <circle cx="12" cy="11" r="3" />
+                            </svg>
+                        </span><span>Settings</span><span class="sv-nav-current-dot" aria-hidden="true"></span></a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <footer class="sv-sidebar-footer">
+        <a class="sidebar-user-card" href="{% url 'settings' %}" aria-label="Open your profile settings"><span class="sidebar-user-avatar" aria-hidden="true"><span class="sidebar-user-initials">{{ request.user.name|slice:':2'|upper|default:'SV' }}</span>
+                <img class="sidebar-user-photo" {% if request.user.profile_image and request.user.profile_image.name != 'default.png' %}src="{{ request.user.profile_image.url }}"{% else %}hidden{% endif %} alt="">
+            </span><span class="sidebar-user-details"><strong class="sidebar-user-name">{{ request.user.name|default:'Your account' }}</strong><span>Personal workspace</span></span>
+            <svg class="sidebar-user-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m9 5 7 7-7 7" />
+            </svg>
+        </a>
+        <a class="sv-sidebar-signout" href="{% url 'logout' %}">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4M14 7l5 5-5 5M8 12h11" />
+            </svg>
+            <span>Sign out</span></a>
+    </footer>
+</aside>

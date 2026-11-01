@@ -1,237 +1,329 @@
-const wrapper = document.querySelector('.wrapper');
-const submit_button = document.querySelector('#submit');
-const sell_submit = document.querySelector('#sell-submit');
-const output = document.querySelector('#output');
-const transaction_type = document.querySelector('#transaction-type');
-const CGT = document.querySelector('.CGT');
-
-const error = document.querySelector('.error-message');
-
-const charges = {
-    broker: {
-        minBrokerage: 10,
-        slabs: [
-            { upTo: 50_000, rate: 0.0036 },
-            { upTo: 500_000, rate: 0.0033 },
-            { upTo: 2_000_000, rate: 0.0031 },
-            { upTo: 10_000_000, rate: 0.0027 },
-            { upTo: Infinity, rate: 0.0024 },
-        ],
-    },
-    sebonFeeRate: 0.00015,
-    dpCharge: 25,
-    capitalGainsTax: {
-        "365 days or less (5%)": 0.05,
-        "365 days or more (3.75%)": 0.0375,
-        "Institutional (10%)": 0.10,
-    },
-};
-
-function formatPrice(num) {
-    const rounded = parseFloat(num.toFixed(2));
-
-    return rounded.toLocaleString('en-US', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2
-    });
-}
-
-transaction_type.addEventListener('change', function() {
-    const display = this.value === 'sell' ? 'flex' : 'none';
-
-    selling_price_wrapper.style.display = display;
-    CGT.style.display = display;
-
-});
-
-submit_button.addEventListener('click', function() {
-    if(transaction_type.value === 'buy'){
-        buy_share();
+(() => {
+    const calculator = document.querySelector('.sv-calculator');
+    if(!calculator){
+        return;
     }
 
-    else{
-        sell_share();
+    const form = calculator.querySelector('#trade-form');
+    const output = calculator.querySelector('#output');
+    const transactionType = calculator.querySelector('#transaction-type');
+    const quantityField = calculator.querySelector('#share-quantity');
+    const purchaseField = calculator.querySelector('#purchase-price');
+    const sellingField = calculator.querySelector('#selling-price');
+    const taxField = calculator.querySelector('#CGT');
+    const error = calculator.querySelector('#calculator-error');
+    const estimateState = calculator.querySelector('#estimate-state');
+    const resultMode = calculator.querySelector('#result-mode');
+    const resultContext = calculator.querySelector('#result-context');
+    const emptyNodes = [...output.childNodes].map(node => node.cloneNode(true));
+    let hasCalculated = false;
+
+    // These mirror StockVault's configured rates in utils/calculator.py.
+    const charges = {
+        broker: {
+            minBrokerage: 10,
+            slabs: [
+                { upTo: 50_000, rate: 0.0036 },
+                { upTo: 500_000, rate: 0.0033 },
+                { upTo: 2_000_000, rate: 0.0031 },
+                { upTo: 10_000_000, rate: 0.0027 },
+                { upTo: Infinity, rate: 0.0024 },
+            ],
+        },
+        sebonFeeRate: 0.00015,
+        dpCharge: 25,
+        capitalGainsTax: {
+            '365 days or less (5%)': 0.05,
+            '365 days or more (3.75%)': 0.0375,
+            'Institutional (10%)': 0.10,
+        },
+    };
+    const maxAmountCents = BigInt(Number.MAX_SAFE_INTEGER);
+    const wholeNumber = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 });
+
+    // Integer cents keep each component's half-up rounding consistent with Decimal.
+    function applyRate(amountCents, rate) {
+        const decimal = String(rate);
+        const places = (decimal.split('.')[1] || '').length;
+        const divisor = 10n ** BigInt(places);
+        const numerator = BigInt(decimal.replace('.', ''));
+        return (amountCents * numerator + divisor / 2n) / divisor;
     }
-});
 
-function buy_shares_calculation(share_quantity, price_per_share){
-    total_purchase_amount = share_quantity * price_per_share;
-
-    brokerage_rate = charges.broker.slabs.find(s=>total_purchase_amount<=s.upTo).rate;
-    brokerage_commission = total_purchase_amount * brokerage_rate;
-    brokerage_commission = Math.max(brokerage_commission, charges.broker.minBrokerage);
-
-    sebon_commission = total_purchase_amount * charges.sebonFeeRate;
-
-    dp_charge = charges.dpCharge;
-
-    total_amount = total_purchase_amount + brokerage_commission + sebon_commission + dp_charge
-
-    return {
-        'total_purchase_amount': formatPrice(total_purchase_amount),
-        'bokerage_commission': formatPrice(brokerage_commission),
-        'sebon_commission': formatPrice(sebon_commission),
-        'dp_charge': formatPrice(dp_charge),
-        'total_amount': formatPrice(total_amount)
+    function priceToCents(value) {
+        const [whole, fraction = ''] = value.split('.');
+        return BigInt(whole || '0') * 100n + BigInt(fraction.padEnd(2, '0'));
     }
-}
 
+    function formatMoney(cents) {
+        const sign = cents < 0n ? '-' : '';
+        const absolute = cents < 0n ? -cents : cents;
+        return `${sign}${wholeNumber.format(absolute / 100n)}.${String(absolute % 100n).padStart(2, '0')}`;
+    }
 
-function sell_share_calculation(buy_type, share_quantity, purchase_value, selling_price, cgt_value){
-    secondary = null;
-    total_purchase_amount = share_quantity * purchase_value;
+    function rateLabel(rate) {
+        return `${parseFloat((rate * 100).toFixed(4))}%`;
+    }
 
-    if(buy_type == 'secondary'){
-        brokerage_rate = charges.broker.slabs.find(s=>total_purchase_amount<=s.upTo).rate;
-        brokerage_commission = total_purchase_amount * brokerage_rate;
-        brokerage_commission = Math.max(brokerage_commission, charges.broker.minBrokerage);
+    function tradeCharges(amountCents) {
+        const slab = charges.broker.slabs.find(item => item.upTo === Infinity ||
+            amountCents <= BigInt(item.upTo) * 100n);
+        const brokerage = applyRate(amountCents, slab.rate);
+        const minimum = BigInt(charges.broker.minBrokerage) * 100n;
+        return {
+            rate: slab.rate,
+            brokerage: brokerage < minimum ? minimum : brokerage,
+            sebon: applyRate(amountCents, charges.sebonFeeRate),
+            dp: BigInt(charges.dpCharge) * 100n,
+        };
+    }
 
-        sebon_commission = total_purchase_amount * charges.sebonFeeRate;
-        dp_charge = charges.dpCharge;
+    function calculatePurchase(quantity, priceCents, purchaseType) {
+        const gross = quantity * priceCents;
+        const fees = purchaseType === 'secondary' ?
+            tradeCharges(gross) : {
+                rate: 0,
+                brokerage: 0n,
+                sebon: 0n,
+                dp: 0n
+            };
+        return {
+            gross,
+            fees,
+            total: gross + fees.brokerage + fees.sebon + fees.dp
+        };
+    }
 
-        total_payable_amount = total_purchase_amount + brokerage_commission + sebon_commission + dp_charge
+    function calculateSale(quantity, purchasePriceCents, sellingPriceCents, purchaseType, taxRate) {
+        const purchase = calculatePurchase(quantity, purchasePriceCents, purchaseType);
+        const gross = quantity * sellingPriceCents;
+        const fees = tradeCharges(gross);
+        const beforeTax = gross - fees.brokerage - fees.sebon - fees.dp;
+        const gain = beforeTax - purchase.total;
+        const tax = applyRate(gain > 0n ? gain : 0n, taxRate);
+        const proceeds = beforeTax - tax;
+        return {
+            purchase,
+            gross,
+            fees,
+            tax,
+            proceeds,
+            profit: proceeds - purchase.total
+        };
+    }
 
-        secondary = {
-            "secondary": {
-                "total_payable_amount": formatPrice(total_payable_amount),
-                "total_purchased_amount": formatPrice(total_purchase_amount),
-                "brokerage_commission": formatPrice(brokerage_commission),
-                "sebon_commission": formatPrice(sebon_commission),
-                "dp_charge": formatPrice(dp_charge)
-            }
+    function clearError() {
+        error.hidden = true;
+        error.textContent = '';
+        form.querySelectorAll('[aria-invalid="true"]').forEach(field => field.removeAttribute('aria-invalid'));
+    }
+
+    function showError(field, message) {
+        error.textContent = message;
+        error.hidden = false;
+        field.setAttribute('aria-invalid', 'true');
+        field.focus();
+    }
+
+    function renderEmpty() {
+        output.replaceChildren(...emptyNodes.map(node => node.cloneNode(true)));
+        resultContext.textContent = '';
+        estimateState.textContent = hasCalculated ? 'Update & calculate' : 'Awaiting input';
+        estimateState.classList.remove('is-ready');
+        estimateState.classList.toggle('is-stale', hasCalculated);
+    }
+
+    function syncMode() {
+        const selected = form.querySelector('input[name="transaction-mode"]:checked');
+        transactionType.value = selected?.value || 'buy';
+        const selling = transactionType.value === 'sell';
+        calculator.querySelector('#selling_price_wrapper').hidden = !selling;
+        calculator.querySelector('.CGT').hidden = !selling;
+        sellingField.required = selling;
+        taxField.required = selling;
+        calculator.querySelector('#purchase-price-label').textContent = selling ?
+            'Original purchase price' : 'Purchase price';
+        resultMode.textContent = selling ? 'Sell estimate' : 'Buy estimate';
+    }
+
+    function readPrice(field, label) {
+        const value = field.value.trim();
+        if(!/^(?:\d+(?:\.\d{1,2})?|\.\d{1,2})$/.test(value) ||
+            !Number.isFinite(Number(value)) || Number(value) <= 0){
+            showError(field, `Enter a positive ${label} with up to two decimal places.`);
+            return null;
+        }
+        const cents = priceToCents(value);
+        if(cents > maxAmountCents){
+            showError(field, 'This price is too large. Please enter a smaller amount.');
+            return null;
+        }
+        return cents;
+    }
+
+    function readTrade() {
+        const quantity = quantityField.value.trim();
+        if(!/^\d+$/.test(quantity) || !Number.isSafeInteger(Number(quantity)) || Number(quantity) <= 0){
+            showError(quantityField, 'Enter a positive whole number of shares.');
+            return null;
+        }
+        const quantityValue = BigInt(quantity);
+        const purchaseType = form.querySelector('input[name="buy-type"]:checked');
+        if(!purchaseType || !['ipo', 'secondary'].includes(purchaseType.value)){
+            showError(form.querySelector('input[name="buy-type"]'), 'Choose a purchase type.');
+            return null;
+        }
+        const purchasePrice = readPrice(purchaseField, 'purchase price');
+        if(purchasePrice === null){
+            return null;
+        }
+        const selling = transactionType.value === 'sell';
+        const sellingPrice = selling ? readPrice(sellingField, 'selling price') : null;
+        if(selling && sellingPrice === null){
+            return null;
+        }
+        if(quantityValue * purchasePrice > maxAmountCents ||
+            (selling && quantityValue * sellingPrice > maxAmountCents)){
+            showError(quantityField, 'This trade is too large. Please reduce the quantity or price.');
+            return null;
+        }
+        if(selling && !Object.hasOwn(charges.capitalGainsTax, taxField.value)){
+            showError(taxField, 'Choose a holding period or investor type for capital gains tax.');
+            return null;
+        }
+        return {
+            quantity: quantityValue,
+            purchasePrice,
+            sellingPrice,
+            purchaseType: purchaseType.value,
+            taxRate: selling ? charges.capitalGainsTax[taxField.value] : null,
+        };
+    }
+
+    function addTitle(text, parent = output) {
+        const title = document.createElement('h3');
+        title.className = 'output-section-title';
+        title.textContent = text;
+        parent.appendChild(title);
+    }
+
+    function addRow(label, amount, className = '', parent = output) {
+        const row = document.createElement('div');
+        row.className = `output-row ${className}`.trim();
+        const name = document.createElement('p');
+        name.textContent = label;
+        const value = document.createElement('p');
+        value.textContent = `Rs. ${formatMoney(amount)}`;
+        row.append(name, value);
+        parent.appendChild(row);
+        return row;
+    }
+
+    function addFeeRows(fees, parent = output) {
+        addRow(`Broker commission (${rateLabel(fees.rate)})`, fees.brokerage, '', parent);
+        addRow(`SEBON fee (${rateLabel(charges.sebonFeeRate)})`, fees.sebon, '', parent);
+        addRow('DP charge', fees.dp, '', parent);
+    }
+
+    function renderPurchase(trade, result) {
+        output.replaceChildren();
+        addTitle(trade.purchaseType === 'ipo' ? 'IPO purchase' : 'Purchase breakdown');
+        addRow('Share value', result.gross);
+        if(trade.purchaseType === 'secondary'){
+            addFeeRows(result.fees);
         }
 
-        total_purchase_amount = total_payable_amount;
+        else{
+            addRow('Trade charges', 0n);
+        }
+        addRow('Total purchase cost', result.total, 'answer-div');
     }
 
-    total_selling_amount = share_quantity * selling_price;
+    function renderSale(trade, result) {
+        output.replaceChildren();
+        addTitle('Sale breakdown');
+        addRow('Sale value', result.gross);
+        addFeeRows(result.fees);
+        addRow(`Capital gains tax (${rateLabel(trade.taxRate)})`, result.tax);
+        addRow('Net sale proceeds', result.proceeds, 'answer-div');
+        addRow('Estimated profit / loss', result.profit,
+            `profit-row ${result.profit < 0n ? 'is-negative' : 'is-positive'}`);
 
-    brokerage_rate = charges.broker.slabs.find(s=>total_selling_amount<=s.upTo).rate;
-    brokerage_commission = total_selling_amount * brokerage_rate;
+        if(trade.purchaseType === 'secondary'){
+            const details = document.createElement('details');
+            details.className = 'purchase-breakdown';
+            const summary = document.createElement('summary');
+            summary.textContent = 'Purchase cost breakdown';
+            details.appendChild(summary);
+            addRow('Original share value', result.purchase.gross, '', details);
+            addFeeRows(result.purchase.fees, details);
+            addRow('Total purchase cost', result.purchase.total, '', details);
+            output.appendChild(details);
+        }
 
-    sebon_commission = total_selling_amount * charges.sebonFeeRate;
-    dp_charge = charges.dpCharge;
-
-    net_amount_before_CGT = total_selling_amount - brokerage_commission - sebon_commission - dp_charge;
-
-    capital_gain = net_amount_before_CGT - total_purchase_amount;
-    capital_gain_tax = charges.capitalGainsTax[cgt_value] * capital_gain;
-
-    profit_amount = capital_gain - capital_gain_tax
-    final_receivable_amount = net_amount_before_CGT - capital_gain_tax
-
-    return {
-        ...secondary,
-        "total_purchased_amount": formatPrice(total_purchase_amount),
-        "total_selling_amount": formatPrice(total_selling_amount),
-        "brokerage_commission": formatPrice(brokerage_commission),
-        "sebon_commission": formatPrice(sebon_commission),
-        "dp_charge": formatPrice(dp_charge),
-        "profit_amount": formatPrice(profit_amount),
-        "capital_gain_tax": formatPrice(capital_gain_tax),
-        "final_receivable_amount": formatPrice(final_receivable_amount)
-    }
-}
-
-
-function buy_share() {
-    number_regex = /^-?\d+$/;
-    float_regex = /^-?\d+(\.\d+)?$/;
-
-    const sharePrice = document.querySelector('#purchase-price').value;
-    const shareQuantity = document.querySelector('#share-quantity').value;
-    const buy_type = document.querySelector('input[name="buy-type"]:checked')?.value || null;
-
-    if(!number_regex.test(shareQuantity) || !float_regex.test(sharePrice || !buy_type)){
-        error.style.display = 'block';
-        remove_error_message(error);
-        return;
+        else{
+            addRow('IPO purchase cost', result.purchase.total);
+        }
     }
 
-    else{
-        error.style.display = 'none';
-    }
+    form.addEventListener('submit', event => {
+        event.preventDefault();
+        clearError();
+        const trade = readTrade();
+        if(!trade){
+            return;
+        }
+        const selling = transactionType.value === 'sell';
+        const result = selling ?
+            calculateSale(trade.quantity, trade.purchasePrice, trade.sellingPrice, trade.purchaseType, trade.taxRate) :
+            calculatePurchase(trade.quantity, trade.purchasePrice, trade.purchaseType);
+        const purchaseTotal = selling ? result.purchase.total : result.total;
+        if(purchaseTotal > maxAmountCents){
+            showError(quantityField, 'This trade is too large after charges. Please reduce the quantity or price.');
+            return;
+        }
+        if(selling){
+            renderSale(trade, result);
+        }
 
-    calculated_values = (buy_type == 'ipo') ? shareQuantity * sharePrice : buy_shares_calculation(shareQuantity, sharePrice);
-    console.log(calculated_values);
+        else{
+            renderPurchase(trade, result);
+        }
+        hasCalculated = true;
+        estimateState.textContent = 'Estimate ready';
+        estimateState.classList.add('is-ready');
+        estimateState.classList.remove('is-stale');
+        resultContext.textContent = `${wholeNumber.format(trade.quantity)} ${trade.quantity === 1n ? 'share' : 'shares'} × Rs. ${formatMoney(selling ? trade.sellingPrice : trade.purchasePrice)}`;
 
-    output.replaceChildren();
+        if(typeof matchMedia === 'function' && matchMedia('(max-width: 1180px)').matches){
+            const estimateCard = calculator.querySelector('.trade-estimate-card');
+            if(typeof estimateCard?.scrollIntoView === 'function'){
+                estimateCard.scrollIntoView({
+                    block: 'start',
+                    behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+                });
+            }
+        }
+    });
 
-    if(buy_type == 'secondary'){
-        makeOutputInnerDivs("Total Purchase Amount", calculated_values.total_purchase_amount);
-        makeOutputInnerDivs(`Broker Commission (${brokerage_rate * 100}%)`, calculated_values.bokerage_commission);
-        makeOutputInnerDivs(`SEBON Commission (${charges.sebonFeeRate * 100}%)`, calculated_values.sebon_commission);
-        makeOutputInnerDivs("DP Charge", calculated_values.dp_charge);
-        makeOutputInnerDivs("Total Purchased Amount", calculated_values.total_amount, innerClassName='answer-div');
-    }
+    form.addEventListener('input', () => {
+        clearError();
+        renderEmpty();
+    });
+    form.addEventListener('change', () => {
+        clearError();
+        syncMode();
+        renderEmpty();
+    });
 
-    else{
-        makeOutputInnerDivs("Total Purchase Amount", formatPrice(calculated_values));
-    }
-}
+    calculator.querySelector('#reset-calculator').addEventListener('click', () => {
+        form.reset();
+        hasCalculated = false;
+        clearError();
+        syncMode();
+        renderEmpty();
+        quantityField.focus();
+    });
 
-
-function sell_share() {
-    number_regex = /^-?\d+$/;
-    float_regex = /^-?\d+(\.\d+)?$/;
-
-    buy_type = document.querySelector('input[name="buy-type"]:checked')?.value || null;
-    share_quantity = document.querySelector('#share-quantity').value;
-    purchase_value = document.querySelector('#purchase-price').value;
-    selling_price = document.querySelector('#selling-price').value;
-    cgt_value = document.getElementById('CGT').value;
-
-    if(!buy_type || !number_regex.test(share_quantity) || !float_regex.test(purchase_value) || !float_regex.test(selling_price || !cgt_value)){
-        error.style.display = 'block';
-        remove_error_message(error);
-        return;
-    }
-
-    else{
-        error.style.display = 'none';
-    }
-
-    output.replaceChildren();
-
-    calculated_values = sell_share_calculation(buy_type, share_quantity, purchase_value, selling_price, cgt_value);
-    output.replaceChildren();
-
-    if(buy_type == 'secondary'){
-        makeOutputInnerDivs(`Total Purchased Amount`, calculated_values.secondary.total_purchased_amount);
-        makeOutputInnerDivs(`Broker Commission (${brokerage_rate * 100}%)`, calculated_values.secondary.brokerage_commission);
-        makeOutputInnerDivs(`SEBON Commission (${charges.sebonFeeRate * 100}%)`, calculated_values.secondary.sebon_commission);
-        makeOutputInnerDivs("DP Charge", formatPrice(dp_charge));
-        makeOutputInnerDivs("Total Purchased Amount", calculated_values.secondary.total_payable_amount, innerClassName='answer-div');
-    }
-
-    makeOutputInnerDivs("Total Selling Amount", calculated_values.total_selling_amount);
-    makeOutputInnerDivs(`Broker Commission (${brokerage_rate * 100}%)`, calculated_values.brokerage_commission);
-    makeOutputInnerDivs(`SEBON Commission (${charges.sebonFeeRate * 100}%)`, calculated_values.sebon_commission);
-    makeOutputInnerDivs("DP Charge", calculated_values.dp_charge);
-    makeOutputInnerDivs(`Capital Gain Tax (${charges.capitalGainsTax[cgt_value] * 100}%)`, calculated_values.capital_gain_tax);
-    makeOutputInnerDivs("Final Receivable Amount", calculated_values.final_receivable_amount);
-    makeOutputInnerDivs("Profit Amount", calculated_values.profit_amount, innerClassName='answer-div');
-}
-
-
-function makeOutputInnerDivs(text1 = '', text2 = '', innerClassName='') {
-    const wrapper = output;
-
-    if (!wrapper) {
-        return null;
-    }
-
-    const div = document.createElement('div');
-    div.className = `output-row ${innerClassName}`;
-
-    const p1 = document.createElement('p');
-    p1.textContent = text1;
-
-    const p2 = document.createElement('p');
-    p2.textContent = text2;
-
-    div.append(p1, p2);
-    wrapper.appendChild(div);
-
-    return div;
-}
+    syncMode();
+})();
