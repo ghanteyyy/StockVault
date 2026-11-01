@@ -1,5 +1,7 @@
 # Stock Vault
 
+<img src="static/images/stockvault-tour.gif">
+
 <br>
 
 Stock Vault is designed to provide a secure and user-friendly platform for managing and tracking stock portfolios. The project aims to offer a comprehensive tool for users to monitor their investments, access real-time stock data, and organize their financial assets efficiently, catering to both novice and experienced investors.
