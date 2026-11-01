@@ -1,4 +1,3 @@
-import datetime as dt
 from rest_framework import serializers
 from . import models
 from rest_framework import serializers
@@ -42,25 +41,6 @@ class PortfoliosSerializer(serializers.ModelSerializer):
 
     def get_user_email(self, obj):
         return obj.user_id.email
-
-
-class PortfolioLotsSerializer(serializers.ModelSerializer):
-    user_email = serializers.SerializerMethodField()
-    company_name = serializers.SerializerMethodField()
-    purchased_date = serializers.SerializerMethodField()
-
-    class Meta:
-        model = models.PortfolioLots
-        fields = ['id', 'company_name', 'number_of_shares', 'total_cost', 'user_email', 'purchased_date']
-
-    def get_company_name(self, obj):
-        return obj.portfolio_id.company_id.name
-
-    def get_user_email(self, obj):
-        return obj.portfolio_id.user_id.email
-
-    def get_purchased_date(self, obj):
-        return obj.purchased_date.strftime("%b %e, %Y")
 
 
 class TransactionsSerializer(serializers.ModelSerializer):
