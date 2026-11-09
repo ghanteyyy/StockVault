@@ -11,7 +11,7 @@ class AdminRedirectMiddleware:
         self.frontend_views = {
             'login', 'signup', 'buy-sell', 'dashboard',
             'portfolio', 'settings', 'wishlist', 'profit-loss', 'timeline',
-            'trades', 'transactions',
+            'trades', 'transactions', 'market-data',
         }
 
     def __call__(self, request):

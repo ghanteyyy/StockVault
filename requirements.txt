@@ -9,3 +9,4 @@ beautifulsoup4
 djangorestframework
 django-simple-captcha
 djangorestframework-simplejwt
+nepse @ git+https://github.com/basic-bgnr/NepseUnofficialApi.git@180a550c60f1959983b854659e650a4c189a3c0f

@@ -1,0 +1,187 @@
+{% extends 'users/root.html' %}
+{% load static nepali_currency tz %}
+
+{% block global_assets %}{% endblock %}
+{% block public_footer %}{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/users/market-data.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="sv-market">
+        <header class="market-heading">
+            <div>
+                <p class="market-eyebrow">StockVault / Workspace</p>
+                <h1>Market Data</h1>
+                <p>The NEPSE index, market totals, and the latest reported price moves.</p>
+            </div>
+            {% if fetched_at %}
+                {% timezone 'Asia/Kathmandu' %}
+                    <p class="market-retrieved">
+                        <span>Last retrieved</span>
+                        <time datetime="{{ fetched_at|date:'c' }}">{{ fetched_at|date:'M j, Y, H:i' }} NPT</time>
+                    </p>
+                {% endtimezone %}
+            {% endif %}
+        </header>
+
+        {% if unavailable %}
+            <p class="market-notice" role="status">Market data is unavailable right now. Reload the page to try again.</p>
+
+        {% elif stale %}
+            <p class="market-notice" role="status">Some sections show previously retrieved data because the latest update was unavailable.</p>
+
+        {% elif index is None or summary is None or gainers is None or losers is None %}
+            <p class="market-notice" role="status">Some market data is unavailable. Available sections are shown below.</p>
+        {% endif %}
+
+        <div class="market-overview">
+            <section class="market-index" aria-labelledby="market-index-title">
+                <div class="market-index-header">
+                    <p class="market-kicker">Nepal Stock Exchange</p>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 18V6m0 12h16M7 14l4-4 3 2 6-6" />
+                        <path d="M16 6h4v4" />
+                    </svg>
+                </div>
+                <h2 id="market-index-title">NEPSE Index</h2>
+                {% if index %}
+                    <p class="market-index-value">{{ index.value|npr_amount }} <span>points</span></p>
+                    {% if index.change is not None or index.percent is not None %}
+                        <div class="market-index-movement">
+                            <span class="market-index-movement-label">Daily change</span>
+                            {% if index.change is not None %}
+                                <span class="market-change{% if index.change > 0 %} market-positive{% elif index.change < 0 %} market-negative{% endif %}">
+                                    {% if index.change > 0 %}+{% endif %}{{ index.change|npr_amount }} pts
+                                </span>
+                            {% endif %}
+                            {% if index.percent is not None %}
+                                <span class="market-change{% if index.percent > 0 %} market-positive{% elif index.percent < 0 %} market-negative{% endif %}">
+                                    {% if index.percent > 0 %}+{% endif %}{{ index.percent|npr_amount }}%
+                                </span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    {% if index.date %}
+                        <p class="market-index-date">Trading date <time datetime="{{ index.date|date:'Y-m-d' }}">{{ index.date|date:'M j, Y' }}</time></p>
+                    {% endif %}
+
+                {% else %}
+                    <p class="market-index-value">—</p>
+                    <p class="market-index-date">The index is currently unavailable.</p>
+                {% endif %}
+            </section>
+
+            <section class="market-card market-summary" aria-labelledby="market-summary-title">
+                <header class="market-section-heading">
+                    <div>
+                        <p class="market-kicker">Trading activity</p>
+                        <h2 id="market-summary-title">Market Summary</h2>
+                    </div>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 19h16M6 16v-4m4 4V7m4 9V9m4 7V5" />
+                    </svg>
+                </header>
+                {% if summary %}
+                    <dl class="market-metrics">
+                        {% for metric in summary %}
+                            <div>
+                                <dt>{{ metric.label }}</dt>
+                                <dd>
+                                    {% if metric.kind == 'currency' %}
+                                        <small>Rs.</small> {{ metric.value|npr_amount }}
+
+                                    {% else %}
+                                        {{ metric.value|floatformat:'0g' }}
+                                    {% endif %}
+                                </dd>
+                            </div>
+                        {% endfor %}
+                    </dl>
+
+                {% else %}
+                    <p class="market-empty">Market totals are currently unavailable.</p>
+                {% endif %}
+            </section>
+        </div>
+
+        <div class="market-movers">
+            {% for section in mover_sections %}
+                <section class="market-card market-mover market-mover--{{ section.id }}" aria-labelledby="market-{{ section.id }}-title">
+                    <header class="market-section-heading">
+                        <div>
+                            <p class="market-kicker">Ranked by daily change</p>
+                            <h2 id="market-{{ section.id }}-title">{{ section.title }}</h2>
+                        </div>
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            {% if section.id == 'gainers' %}
+                                <path d="m3 17 7-7 4 4 7-8m-6 0h6v6" />
+
+                            {% else %}
+                                <path d="m3 7 7 7 4-4 7 8m-6 0h6v-6" />
+                            {% endif %}
+                        </svg>
+                    </header>
+                    {% if section.rows %}
+                        <div class="market-table-scroll" tabindex="0" role="region" aria-labelledby="market-{{ section.id }}-title">
+                            <table class="market-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Company</th>
+                                        <th scope="col">Last price</th>
+                                        <th scope="col">Change</th>
+                                        <th scope="col">Change %</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in section.rows %}
+                                        <tr>
+                                            <th scope="row">
+                                                <strong>{{ row.symbol }}</strong>
+                                                {% if row.name and row.name != row.symbol %}
+                                                    <small>{{ row.name }}</small>
+                                                {% endif %}
+                                            </th>
+                                            <td>
+                                                {% if row.price is not None %}
+                                                    {{ row.price|npr_amount }}
+
+                                                {% else %}
+                                                    —
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if row.change is not None %}
+                                                    <span class="{% if row.change > 0 %}market-positive{% elif row.change < 0 %}market-negative{% endif %}">{% if row.change > 0 %}+{% endif %}{{ row.change|npr_amount }}</span>
+
+                                                {% else %}
+                                                    —
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if row.percent is not None %}
+                                                    <span class="market-change{% if row.percent > 0 %} market-positive{% elif row.percent < 0 %} market-negative{% endif %}">{% if row.percent > 0 %}+{% endif %}{{ row.percent|npr_amount }}%</span>
+
+                                                {% else %}
+                                                    —
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="market-table-note">Prices and absolute changes in NPR.</p>
+
+                    {% elif section.rows is None %}
+                        <p class="market-empty">{{ section.title }} data is currently unavailable.</p>
+
+                    {% else %}
+                        <p class="market-empty">No {{ section.id }} reported for the current snapshot.</p>
+                    {% endif %}
+                </section>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
