@@ -13,6 +13,7 @@ from nepse import Nepse
 
 from Shares.models import ListedCompanies, Portfolios, Transactions
 from Shares.trading import delete_holding, holding_summary, record_transaction, sale_preview
+from utils.calculator import money
 from utils.utils import nepali_comma
 
 
@@ -54,14 +55,16 @@ def DashboardPage(request):
     sales = Transactions.objects.filter(
         user_id=request.user, transaction_type='sell', is_legacy=False,
     ).aggregate(total=Sum('net_amount'))['total'] or ZERO
+    value_change = market_value - investment
     percentage = None if missing_quotes else (
-        round((market_value - investment) / investment * 100, 2) if investment else ZERO
+        round(value_change / investment * 100, 2) if investment else ZERO
     )
     return render(request, 'users/dashboard.html', {
         'page_title': 'Dashboard | Stock Vault',
         'total_investment': str(investment),
         'total_sales': str(sales),
         'percentage_change': percentage,
+        'profit_loss': None if missing_quotes else money(value_change),
         'missing_quotes': missing_quotes,
         'data_per_company_sector': sectors,
     })

@@ -158,7 +158,7 @@
 
 .portfolio-summary {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: clamp(13px, 1.7vw, 22px);
     margin: 0 0 clamp(34px, 4.3vw, 54px);
 }
@@ -170,7 +170,7 @@
     min-width: 0;
     min-height: 218px;
     overflow: hidden;
-    padding: clamp(22px, 2.35vw, 31px);
+    padding: clamp(22px, 2vw, 31px);
     border: 1px solid #b2bac8;
     border-radius: var(--sv-radius-lg);
     background: var(--sv-surface);
@@ -237,7 +237,7 @@
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.015em;
-    white-space: nowrap;
+    text-align: center;
 }
 
 .card-label {
@@ -251,7 +251,7 @@
 .card-amount {
     margin-bottom: 0;
     color: var(--sv-heading);
-    font-size: clamp(24px, 2.35vw, 34px);
+    font-size: clamp(24px, 2vw, 34px);
     font-weight: 800;
     line-height: 1.24;
     letter-spacing: -0.055em;
@@ -372,6 +372,33 @@
 .change-card.is-negative .card-icon {
     background: #fff0f1;
     color: #9f1239;
+}
+
+.profit-loss-card.is-positive {
+    --profit-loss-ink: #166534;
+    --profit-loss-accent: #d9f2e3;
+    border-color: #75a78a;
+    background: linear-gradient(145deg, #f5fcf8, #e8f7ef);
+}
+
+.profit-loss-card.is-negative {
+    --profit-loss-ink: #9f1239;
+    --profit-loss-accent: #fbe1e8;
+    border-color: #bd8191;
+    background: linear-gradient(145deg, #fff7f8, #fce9ed);
+}
+
+.profit-loss-card:is(.is-positive, .is-negative) .card-amount {
+    color: var(--profit-loss-ink);
+}
+
+.profit-loss-card:is(.is-positive, .is-negative) :is(.card-icon, .card-tag) {
+    background: var(--profit-loss-accent);
+    color: var(--profit-loss-ink);
+}
+
+.profit-loss-card:is(.is-positive, .is-negative) .card-tag {
+    border-color: currentColor;
 }
 
 .dashboard-charts {
@@ -642,13 +669,9 @@
     }
 }
 
-@media (max-width: 1060px) {
+@media (max-width: 1350px) {
     .portfolio-summary {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .invested-card {
-        grid-column: 1 / -1;
     }
 
     .summary-card {
@@ -691,10 +714,6 @@
         grid-template-columns: minmax(0, 1fr);
         gap: 13px;
         margin-bottom: 30px;
-    }
-
-    .invested-card {
-        grid-column: auto;
     }
 
     .summary-card {

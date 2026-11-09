@@ -5,7 +5,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/users/dashboard.css' %}?v=contrast-1">
+    <link rel="stylesheet" href="{% static 'css/users/dashboard.css' %}?v=profit-loss-1">
 {% endblock %}
 
 {% block content %}
@@ -97,6 +97,42 @@
 
                         {% else %}
                             Market value compared with current cost basis
+                        {% endif %}
+                    </p>
+                </article>
+
+                <article class="summary-card profit-loss-card {% if profit_loss > 0 %}is-positive{% elif profit_loss < 0 %}is-negative{% else %}is-neutral{% endif %}">
+                    <div class="card-top">
+                        <span class="card-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                {% if profit_loss > 0 %}
+                                    <path d="m3 16 6-6 4 4 8-8M15 6h6v6" />
+
+                                {% elif profit_loss < 0 %}
+                                    <path d="m3 8 6 6 4-4 8 8m-6 0h6v-6" />
+
+                                {% else %}
+                                    <path d="M4 12h16" />
+                                {% endif %}
+                            </svg>
+                        </span>
+                        <span class="card-tag">Open holdings</span>
+                    </div>
+                    <p class="card-label">Profit / loss</p>
+                    <h2 class="card-amount">
+                        {% if missing_quotes %}
+                            —
+
+                        {% else %}
+                            <span class="currency">Rs.</span> {% if profit_loss > 0 %}+{% endif %}{{ profit_loss|npr_amount }}
+                        {% endif %}
+                    </h2>
+                    <p class="card-description">
+                        {% if missing_quotes %}
+                            Waiting for a complete market snapshot
+
+                        {% else %}
+                            Market value minus current cost basis
                         {% endif %}
                     </p>
                 </article>

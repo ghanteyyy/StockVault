@@ -66,3 +66,20 @@ class PortfolioTradingIntegrationTests(TestCase):
         self.assertEqual(Decimal(response.context['total_sales']), sale.net_amount)
         self.assertEqual(Decimal(response.context['total_investment']), Decimal('0.00'))
         self.assertEqual(response.context['data_per_company_sector'], {})
+
+    @patch('Users.portfolio_views._market_quote')
+    def test_dashboard_profit_loss_uses_the_open_holdings_snapshot(self, market_quote):
+        self.buy()
+        cases = (
+            ('12445.92', Decimal('123456.70'), 'is-positive', '+1,23,456.70'),
+            ('75.25', Decimal('-250.00'), 'is-negative', '-250.00'),
+            ('100.25', Decimal('0.00'), 'is-neutral', '0.00'),
+            (None, None, 'is-neutral', 'Waiting for a complete market snapshot'),
+        )
+        for price, profit_loss, state, display in cases:
+            with self.subTest(price=price):
+                market_quote.return_value = {'lastTradedPrice': price} if price is not None else None
+                response = self.client.get(reverse('dashboard'))
+                self.assertEqual(response.context['profit_loss'], profit_loss)
+                self.assertContains(response, f'profit-loss-card {state}')
+                self.assertContains(response, display)
