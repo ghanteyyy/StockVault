@@ -40,7 +40,7 @@ class WorkspaceTradingTests(TestCase):
             response = self.submit_trade('buy', 100, '100.25', purchase_type='ipo', idempotency_key=key)
             self.assertEqual(response.status_code, 302)
         self.assertEqual(self.submit_trade('buy', 50, '200.40').status_code, 302)
-        self.assertEqual(self.submit_trade('bonus', 50).status_code, 302)
+        self.assertEqual(self.submit_trade('bonus', 50, bonus_company=self.company.pk, company=self.other_company.pk).status_code, 302)
         self.assertEqual(Portfolios.objects.filter(user_id=self.member).count(), 1)
 
         response = self.client.get(self.trades, {
@@ -72,6 +72,8 @@ class WorkspaceTradingTests(TestCase):
             with self.subTest(transaction_type=transaction_type):
                 self.assertContains(self.submit_trade(transaction_type, quantity, price),
                                     'Check the transaction details.', status_code=400)
+        self.assertContains(self.submit_trade('bonus', 1, bonus_company=self.other_company.pk),
+                            'Bonus shares require an existing holding', status_code=400)
         response = self.client.get(self.trades, {
             'quote': '1', 'company': self.company.pk, 'transaction_type': 'sell', 'quantity': 11,
         })

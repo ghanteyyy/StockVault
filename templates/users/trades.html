@@ -72,7 +72,7 @@
                     <p class="dealing-mode-description" data-buy-only>Each purchase adds to your company holding and updates its average cost.</p>
                     <p class="dealing-mode-description" data-sell-only>A sale reduces the number of shares you hold and removes their share of the purchase cost.</p>
                     <p class="dealing-mode-description" data-bonus-only>Add the bonus shares you received to an existing company holding.</p>
-                    <div class="dealing-field">
+                    <div class="dealing-field" data-priced-only>
                         <label for="dealing-company">Company</label>
                         <select name="company" id="dealing-company" required>
                             <option value="">Choose a company</option>
@@ -80,6 +80,18 @@
                                 <option value="{{ company.pk }}" {% if form_values.company == company.pk %}selected{% endif %}>{{ company.name }} · {{ company.abbreviation }}</option>
                             {% endfor %}
                         </select>
+                    </div>
+                    <div class="dealing-field" data-bonus-only>
+                        <label for="dealing-bonus-company">Company</label>
+                        <select name="bonus_company" id="dealing-bonus-company" required>
+                            <option value="">{% if positions %}Choose a company you hold{% else %}No companies held yet{% endif %}</option>
+                            {% for position in positions %}
+                                <option value="{{ position.company.pk }}" {% if form_values.company == position.company.pk %}selected{% endif %}>{{ position.company.name }} · {{ position.company.abbreviation }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if not positions %}
+                            <p>Record a purchase before adding bonus shares.</p>
+                        {% endif %}
                     </div>
                     <div class="dealing-field-pair">
                         <div class="dealing-field">
@@ -205,5 +217,5 @@
 {% endblock %}
 
 {% block js %}
-    <script src="{% static 'js/users/trading.js' %}?v=2" defer></script>
+    <script src="{% static 'js/users/trading.js' %}?v=3" defer></script>
 {% endblock %}

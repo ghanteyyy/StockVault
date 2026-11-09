@@ -5,7 +5,8 @@
     }
 
     const form = page.querySelector('#dealing-form');
-    const company = form.querySelector('#dealing-company');
+    const tradeCompany = form.querySelector('#dealing-company');
+    const bonusCompany = form.querySelector('#dealing-bonus-company');
     const quantity = form.querySelector('#dealing-quantity');
     const price = form.querySelector('#dealing-price');
     const tax = form.querySelector('#dealing-tax');
@@ -20,6 +21,7 @@
     let timer;
     let activeRequest;
     let quoteVersion = 0;
+    let company = mode() === 'bonus' ? bonusCompany : tradeCompany;
 
     form.noValidate = false;
 
@@ -122,6 +124,15 @@
 
     function syncMode() {
         const selected = mode();
+        const previousCompany = company;
+        company = selected === 'bonus' ? bonusCompany : tradeCompany;
+        if(company !== previousCompany){
+            const previousValue = previousCompany.value;
+            company.value = Array.from(company.options).some(option => option.value === previousValue) ? previousValue : '';
+        }
+        tradeCompany.disabled = selected === 'bonus';
+        bonusCompany.disabled = selected !== 'bonus';
+        submit.disabled = selected === 'bonus' && bonusCompany.options.length === 1;
         price.required = selected !== 'bonus';
         price.disabled = selected === 'bonus';
         page.querySelector('#dealing-price-label').textContent = selected === 'sell' ?
@@ -137,15 +148,18 @@
         else{
             submitLabel.textContent = 'Record purchase';
         }
+        showHolding(holdings[company.value] || null);
         scheduleQuote(true);
     }
 
     form.querySelectorAll('[name="transaction_type"]').forEach(input => {
         input.addEventListener('change', syncMode);
     });
-    company.addEventListener('change', () => {
-        showHolding(holdings[company.value] || null);
-        scheduleQuote(true);
+    [tradeCompany, bonusCompany].forEach(picker => {
+        picker.addEventListener('change', () => {
+            showHolding(holdings[company.value] || null);
+            scheduleQuote(true);
+        });
     });
     quantity.addEventListener('input', () => {
         if(mode() === 'sell'){
@@ -179,6 +193,5 @@
     if(page.querySelector('#trade-errors')){
         page.querySelector('#trade-errors').focus();
     }
-    showHolding(holdings[company.value] || null);
     syncMode();
 })();

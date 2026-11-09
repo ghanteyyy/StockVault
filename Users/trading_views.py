@@ -33,9 +33,13 @@ PURCHASE_CHOICES = (
 
 def _form_values(request):
     source = request.POST if request.method == 'POST' else request.GET
+    transaction_type = (source.get('transaction_type') or 'buy').strip().lower()
+    company = source.get('company')
+    if request.method == 'POST' and transaction_type == 'bonus':
+        company = source.get('bonus_company', company)
     return {
-        'company': (source.get('company') or '').strip(),
-        'transaction_type': (source.get('transaction_type') or 'buy').strip().lower(),
+        'company': (company or '').strip(),
+        'transaction_type': transaction_type,
         'quantity': (source.get('quantity') or '').strip(),
         'unit_price': (source.get('unit_price') or '').strip(),
         'purchase_type': (source.get('purchase_type') or 'secondary').strip(),
