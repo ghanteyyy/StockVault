@@ -1,0 +1,56 @@
+.adm-ledger-banner {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    margin-bottom: 22px;
+    border: 1px solid #9584aa;
+    border-radius: 12px;
+    background: #f4effa;
+    color: #302347;
+}
+
+.adm-ledger-banner > .adm-icon {
+    width: 21px;
+    height: 21px;
+    color: #59378f;
+}
+
+.adm-ledger-banner strong {
+    display: block;
+    font-size: 14px;
+}
+
+.adm-ledger-banner p {
+    margin-top: 4px;
+    color: #475569;
+    font-size: 12px;
+    line-height: 1.65;
+}
+
+.adm-ledger-table {
+    min-width: 800px;
+}
+
+.adm-ledger-table :is(th, td) {
+    padding-inline: 14px;
+}
+
+.adm-ledger-table .adm-table-actions {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
+@media (max-width: 580px) {
+    .adm-ledger-banner {
+        grid-template-columns: auto 1fr;
+        gap: 10px;
+        padding: 14px;
+    }
+
+    .adm-ledger-banner .adm-button {
+        grid-column: 2;
+        justify-self: start;
+    }
+}

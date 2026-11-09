@@ -8,12 +8,16 @@
             <p>{{ record_description }}</p>
         </div>
         <div class="adm-heading-actions">
-            <span class="adm-badge">Read-only report</span><a class="adm-button adm-button--ghost" href="?{% if query_string %}{{ query_string }}&{% endif %}export=csv">
+            {% block record_heading_actions %}
+                <span class="adm-badge">Read-only report</span>
+            {% endblock %}
+            <a class="adm-button adm-button--ghost" href="?{% if query_string %}{{ query_string }}&{% endif %}export=csv">
                 {% include 'admin/_icon.html' with name='download' %}
                 Export CSV</a>
         </div>
     </div>
     {% include 'admin/_metrics.html' %}
+    {% block record_intro %}{% endblock %}
     {% if filter_errors %}
         <div class="adm-alert adm-alert--warning" role="alert">
             <strong>Check your filters.</strong>
@@ -60,6 +64,9 @@
                         <option value="">All types</option>
                         <option value="buy"{% if filters.type == 'buy' %} selected{% endif %}>Buy</option>
                         <option value="sell"{% if filters.type == 'sell' %} selected{% endif %}>Sell</option>
+                        {% if record_kind == 'transactions' %}
+                            <option value="bonus"{% if filters.type == 'bonus' %} selected{% endif %}>Bonus shares</option>
+                        {% endif %}
                     </select>
                 </div>
             {% endif %}
@@ -114,117 +121,98 @@
             <button class="adm-button adm-button--primary" type="submit">Apply filters</button>
             <a class="adm-button adm-button--ghost" href="{{ request.path }}">Reset</a>
         </form>
-        {% if page_obj %}
-            <div class="adm-table-wrap">
-                <table class="adm-table">
-                    <thead>
-                        <tr>
-                            <th scope="col">Member</th>
-                            <th scope="col">Company</th>
-                            {% if record_kind == 'portfolios' %}
-                                <th scope="col" class="adm-numeric">Shares</th>
-                                <th scope="col" class="adm-numeric">Purchase cost · NPR</th>
-                                <th scope="col">Created</th>
-
-                            {% elif record_kind == 'transactions' %}
-                                <th scope="col">Type</th>
-                                <th scope="col" class="adm-numeric">Shares</th>
-                                <th scope="col" class="adm-numeric">Recorded value · NPR</th>
-                                <th scope="col">Date</th>
-
-                            {% elif record_kind == 'targets' %}
-                                <th scope="col">Type</th>
-                                <th scope="col" class="adm-numeric">Low · NPR</th>
-                                <th scope="col" class="adm-numeric">High · NPR</th>
-                                <th scope="col">State</th>
-                                <th scope="col">Created</th>
-
-                            {% else %}
-                                <th scope="col">Sector</th>
-                                <th scope="col">Account status</th>
-                            {% endif %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for record in page_obj %}
+        {% block record_table %}
+            {% if page_obj %}
+                <div class="adm-table-wrap">
+                    <table class="adm-table">
+                        <thead>
                             <tr>
-                                <td>
-                                    <a href="{% url 'admin-user-profile' %}?id={{ record.user_id.pk|urlencode }}"><strong>{{ record.user_id.name }}</strong><small>{{ record.user_id.email }}</small></a>
-                                </td>
-                                <td>
-                                    <strong>{{ record.company_id.abbreviation }}</strong><small>{{ record.company_id.name }}</small>
-                                </td>
-                                {% if record_kind == 'portfolios' %}
-                                    <td class="adm-numeric">{{ record.number_of_shares|default_if_none:0 }}</td>
-                                    <td class="adm-numeric">{{ record.total_cost|default_if_none:0|npr_amount }}</td>
-                                    <td>{{ record.created_at|date:'j M Y' }}</td>
-
-                                {% elif record_kind == 'transactions' %}
-                                    <td>
-                                        <span class="adm-badge{% if record.transaction_type|lower == 'buy' %} adm-badge--success{% else %} adm-badge--purple{% endif %}">{{ record.transaction_type|default:'Unspecified'|title }}</span>
-                                    </td>
-                                    <td class="adm-numeric">{{ record.number_of_shares|default_if_none:0 }}</td>
-                                    <td class="adm-numeric">{{ record.transacted_price|default_if_none:0|npr_amount }}</td>
-                                    <td>{{ record.transaction_date|date:'j M Y' }}</td>
-
-                                {% elif record_kind == 'targets' %}
-                                    <td>
-                                        <span class="adm-badge{% if record.target_type == 'buy' %} adm-badge--success{% else %} adm-badge--purple{% endif %}">{{ record.target_type|title }}</span>
-                                    </td>
-                                    <td class="adm-numeric">
-                                        {% if record.low_target != None %}
-                                            {{ record.low_target|npr_amount }}
-
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-                                    <td class="adm-numeric">
-                                        {% if record.high_target != None %}
-                                            {{ record.high_target|npr_amount }}
-
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if record.is_deleted %}
-                                            <span class="adm-badge">Removed</span>
-
-                                        {% else %}
-                                            <span class="adm-badge adm-badge--success">Active</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ record.created_at|date:'j M Y' }}</td>
+                                <th scope="col">Member</th>
+                                <th scope="col">Company</th>
+                                {% if record_kind == 'targets' %}
+                                    <th scope="col">Type</th>
+                                    <th scope="col" class="adm-numeric">Low · NPR</th>
+                                    <th scope="col" class="adm-numeric">High · NPR</th>
+                                    <th scope="col">State</th>
+                                    <th scope="col">Created</th>
 
                                 {% else %}
-                                    <td>{{ record.company_id.sector|default:'Unclassified' }}</td>
-                                    <td>
-                                        {% if record.user_id.is_active %}
-                                            <span class="adm-badge adm-badge--success">Active</span>
-
-                                        {% else %}
-                                            <span class="adm-badge">Inactive</span>
-                                        {% endif %}
-                                    </td>
+                                    <th scope="col">Sector</th>
+                                    <th scope="col">Account status</th>
                                 {% endif %}
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {% for record in page_obj %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'admin-user-profile' %}?id={{ record.user_id.pk|urlencode }}"><strong>{{ record.user_id.name }}</strong><small>{{ record.user_id.email }}</small></a>
+                                    </td>
+                                    <td>
+                                        <strong>{{ record.company_id.abbreviation }}</strong><small>{{ record.company_id.name }}</small>
+                                    </td>
+                                    {% if record_kind == 'targets' %}
+                                        <td>
+                                            <span class="adm-badge{% if record.target_type == 'buy' %} adm-badge--success{% else %} adm-badge--purple{% endif %}">{{ record.target_type|title }}</span>
+                                        </td>
+                                        <td class="adm-numeric">
+                                            {% if record.low_target != None %}
+                                                {{ record.low_target|npr_amount }}
 
-        {% else %}
-            <div class="adm-empty">
-                {% include 'admin/_icon.html' with name='search' %}
-                <h3>No matching records.</h3>
-                <p>Adjust the search or clear the filters to browse all records.</p>
-                <a class="adm-button adm-button--ghost" href="{{ request.path }}">Reset filters</a>
-            </div>
-        {% endif %}
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </td>
+                                        <td class="adm-numeric">
+                                            {% if record.high_target != None %}
+                                                {{ record.high_target|npr_amount }}
+
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if record.is_deleted %}
+                                                <span class="adm-badge">Removed</span>
+
+                                            {% else %}
+                                                <span class="adm-badge adm-badge--success">Active</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ record.created_at|date:'j M Y' }}</td>
+
+                                    {% else %}
+                                        <td>{{ record.company_id.sector|default:'Unclassified' }}</td>
+                                        <td>
+                                            {% if record.user_id.is_active %}
+                                                <span class="adm-badge adm-badge--success">Active</span>
+
+                                            {% else %}
+                                                <span class="adm-badge">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            {% else %}
+                <div class="adm-empty">
+                    {% include 'admin/_icon.html' with name='search' %}
+                    <h3>No matching records.</h3>
+                    <p>Adjust the search or clear the filters to browse all records.</p>
+                    <a class="adm-button adm-button--ghost" href="{{ request.path }}">Reset filters</a>
+                </div>
+            {% endif %}
+        {% endblock %}
         {% include 'admin/_pagination.html' %}
     </section>
-    <p class="adm-money-note adm-report-note">
-        Financial values use stored records in NPR. The report is available for review and export.
-    </p>
+    {% block record_note %}
+        <p class="adm-money-note adm-report-note">
+            Financial values use stored records in NPR. The report is available for review and export.
+        </p>
+    {% endblock %}
+    {% block record_dialogs %}{% endblock %}
 {% endblock %}

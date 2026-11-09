@@ -1,0 +1,71 @@
+{% if record_kind == 'transactions' %}
+    <dialog class="adm-dialog" id="transaction-dialog" aria-labelledby="trade-dialog-title">
+        <div class="adm-dialog-heading">
+            <div>
+                <p class="adm-eyebrow">Transaction ledger</p>
+                <h2 id="trade-dialog-title" data-record-title>Record transaction</h2>
+            </div>
+            <button type="button" class="adm-dialog-close" data-dialog-close aria-label="Close dialog">×</button>
+        </div>
+        <form method="post" action="{% url 'admin-transaction-add' %}" data-admin-form data-trade-form data-add-url="{% url 'admin-transaction-add' %}" data-edit-url="{% url 'admin-transaction-edit' %}" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="transaction_id" data-record-id>
+            <input type="hidden" name="idempotency_key" value="{{ trade_request_key }}">
+            {% include 'admin/_trade_fields.html' with prefix='trade' %}
+            <p class="adm-form-status" data-form-status role="status" hidden></p>
+            <div class="adm-dialog-actions">
+                <button type="button" class="adm-button adm-button--ghost" data-dialog-close>Cancel</button>
+                <button type="submit" class="adm-button adm-button--primary" data-record-submit>Record transaction</button>
+            </div>
+        </form>
+    </dialog>
+
+{% else %}
+    <dialog class="adm-dialog" id="holding-dialog" aria-labelledby="opening-dialog-title">
+        <div class="adm-dialog-heading">
+            <div>
+                <p class="adm-eyebrow">Member holdings</p>
+                <h2 id="opening-dialog-title" data-record-title>Add opening holding</h2>
+            </div>
+            <button type="button" class="adm-dialog-close" data-dialog-close aria-label="Close dialog">×</button>
+        </div>
+        <form method="post" action="{% url 'admin-holding-save' %}" data-admin-form data-opening-form novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="holding_id" data-record-id>
+            {% include 'admin/_opening_fields.html' with prefix='opening' %}
+            <p class="adm-form-status" data-form-status role="status" hidden></p>
+            <div class="adm-dialog-actions">
+                <button type="button" class="adm-button adm-button--ghost" data-dialog-close>Cancel</button>
+                <button type="submit" class="adm-button adm-button--primary" data-record-submit>Save opening holding</button>
+            </div>
+        </form>
+    </dialog>
+{% endif %}
+
+<dialog class="adm-dialog" id="record-delete-dialog" aria-labelledby="record-delete-title">
+    <div class="adm-dialog-heading">
+        <div>
+            <p class="adm-eyebrow">{{ page_title }}</p>
+            <h2 id="record-delete-title">{% if record_kind == 'transactions' %}Delete transaction?{% else %}Remove opening holding?{% endif %}</h2>
+        </div>
+        <button type="button" class="adm-dialog-close" data-dialog-close aria-label="Close dialog">×</button>
+    </div>
+    <form method="post" action="{% if record_kind == 'transactions' %}{% url 'admin-transaction-delete' %}{% else %}{% url 'admin-holding-delete' %}{% endif %}" data-admin-form data-delete-form>
+        {% csrf_token %}
+        <input type="hidden" name="{% if record_kind == 'transactions' %}transaction_id{% else %}holding_id{% endif %}" data-record-id>
+        <input type="hidden" name="confirm" value="yes">
+        <p class="adm-dialog-description"><strong data-record-label></strong></p>
+        {% if record_kind == 'transactions' %}
+            <p class="adm-alert adm-alert--warning" data-delete-ledger>Deleting this transaction recalculates the holding and any later trades.</p>
+            <p class="adm-alert adm-alert--warning" data-delete-history hidden>Deleting this historical record removes it from history. The opening balance remains in place.</p>
+
+        {% else %}
+            <p class="adm-alert adm-alert--warning">Removing this opening balance clears the holding. Historical transactions remain visible.</p>
+        {% endif %}
+        <p class="adm-form-status" data-form-status role="status" hidden></p>
+        <div class="adm-dialog-actions">
+            <button type="button" class="adm-button adm-button--ghost" data-dialog-close autofocus>Cancel</button>
+            <button type="submit" class="adm-button adm-button--danger">{% if record_kind == 'transactions' %}Delete transaction{% else %}Remove holding{% endif %}</button>
+        </div>
+    </form>
+</dialog>

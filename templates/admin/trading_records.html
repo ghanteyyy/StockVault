@@ -1,0 +1,59 @@
+{% extends 'admin/records.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/admin/trading.css' %}?v=1">
+{% endblock %}
+
+{% block record_heading_actions %}
+    {% if record_kind == 'transactions' %}
+        <button type="button" class="adm-button adm-button--primary" data-dialog-open="transaction-dialog">
+            {% include 'admin/_icon.html' with name='plus' %}
+            Record transaction
+        </button>
+
+    {% else %}
+        <button type="button" class="adm-button adm-button--primary" data-dialog-open="holding-dialog">
+            {% include 'admin/_icon.html' with name='plus' %}
+            Add opening holding
+        </button>
+    {% endif %}
+{% endblock %}
+
+{% block record_intro %}
+    <div class="adm-ledger-banner">
+        {% include 'admin/_icon.html' with name='transactions' %}
+        <div>
+            {% if record_kind == 'transactions' %}
+                <strong>How trades affect holdings</strong>
+                <p>Buys add shares and cost. Sales reduce cost proportionally. Bonus shares carry no purchase cost.</p>
+
+            {% else %}
+                <strong>Opening balances and current holdings</strong>
+                <p>Current shares and cost reflect the opening balance and every trade recorded in the ledger.</p>
+            {% endif %}
+        </div>
+        {% if record_kind == 'transactions' %}
+            <a class="adm-button adm-button--ghost" href="{% url 'admin-portfolios' %}">View holdings</a>
+
+        {% else %}
+            <a class="adm-button adm-button--ghost" href="{% url 'admin-transactions' %}">Manage transactions</a>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block record_table %}
+    {% include 'admin/_ledger_table.html' %}
+{% endblock %}
+
+{% block record_note %}
+    <p class="adm-money-note adm-report-note">All amounts are in NPR. Historical transactions are kept separately from the trades that update holdings.</p>
+{% endblock %}
+
+{% block record_dialogs %}
+    {% include 'admin/_ledger_dialogs.html' %}
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/admin/transactions.js' %}?v=1" defer></script>
+{% endblock %}

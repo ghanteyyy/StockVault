@@ -1,0 +1,80 @@
+<div class="adm-form-grid">
+    <div class="adm-form-field adm-form-field--wide">
+        <label for="{{ prefix }}-member">Member</label>
+        <select id="{{ prefix }}-member" aria-describedby="{{ prefix }}-member-error" name="user_id" required>
+            <option value="">Choose a member</option>
+            {% for member in member_options %}
+                <option value="{{ member.pk }}">{{ member.name }} · {{ member.email }}</option>
+            {% endfor %}
+        </select>
+        <p id="{{ prefix }}-member-error" class="adm-error" data-error-for="user_id" hidden></p>
+    </div>
+    <div class="adm-form-field adm-form-field--wide">
+        <label for="{{ prefix }}-company">Company</label>
+        <select id="{{ prefix }}-company" aria-describedby="{{ prefix }}-company-error" name="company_id" required>
+            <option value="">Choose a company</option>
+            {% for company in trade_company_options %}
+                <option value="{{ company.pk }}">{{ company.abbreviation }} · {{ company.name }}</option>
+            {% endfor %}
+        </select>
+        <p id="{{ prefix }}-company-error" class="adm-error" data-error-for="company_id" hidden></p>
+    </div>
+    <div class="adm-form-field">
+        <label for="{{ prefix }}-type">Transaction type</label>
+        <select id="{{ prefix }}-type" aria-describedby="{{ prefix }}-type-error" name="transaction_type" required>
+            <option value="buy">Buy shares</option>
+            <option value="sell">Sell shares</option>
+            <option value="bonus">Bonus shares</option>
+        </select>
+        <p id="{{ prefix }}-type-error" class="adm-error" data-error-for="transaction_type" hidden></p>
+    </div>
+    <div class="adm-form-field">
+        <label for="{{ prefix }}-quantity">Number of shares</label>
+        <input id="{{ prefix }}-quantity" aria-describedby="{{ prefix }}-quantity-error" name="quantity" type="number" min="1" max="2147483647" step="1" required>
+        <p id="{{ prefix }}-quantity-error" class="adm-error" data-error-for="quantity" hidden></p>
+    </div>
+    <div class="adm-form-field" data-unit-price-field>
+        <label for="{{ prefix }}-price">Price per share · NPR</label>
+        <input id="{{ prefix }}-price" aria-describedby="{{ prefix }}-price-error" name="unit_price" type="number" min="0.01" step="0.01" required>
+        <p id="{{ prefix }}-price-error" class="adm-error" data-error-for="unit_price" hidden></p>
+    </div>
+    <div class="adm-form-field" data-legacy-amount-field hidden>
+        <label for="{{ prefix }}-legacy-amount">Historical total value · NPR</label>
+        <input id="{{ prefix }}-legacy-amount" aria-describedby="{{ prefix }}-legacy-amount-error" name="legacy_amount" type="number" min="0" step="0.01" disabled>
+        <p id="{{ prefix }}-legacy-amount-error" class="adm-error" data-error-for="legacy_amount" hidden></p>
+    </div>
+    <div class="adm-form-field">
+        <label for="{{ prefix }}-date">Transaction date</label>
+        <input id="{{ prefix }}-date" aria-describedby="{{ prefix }}-date-error" name="transaction_date" type="date" max="{{ today|date:'Y-m-d' }}" value="{{ today|date:'Y-m-d' }}" required>
+        <p id="{{ prefix }}-date-error" class="adm-error" data-error-for="transaction_date" hidden></p>
+    </div>
+    <div class="adm-form-field" data-purchase-type-field>
+        <label for="{{ prefix }}-purchase-type">Purchase type</label>
+        <select id="{{ prefix }}-purchase-type" aria-describedby="{{ prefix }}-purchase-type-error" name="purchase_type">
+            <option value="secondary">Secondary market</option>
+            <option value="ipo">IPO</option>
+            <option value="fpo">FPO</option>
+            <option value="right">Rights shares</option>
+        </select>
+        <p id="{{ prefix }}-purchase-type-error" class="adm-error" data-error-for="purchase_type" hidden></p>
+    </div>
+    <div class="adm-form-field" data-cgt-field>
+        <label for="{{ prefix }}-cgt">Capital gains tax category</label>
+        <select id="{{ prefix }}-cgt" aria-describedby="{{ prefix }}-cgt-error" name="cgt_type">
+            {% for option in cgt_options %}
+                <option value="{{ option }}"{% if option == default_cgt %} selected{% endif %}>{{ option }}</option>
+            {% endfor %}
+        </select>
+        <p id="{{ prefix }}-cgt-error" class="adm-error" data-error-for="cgt_type" hidden></p>
+    </div>
+    <div class="adm-form-field adm-form-field--wide">
+        <label for="{{ prefix }}-notes">Notes <span class="adm-optional">Optional</span></label>
+        <textarea id="{{ prefix }}-notes" aria-describedby="{{ prefix }}-notes-error" name="notes" rows="2" maxlength="500" placeholder="Reason for the record or correction"></textarea>
+        <p id="{{ prefix }}-notes-error" class="adm-error" data-error-for="notes" hidden></p>
+    </div>
+</div>
+<p class="adm-form-hint" data-trade-hint>Purchases include configured fees. Sales use the holding’s weighted average cost.</p>
+<div class="adm-alert adm-alert--warning" data-legacy-warning hidden>
+    This is a historical record. Its original total value is preserved separately from the opening holding.
+    Use the holding’s opening balance to correct shares or cost.
+</div>

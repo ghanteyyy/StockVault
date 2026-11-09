@@ -168,7 +168,14 @@
                                     <span class="adm-badge{% if record.transaction_type|lower == 'buy' %} adm-badge--success{% else %} adm-badge--purple{% endif %}">{{ record.transaction_type|default:'Unspecified'|title }}</span>
                                 </td>
                                 <td class="adm-numeric">{{ record.number_of_shares|default_if_none:0 }}</td>
-                                <td class="adm-numeric">{{ record.transacted_price|default_if_none:0|npr_amount }}</td>
+                                <td class="adm-numeric">
+                                    {% if record.is_legacy %}
+                                        {{ record.transacted_price|npr_amount|default:'—' }}
+
+                                    {% else %}
+                                        {{ record.net_amount|npr_amount }}
+                                    {% endif %}
+                                </td>
                                 <td>{{ record.transaction_date|date:'j M Y' }}</td>
                             </tr>
                         {% endfor %}
@@ -179,7 +186,7 @@
         {% else %}
             <div class="adm-empty">
                 <h3>No transactions recorded yet.</h3>
-                <p>Recorded buy and sell activity will appear here.</p>
+                <p>Purchases, sales, and bonus share records will appear here.</p>
             </div>
         {% endif %}
     </section>

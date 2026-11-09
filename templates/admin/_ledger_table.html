@@ -1,0 +1,107 @@
+{% load l10n nepali_currency %}
+
+{% if page_obj %}
+    <div class="adm-table-wrap" tabindex="0" role="region" aria-label="{{ page_title }} records">
+        <table class="adm-table adm-ledger-table">
+            <thead>
+                <tr>
+                    <th scope="col">Member</th>
+                    <th scope="col">Company</th>
+                    {% if record_kind == 'transactions' %}
+                        <th scope="col">Type</th>
+                        <th scope="col" class="adm-numeric">Shares</th>
+                        <th scope="col" class="adm-numeric">Price / share</th>
+                        <th scope="col" class="adm-numeric">Amount</th>
+                        <th scope="col">Trade date</th>
+
+                    {% else %}
+                        <th scope="col" class="adm-numeric">Current shares</th>
+                        <th scope="col" class="adm-numeric">Current cost</th>
+                        <th scope="col" class="adm-numeric">Opening balance</th>
+                        <th scope="col">Created</th>
+                    {% endif %}
+                    <th scope="col" class="adm-numeric">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in page_obj %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'admin-user-profile' %}?id={{ record.user_id.pk|urlencode }}">
+                                <strong>{{ record.user_id.name }}</strong>
+                                <small>{{ record.user_id.email }}</small>
+                            </a>
+                        </td>
+                        <td>
+                            <strong>{{ record.company_id.abbreviation }}</strong>
+                            <small>{{ record.company_id.name }}</small>
+                        </td>
+                        {% if record_kind == 'transactions' %}
+                            <td>
+                                <span class="adm-badge{% if record.transaction_type|lower == 'buy' %} adm-badge--success{% elif record.transaction_type|lower == 'bonus' %} adm-badge--purple{% endif %}">{{ record.transaction_type|default:'Unspecified'|title }}</span>
+                                {% if record.is_legacy %}
+                                    <small>Historical record</small>
+                                {% endif %}
+                            </td>
+                            <td class="adm-numeric">{{ record.number_of_shares|default_if_none:'—' }}</td>
+                            <td class="adm-numeric">{{ record.unit_price|npr_amount|default:'—' }}</td>
+                            <td class="adm-numeric">
+                                {% if record.is_legacy %}
+                                    {{ record.transacted_price|npr_amount|default:'—' }}
+                                    <small>Original total</small>
+
+                                {% else %}
+                                    {{ record.net_amount|npr_amount }}
+                                    {% if record.transaction_type == 'sell' %}
+                                        <small>Net proceeds · Gain / loss {{ record.realized_gain|npr_amount }}</small>
+
+                                    {% elif record.transaction_type == 'buy' %}
+                                        <small>Purchase cost</small>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            <td>{{ record.transaction_date|date:'j M Y' }}</td>
+                            <td>
+                                <div class="adm-table-actions">
+                                    <button type="button" class="adm-button adm-button--ghost" data-dialog-open="transaction-dialog" data-record-edit data-id="{{ record.pk }}" data-member="{{ record.user_id_id }}" data-company="{{ record.company_id_id }}" data-type="{{ record.transaction_type|default_if_none:''|lower }}" data-quantity="{{ record.number_of_shares|default_if_none:''|unlocalize }}" data-price="{{ record.unit_price|default_if_none:''|unlocalize }}" data-amount="{{ record.transacted_price|default_if_none:''|floatformat:'2u' }}" data-date="{{ record.transaction_date|date:'Y-m-d' }}" data-purchase="{{ record.purchase_type }}" data-cgt="{{ record.cgt_type }}" data-notes="{{ record.notes }}" data-legacy="{{ record.is_legacy|yesno:'yes,no' }}" aria-label="Edit {{ record.company_id.abbreviation }} transaction for {{ record.user_id.name }}">Edit</button>
+                                    <button type="button" class="adm-button adm-button--danger" data-dialog-open="record-delete-dialog" data-record-delete data-id="{{ record.pk }}" data-label="{{ record.company_id.abbreviation }} · {{ record.user_id.name }} · {{ record.transaction_date|date:'j M Y' }}" data-legacy="{{ record.is_legacy|yesno:'yes,no' }}" aria-label="Delete {{ record.company_id.abbreviation }} transaction for {{ record.user_id.name }}">Delete</button>
+                                </div>
+                            </td>
+
+                        {% else %}
+                            <td class="adm-numeric">{{ record.number_of_shares|default_if_none:'—' }}</td>
+                            <td class="adm-numeric">{{ record.total_cost|npr_amount|default:'—' }}</td>
+                            {% if record.ledger_initialized %}
+                                <td class="adm-numeric">
+                                    {{ record.opening_number_of_shares }} shares
+                                    <small>NPR {{ record.opening_total_cost|npr_amount }}</small>
+                                </td>
+
+                            {% else %}
+                                <td class="adm-numeric">
+                                    {{ record.number_of_shares|default_if_none:0 }} shares
+                                    <small>NPR {{ record.total_cost|default_if_none:0|npr_amount }}</small>
+                                </td>
+                            {% endif %}
+                            <td>{{ record.created_at|date:'j M Y' }}</td>
+                            <td>
+                                <div class="adm-table-actions">
+                                    <button type="button" class="adm-button adm-button--ghost" data-dialog-open="holding-dialog" data-record-edit data-id="{{ record.pk }}" data-member="{{ record.user_id_id }}" data-company="{{ record.company_id_id }}" {% if record.ledger_initialized %}data-quantity="{{ record.opening_number_of_shares|unlocalize }}" data-cost="{{ record.opening_total_cost|unlocalize }}"{% else %}data-quantity="{{ record.number_of_shares|default_if_none:0|unlocalize }}" data-cost="{{ record.total_cost|default_if_none:0|unlocalize }}"{% endif %} aria-label="Edit {{ record.company_id.abbreviation }} opening balance for {{ record.user_id.name }}">Edit opening</button>
+                                    <button type="button" class="adm-button adm-button--danger" data-dialog-open="record-delete-dialog" data-record-delete data-id="{{ record.pk }}" data-label="{{ record.company_id.abbreviation }} · {{ record.user_id.name }}" {% if record.has_ledger_entries %}disabled title="Holdings with ledger transactions cannot be removed."{% endif %} aria-label="Remove {{ record.company_id.abbreviation }} holding for {{ record.user_id.name }}">Remove</button>
+                                </div>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% else %}
+    <div class="adm-empty">
+        {% include 'admin/_icon.html' with name='search' %}
+        <h3>No matching records.</h3>
+        <p>Adjust the search or clear the filters to browse all records.</p>
+        <a class="adm-button adm-button--ghost" href="{{ request.path }}">Reset filters</a>
+    </div>
+{% endif %}

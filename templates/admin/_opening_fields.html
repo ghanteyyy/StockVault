@@ -1,0 +1,33 @@
+<div class="adm-form-grid">
+    <div class="adm-form-field adm-form-field--wide">
+        <label for="{{ prefix }}-member">Member</label>
+        <select id="{{ prefix }}-member" aria-describedby="{{ prefix }}-member-error" name="user_id" required>
+            <option value="">Choose a member</option>
+            {% for member in member_options %}
+                <option value="{{ member.pk }}">{{ member.name }} · {{ member.email }}</option>
+            {% endfor %}
+        </select>
+        <p id="{{ prefix }}-member-error" class="adm-error" data-error-for="user_id" hidden></p>
+    </div>
+    <div class="adm-form-field adm-form-field--wide">
+        <label for="{{ prefix }}-company">Company</label>
+        <select id="{{ prefix }}-company" aria-describedby="{{ prefix }}-company-error" name="company_id" required>
+            <option value="">Choose a company</option>
+            {% for company in trade_company_options %}
+                <option value="{{ company.pk }}">{{ company.abbreviation }} · {{ company.name }}</option>
+            {% endfor %}
+        </select>
+        <p id="{{ prefix }}-company-error" class="adm-error" data-error-for="company_id" hidden></p>
+    </div>
+    <div class="adm-form-field">
+        <label for="{{ prefix }}-quantity">Opening shares</label>
+        <input id="{{ prefix }}-quantity" aria-describedby="{{ prefix }}-quantity-error" name="quantity" type="number" min="0" max="2147483647" step="1" required>
+        <p id="{{ prefix }}-quantity-error" class="adm-error" data-error-for="quantity" hidden></p>
+    </div>
+    <div class="adm-form-field">
+        <label for="{{ prefix }}-cost">Opening total cost · NPR</label>
+        <input id="{{ prefix }}-cost" aria-describedby="{{ prefix }}-cost-error" name="total_cost" type="number" min="0" step="0.01" required>
+        <p id="{{ prefix }}-cost-error" class="adm-error" data-error-for="total_cost" hidden></p>
+    </div>
+</div>
+<p class="adm-form-hint">An opening balance represents shares held before recording trades here. Changing it recalculates current holdings and later trades.</p>

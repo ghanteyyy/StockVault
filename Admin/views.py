@@ -11,3 +11,6 @@ from .catalog_views import (AdminListedCompanies, AdminListedCompaniesAdd,
 from .operations_views import (AdminOverview, AdminActivity, AdminPortfolios,
                                AdminTransactions,
                                AdminTargets, AdminWishlists)
+
+from .trading_views import (AdminTransactionAdd, AdminTransactionEdit, AdminTransactionDelete,
+                            AdminHoldingSave, AdminHoldingDelete)

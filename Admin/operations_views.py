@@ -1,4 +1,4 @@
-'''Read-only reporting and operational oversight for the custom admin area
+'''Reporting and operational oversight for the custom admin area
 '''
 
 from datetime import timedelta
@@ -6,7 +6,7 @@ import math
 
 from django.contrib.admin.models import ADDITION, CHANGE, DELETION, LogEntry
 from django.contrib.auth import get_user_model
-from django.db.models import Count, F, Q, Sum
+from django.db.models import Count, Exists, F, OuterRef, Q, Sum
 from django.db.models.functions import TruncDate
 from django.shortcuts import render
 from django.urls import reverse
@@ -17,6 +17,7 @@ from Shares.models import ListedCompanies, Portfolios, Transactions, WishLists
 from Users.models import Targets
 from .access import staff_required
 from .utils import csv_response, paginate_queryset, pagination_context
+from .trading_views import management_options
 
 
 def _text(request, name, limit=255):
@@ -154,26 +155,32 @@ def AdminPortfolios(request):
     metrics = [
         {'label': 'Matching holdings', 'value': summary['count'], 'hint': 'Across the current filters'},
         {'label': 'Shares recorded', 'value': summary['shares'] or 0, 'hint': 'Combined recorded quantities'},
-        {'label': 'Recorded cost', 'value': _finite(summary['cost']), 'kind': 'money', 'hint': 'Purchase costs, not market value'},
+        {'label': 'Recorded cost', 'value': _finite(summary['cost']), 'kind': 'money', 'hint': 'Acquisition cost of shares still held'},
         {'label': 'Accounts represented', 'value': summary['accounts'], 'hint': 'Distinct account holders'},
     ]
 
-    return render(request, 'admin/records.html', _record_context(request, queryset, 'portfolios', 'Holdings',
-        'Review recorded holdings across accounts. Financial records are read-only.', filters, metrics, sorts, errors))
+    ledger_entries = Transactions.objects.filter(
+        user_id_id=OuterRef('user_id_id'), company_id_id=OuterRef('company_id_id'), is_legacy=False,
+    )
+    context = _record_context(request, queryset.annotate(has_ledger_entries=Exists(ledger_entries)), 'portfolios', 'Holdings',
+        'Manage opening balances and review holdings kept in sync with each member’s transactions.', filters, metrics, sorts, errors)
+    context.update(management_options('portfolios'))
+
+    return render(request, 'admin/portfolios.html', context)
 
 
 @staff_required
 def AdminTransactions(request):
     queryset, filters = _common_filters(request, Transactions.objects.select_related('user_id', 'company_id'))
-    filters['type'] = filters['type'] if filters['type'] in ('buy', 'sell') else ''
+    filters['type'] = filters['type'] if filters['type'] in ('buy', 'sell', 'bonus') else ''
 
     if filters['type']:
         queryset = queryset.filter(transaction_type__iexact=filters['type'])
 
     queryset, errors = _date_filters(queryset, filters, 'transaction_date')
     queryset, sorts = _ordered(queryset, filters, {
-        'newest': ('Newest transactions', ('-transaction_date', '-pk')),
-        'oldest': ('Oldest transactions', ('transaction_date', 'pk')),
+        'newest': ('Newest transactions', ('-transaction_date', '-created_at', '-pk')),
+        'oldest': ('Oldest transactions', ('transaction_date', 'created_at', 'pk')),
         'value_desc': ('Highest recorded value', ('-transacted_price', 'pk')),
         'shares_desc': ('Most shares', ('-number_of_shares', 'pk')),
         'company': ('Company A–Z', ('company_id__name', 'pk')),
@@ -181,23 +188,31 @@ def AdminTransactions(request):
 
     if request.GET.get('export') == 'csv':
         return csv_response('stockvault-transactions.csv',
-            ['Transaction ID', 'Account email', 'Symbol', 'Company', 'Type', 'Shares', 'Recorded value (NPR)', 'Transaction date'],
+            ['Transaction ID', 'Account email', 'Symbol', 'Company', 'Type', 'Shares', 'Recorded value (NPR)', 'Transaction date',
+             'Unit price (NPR)', 'Gross amount (NPR)', 'Fees (NPR)', 'Capital gains tax (NPR)', 'Realized gain (NPR)', 'Record source', 'Notes'],
             ((row.pk, row.user_id.email, row.company_id.abbreviation, row.company_id.name, row.transaction_type,
-              row.number_of_shares, row.transacted_price, row.transaction_date.isoformat())
+              row.number_of_shares, row.transacted_price if row.is_legacy else row.net_amount, row.transaction_date.isoformat(), row.unit_price,
+              None if row.is_legacy else row.gross_amount, None if row.is_legacy else row.fees,
+              None if row.is_legacy else row.capital_gains_tax,
+              row.realized_gain if not row.is_legacy and row.transaction_type == 'sell' else None,
+              'Historical record' if row.is_legacy else 'Holding ledger', row.notes)
              for row in queryset.iterator(chunk_size=1000)))
 
     summary = queryset.aggregate(count=Count('pk'), buys=Count('pk', filter=Q(transaction_type__iexact='buy')),
-        sells=Count('pk', filter=Q(transaction_type__iexact='sell')), accounts=Count('user_id', distinct=True))
+        sells=Count('pk', filter=Q(transaction_type__iexact='sell')), bonuses=Count('pk', filter=Q(transaction_type__iexact='bonus')))
 
     metrics = [
         {'label': 'Matching transactions', 'value': summary['count'], 'hint': 'Across the current filters'},
         {'label': 'Buy records', 'value': summary['buys'], 'hint': 'Recorded purchases'},
         {'label': 'Sell records', 'value': summary['sells'], 'hint': 'Recorded sales'},
-        {'label': 'Accounts represented', 'value': summary['accounts'], 'hint': 'Distinct account holders'},
+        {'label': 'Bonus records', 'value': summary['bonuses'], 'hint': 'Share allocations without purchase cost'},
     ]
 
-    return render(request, 'admin/records.html', _record_context(request, queryset, 'transactions', 'Transactions',
-        'Search recorded trades and export a filtered report. No trades can be placed from this view.', filters, metrics, sorts, errors))
+    context = _record_context(request, queryset, 'transactions', 'Transactions',
+        'Record purchases, sales, and bonus shares. Corrections automatically recalculate the affected holding.', filters, metrics, sorts, errors)
+    context.update(management_options('transactions'))
+
+    return render(request, 'admin/transactions.html', context)
 
 
 @staff_required
@@ -376,7 +391,7 @@ def AdminOverview(request):
             {'label': 'Transactions · 30 days', 'value': transaction_counts['recent'], 'hint': f"{transaction_counts['total']} recorded transactions overall"},
         ],
         'recent_users': users.order_by('-date_joined', '-pk')[:5],
-        'recent_transactions': Transactions.objects.select_related('user_id', 'company_id').order_by('-transaction_date', '-pk')[:6],
+        'recent_transactions': Transactions.objects.select_related('user_id', 'company_id')[:6],
         'recent_activity': LogEntry.objects.select_related('user', 'content_type').order_by('-action_time', '-pk')[:6],
         'sector_breakdown': sector_breakdown, 'daily_signups': daily_signups,
         'quality_signals': quality_signals,
