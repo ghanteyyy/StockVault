@@ -5,7 +5,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/users/dashboard.css' %}?v=profit-loss-1">
+    <link rel="stylesheet" href="{% static 'css/users/dashboard.css' %}?v=market-value-1">
 {% endblock %}
 
 {% block content %}
@@ -52,6 +52,34 @@
                         <span class="currency">Rs.</span> {{ total_investment|npr_amount }}
                     </h2>
                     <p class="card-description">Acquisition cost of shares you still hold</p>
+                </article>
+
+                <article class="summary-card market-value-card">
+                    <div class="card-top">
+                        <span class="card-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M3 3v18h18M8 17v-4m5 4V8m5 9V5" />
+                            </svg>
+                        </span>
+                        <span class="card-tag">Market snapshot</span>
+                    </div>
+                    <p class="card-label">Total Market Value</p>
+                    <h2 class="card-amount">
+                        {% if missing_quotes %}
+                            —
+
+                        {% else %}
+                            <span class="currency">Rs.</span> {{ total_market_value|npr_amount }}
+                        {% endif %}
+                    </h2>
+                    <p class="card-description">
+                        {% if missing_quotes %}
+                            Waiting for a complete market snapshot
+
+                        {% else %}
+                            Combined value of the shares you still hold at their latest quoted prices
+                        {% endif %}
+                    </p>
                 </article>
 
                 <article class="summary-card sales-card">

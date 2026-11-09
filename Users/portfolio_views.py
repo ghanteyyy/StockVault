@@ -62,6 +62,7 @@ def DashboardPage(request):
     return render(request, 'users/dashboard.html', {
         'page_title': 'Dashboard | Stock Vault',
         'total_investment': str(investment),
+        'total_market_value': None if missing_quotes else market_value,
         'total_sales': str(sales),
         'percentage_change': percentage,
         'profit_loss': None if missing_quotes else money(value_change),
