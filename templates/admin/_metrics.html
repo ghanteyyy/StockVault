@@ -1,9 +1,11 @@
+{% load nepali_currency %}
+
 <div class="adm-stats">
     {% for metric in metrics %}
         <div class="adm-stat{% if metric.kind == 'money' %} adm-stat--money{% endif %}">
             <span>{{ metric.label }}</span><strong>
                 {% if metric.kind == 'money' %}
-                    <small class="adm-currency">Rs.</small> {{ metric.value|floatformat:'2g' }}
+                    <small class="adm-currency">Rs.</small> {{ metric.value|npr_amount }}
 
                 {% else %}
                     {{ metric.value }}

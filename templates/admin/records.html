@@ -1,4 +1,5 @@
 {% extends 'admin/root.html' %}
+{% load nepali_currency %}
 {% block content %}
     <div class="adm-page-heading">
         <div>
@@ -155,7 +156,7 @@
                                 </td>
                                 {% if record_kind == 'portfolios' %}
                                     <td class="adm-numeric">{{ record.number_of_shares|default_if_none:0 }}</td>
-                                    <td class="adm-numeric">{{ record.total_cost|default_if_none:0|floatformat:'2g' }}</td>
+                                    <td class="adm-numeric">{{ record.total_cost|default_if_none:0|npr_amount }}</td>
                                     <td>{{ record.created_at|date:'j M Y' }}</td>
 
                                 {% elif record_kind == 'transactions' %}
@@ -163,7 +164,7 @@
                                         <span class="adm-badge{% if record.transaction_type|lower == 'buy' %} adm-badge--success{% else %} adm-badge--purple{% endif %}">{{ record.transaction_type|default:'Unspecified'|title }}</span>
                                     </td>
                                     <td class="adm-numeric">{{ record.number_of_shares|default_if_none:0 }}</td>
-                                    <td class="adm-numeric">{{ record.transacted_price|default_if_none:0|floatformat:'2g' }}</td>
+                                    <td class="adm-numeric">{{ record.transacted_price|default_if_none:0|npr_amount }}</td>
                                     <td>{{ record.transaction_date|date:'j M Y' }}</td>
 
                                 {% elif record_kind == 'targets' %}
@@ -172,7 +173,7 @@
                                     </td>
                                     <td class="adm-numeric">
                                         {% if record.low_target != None %}
-                                            {{ record.low_target|floatformat:'2g' }}
+                                            {{ record.low_target|npr_amount }}
 
                                         {% else %}
                                             —
@@ -180,7 +181,7 @@
                                     </td>
                                     <td class="adm-numeric">
                                         {% if record.high_target != None %}
-                                            {{ record.high_target|floatformat:'2g' }}
+                                            {{ record.high_target|npr_amount }}
 
                                         {% else %}
                                             —

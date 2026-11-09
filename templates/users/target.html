@@ -1,5 +1,5 @@
 {% extends 'users/root.html' %}
-{% load static l10n %}
+{% load static l10n nepali_currency %}
 
 {% block css %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -219,7 +219,7 @@
                                 <p class="target-metric-label">Current market price</p>
                                 <p class="target-market-price">
                                     {% if target.market_price != None %}
-                                        <span>Rs.</span> <strong data-format-price="{{ target.market_price|unlocalize }}">{{ target.market_price|floatformat:2 }}</strong>
+                                        <span>Rs.</span> <strong data-format-price="{{ target.market_price|unlocalize }}">{{ target.market_price|npr_amount|default:'—' }}</strong>
 
                                     {% else %}
                                         <strong class="unavailable-price">Unavailable</strong>
@@ -247,11 +247,11 @@
                             </div>
                             <div class="target-range-labels">
                                 <div>
-                                    <span>Low target</span><strong>Rs. <span data-format-price="{{ target.low_target|unlocalize }}">{{ target.low_target|floatformat:2 }}</span></strong>
+                                    <span>Low target</span><strong>Rs. <span data-format-price="{{ target.low_target|unlocalize }}">{{ target.low_target|npr_amount|default:'—' }}</span></strong>
                                 </div>
                                 <span class="range-direction" aria-hidden="true">→</span>
                                 <div>
-                                    <span>High target</span><strong>Rs. <span data-format-price="{{ target.high_target|unlocalize }}">{{ target.high_target|floatformat:2 }}</span></strong>
+                                    <span>High target</span><strong>Rs. <span data-format-price="{{ target.high_target|unlocalize }}">{{ target.high_target|npr_amount|default:'—' }}</span></strong>
                                 </div>
                             </div>
                         </div>

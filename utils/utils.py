@@ -1,4 +1,5 @@
 import secrets
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP, localcontext
 
 
 def generate_uuid_hex():
@@ -63,3 +64,20 @@ def nepali_comma(number: str):
     group.reverse()
 
     return sign + ','.join(group) + (dot + decimal if dot else "")
+
+
+def format_npr_amount(value):
+    """Format a rupee amount with Nepali digit grouping and two decimal places."""
+    try:
+        amount = Decimal(str(value))
+    except InvalidOperation:
+        return ''
+
+    if not amount.is_finite():
+        return ''
+
+    with localcontext() as context:
+        context.rounding = ROUND_HALF_UP
+        formatted = format(amount, '.2f')
+
+    return nepali_comma('0.00' if formatted == '-0.00' else formatted)

@@ -1,5 +1,5 @@
 {% extends 'users/root.html' %}
-{% load static %}
+{% load static nepali_currency %}
 
 {% block css %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,7 +49,7 @@
                     </div>
                     <p class="card-label">Total Invested</p>
                     <h2 class="card-amount">
-                        <span class="currency">Rs.</span> {{ total_investment|floatformat:2 }}
+                        <span class="currency">Rs.</span> {{ total_investment|npr_amount }}
                     </h2>
                     <p class="card-description">Total amount committed to shares</p>
                 </article>
@@ -67,7 +67,7 @@
                     </div>
                     <p class="card-label">Total Sale Proceeds</p>
                     <h2 class="card-amount">
-                        <span class="currency">Rs.</span> {{ total_sales|floatformat:2 }}
+                        <span class="currency">Rs.</span> {{ total_sales|npr_amount }}
                     </h2>
                     <p class="card-description">Total amount received from share sales</p>
                 </article>
@@ -176,8 +176,8 @@
     const invested = safeAmount(getData('investment-data', 0));
     const sales = safeAmount(getData('sales-data', 0));
     const palette = ['#6548b4', '#13856d', '#b7791f', '#4f6fc3', '#b84e7c', '#187c8a', '#8763c4', '#bc672f', '#3e826c', '#64748b'];
-    const currency = new Intl.NumberFormat('en-NP', { maximumFractionDigits: 2 });
-    const compact = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
+    const currency = new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const count = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 });
     const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
     const sectors = Object.entries(sectorData && typeof sectorData === 'object' && !Array.isArray(sectorData) ? sectorData : {})
@@ -186,7 +186,7 @@
         .sort((a, b) => b.count - a.count);
     const holdingCount = sectors.reduce((sum, sector) => sum + sector.count, 0);
 
-    document.getElementById('sector-total').textContent = currency.format(holdingCount);
+    document.getElementById('sector-total').textContent = count.format(holdingCount);
 
     const legend = document.getElementById('sector-legend');
     if (!sectors.length) {
@@ -208,7 +208,7 @@
         name.title = sector.name;
         const amount = document.createElement('span');
         amount.className = 'legend-amount';
-        amount.textContent = currency.format(sector.count);
+        amount.textContent = count.format(sector.count);
         row.append(swatch, name, amount);
         legend.appendChild(row);
     });
@@ -247,7 +247,7 @@
                     backgroundColor: '#17223c',
                     padding: 12,
                     displayColors: true,
-                    callbacks: { label: context => ` ${currency.format(context.raw)} holdings` }
+                    callbacks: { label: context => ` ${count.format(context.raw)} holdings` }
                 }
             }
         }
@@ -292,7 +292,7 @@
                     beginAtZero: true,
                     border: { display: false, dash: [4, 4] },
                     grid: { color: '#d1d7e1', drawTicks: false },
-                    ticks: { color: '#475569', padding: 10, maxTicksLimit: 5, callback: value => compact.format(value) }
+                    ticks: { color: '#475569', padding: 10, maxTicksLimit: 5, callback: value => currency.format(value) }
                 }
             }
         }
