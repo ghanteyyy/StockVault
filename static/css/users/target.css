@@ -530,7 +530,7 @@
 }
 
 .sv-targets .create-target-button {
-    display: inline-flex;
+    /* display: inline-flex; */
     align-items: center;
     justify-content: center;
     gap: 8px;
