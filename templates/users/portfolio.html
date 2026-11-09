@@ -1,15 +1,16 @@
 {% extends 'users/root.html' %}
-{% load static %}
+{% load static nepali_currency %}
 
 {% block css %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/users/portfolio.css' %}?v=contrast-1">
+    <link rel="stylesheet" href="{% static 'css/users/portfolio.css' %}?v=ledger-1">
 {% endblock %}
 
 {% block content %}
     <div class="sv-portfolio content" data-delete-url="{% url 'portfolio-delete' %}">
+        {% csrf_token %}
         <header class="portfolio-intro">
             <div>
                 <p class="portfolio-eyebrow">
@@ -41,60 +42,13 @@
                             </svg>
                         </span>
                         <p class="composer-eyebrow">Make your next move</p>
-                        <h2 id="add-holding-title">Add a holding</h2>
+                        <h2 id="add-holding-title">Manage your shares</h2>
                         <p>
-                            Bring your investments together,
-                            <br>
-                            one stock at a time.
+                            Record purchases, sales, and bonus shares in your trade journal.
                         </p>
                     </div>
 
-                    <form class="holding-form input-wrapper" onsubmit="return validateStockSearchingForm()" action="{% url 'portfolio' %}" method="POST">
-                        {% csrf_token %}
-                        <div class="holding-field stock-field">
-                            <label for="stock-input">Company</label>
-                            <div class="field-control">
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <circle cx="10.5" cy="10.5" r="6.5" />
-                                    <path d="m16 16 4.5 4.5" />
-                                </svg>
-                                <input type="text" id="stock-input" name="company" class="autocomplete-input" placeholder="Search for a company" value="{{ request.POST.company }}" autocomplete="off" aria-controls="suggestions" required>
-                            </div>
-                            <div id="suggestions" class="suggestions" aria-label="Company suggestions"></div>
-                        </div>
-                        <div class="holding-field">
-                            <label for="share-quantity">Number of shares</label>
-                            <div class="field-control">
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="m12 3 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 16l9 5 9-5" />
-                                </svg>
-                                <input id="share-quantity" type="text" inputmode="numeric" pattern="[0-9]+" class="share_quantity share_numbering" name="share_quantity" placeholder="e.g. 100" value="{{ request.POST.share_quantity }}" required>
-                            </div>
-                        </div>
-                        <div class="holding-field">
-                            <label for="buying-rate">
-                                Buying rate <span>NPR / share</span>
-                            </label>
-                            <div class="field-control">
-                                <span class="field-currency" aria-hidden="true">Rs.</span>
-                                <input id="buying-rate" type="text" inputmode="numeric" pattern="[0-9]+" class="buying_rate share_numbering" name="buying_rate" placeholder="e.g. 250" value="{{ request.POST.buying_rate }}" required>
-                            </div>
-                        </div>
-                        <div class="holding-field purchase-type-field">
-                            <label for="buy-type">Purchase type</label>
-                            <div class="field-control">
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <rect x="3" y="5" width="18" height="14" rx="3" />
-                                    <path d="M3 10h18M7 15h4" />
-                                </svg>
-                                <select name="buy-type" id="buy-type" required>
-                                    <option value="" disabled selected>Select purchase type</option>
-                                    <option value="ipo">IPO</option>
-                                    <option value="secondary">Secondary market</option>
-                                </select>
-                            </div>
-                        </div>
-                        <p class="error-message" role="alert"></p>
+                    <div class="holding-form">
                         {% if errors %}
                             <div class="portfolio-form-errors" role="alert">
                                 {% for error in errors %}
@@ -102,17 +56,11 @@
                                 {% endfor %}
                             </div>
                         {% endif %}
-                        <button type="submit" id="add-btn" class="add-btn">
-                            <span aria-hidden="true">+</span> Add to portfolio <span aria-hidden="true">→</span>
-                        </button>
-                        <p class="form-note">
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <rect x="5" y="10" width="14" height="11" rx="2" />
-                                <path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3" />
-                            </svg>
-                            Saved to your personal portfolio
-                        </p>
-                    </form>
+                        <a class="add-btn" href="{% url 'trades' %}">
+                            Record a trade <span aria-hidden="true">→</span>
+                        </a>
+                        <a class="portfolio-history-link" href="{% url 'transactions' %}">View transaction history</a>
+                    </div>
                 </section>
                 <div class="portfolio-tip">
                     <span class="tip-icon" aria-hidden="true">
@@ -162,11 +110,16 @@
                                     <h3>{{ data.company_name }}</h3>
                                     <span class="company-sector">{{ data.company_sector }}</span>
                                 </div>
-                                <button class="holding-remove" type="button" data-company-id="{{ data.company_id }}" aria-label="Remove {{ data.company_name }} from portfolio" title="Remove holding">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" />
-                                    </svg>
-                                </button>
+                                <div class="holding-actions">
+                                    <a class="holding-trade" href="{% url 'trades' %}?company={{ data.company_id|urlencode }}" aria-label="Record a trade for {{ data.company_name }}">Trade</a>
+                                    {% if data.can_remove %}
+                                        <button class="holding-remove" type="button" data-company-id="{{ data.company_id }}" aria-label="Remove {{ data.company_name }} from portfolio" title="Remove holding">
+                                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                                <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" />
+                                            </svg>
+                                        </button>
+                                    {% endif %}
+                                </div>
                             </header>
                             {% if data.error %}
                                 <p class="no-market-price">
@@ -182,7 +135,7 @@
                                     <div>
                                         <p class="metric-label">Last traded price</p>
                                         <p class="quote-price">
-                                            <span>Rs.</span> {{ data.tail.lastTradedPrice.0|default:'—' }}
+                                            <span>Rs.</span> {{ data.tail.lastTradedPrice.0|npr_amount|default:'—' }}
                                         </p>
                                     </div>
                                     {% for label, value in data.tail.items %}
@@ -215,7 +168,7 @@
                                         <div>
                                             <dt>Invested amount</dt>
                                             <dd>
-                                                <span>Rs.</span> {{ value }}
+                                                <span>Rs.</span> {{ value|npr_amount }}
                                             </dd>
                                         </div>
                                     {% endif %}
@@ -223,23 +176,38 @@
                                         <div>
                                             <dt>Market value</dt>
                                             <dd>
-                                                <span>Rs.</span> {{ value }}
+                                                <span>Rs.</span> {{ value|npr_amount }}
                                             </dd>
                                         </div>
                                     {% endif %}
                                 {% endfor %}
                             </dl>
-                            {% if data.when_to_sell %}
+                            {% if data.cost_error %}
+                                <p class="no-market-price">{{ data.cost_error }}</p>
+
+                            {% else %}
+                                <dl class="position-metrics position-costs">
+                                    <div>
+                                        <dt>Average cost / share</dt>
+                                        <dd><span>Rs.</span> {{ data.average_cost|npr_amount|default:'—' }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Break-even / share</dt>
+                                        <dd><span>Rs.</span> {{ data.break_even_price|npr_amount|default:'—' }}</dd>
+                                    </div>
+                                </dl>
+                            {% endif %}
+                            {% if data.has_sale_estimate %}
                                 <div class="holding-outcome">
                                     {% for label, value in data.when_to_sell.items %}
                                         {% if label == 'CASH IN HAND' %}
                                             <div>
-                                                <span>Estimated net proceeds</span><strong>Rs. {{ value }}</strong>
+                                                <span>Estimated net proceeds</span><strong>Rs. {{ value|npr_amount }}</strong>
                                             </div>
                                         {% endif %}
                                         {% if label == 'PROFIT / LOSS' %}
                                             <div class="outcome-profit">
-                                                <span>Estimated profit / loss</span><strong class="{% if value|slice:':1' == '-' %}negative{% else %}positive{% endif %}">Rs. {{ value }}</strong>
+                                                <span>Estimated profit / loss</span><strong class="{% if value < 0 %}negative{% else %}positive{% endif %}">Rs. {{ value|npr_amount }}</strong>
                                             </div>
                                         {% endif %}
                                     {% endfor %}
@@ -263,7 +231,7 @@
                                                 <div>
                                                     <dt>{{ value.1 }}</dt>
                                                     <dd>
-                                                        {{ value.0 }}
+                                                        {{ value.0|npr_amount|default:'—' }}
                                                     </dd>
                                                 </div>
                                             {% endif %}
@@ -274,7 +242,7 @@
                                             <div class="trade-charges">
                                                 <span>Estimated sale charges</span>
                                                 <p>{{ label|title }}</p>
-                                                <strong>{{ value }}</strong>
+                                                <strong>{{ value|npr_amount }}</strong>
                                             </div>
                                         {% endif %}
                                     {% endfor %}
@@ -299,7 +267,7 @@
                         <br>
                         market prices, and performance in one place.
                     </p>
-                    <a href="#stock-input" class="empty-action">Add your first holding <span aria-hidden="true">↗</span></a>
+                    <a href="{% url 'trades' %}" class="empty-action">Add your first holding <span aria-hidden="true">↗</span></a>
                 </div>
                 <div id="holdings-no-results" class="holdings-empty" hidden>
                     <span class="empty-icon" aria-hidden="true">
@@ -323,8 +291,5 @@
 {% endblock %}
 
 {% block js %}
-    <script>const urlName = "{{ request.resolver_match.url_name }}";</script>
-    <script id="companies" type="application/json">{{ companies|safe }}</script>
-    <script defer src="{% static 'js/users/portfolio.js' %}"></script>
-    <script defer src="{% static 'js/users/stock_searching.js' %}"></script>
+    <script defer src="{% static 'js/users/portfolio.js' %}?v=ledger-1"></script>
 {% endblock %}

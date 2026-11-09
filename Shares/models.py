@@ -25,6 +25,9 @@ class Portfolios(models.Model):
     class Meta:
         verbose_name = _("Share Holdings")
         verbose_name_plural = _("Share Holdings")
+        constraints = [
+            models.UniqueConstraint(fields=['user_id', 'company_id'], name='unique_user_company_holding'),
+        ]
 
     def __str__(self):
         return self.company_id.name
@@ -34,15 +37,25 @@ class Portfolios(models.Model):
     user_id = models.ForeignKey(to='Users.CustomUser', on_delete=models.CASCADE)
     company_id = models.ForeignKey(to="ListedCompanies", on_delete=models.CASCADE)
 
-    total_cost = models.FloatField(blank=True, null=True)
+    total_cost = models.DecimalField(max_digits=20, decimal_places=2, blank=True, null=True)
     number_of_shares = models.IntegerField(blank=True, null=True, default=0)
     created_at = models.DateTimeField(verbose_name=_('created at'), default=now, editable=False)
+    opening_number_of_shares = models.IntegerField(default=0)
+    opening_total_cost = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    ledger_initialized = models.BooleanField(default=False)
 
 
 class Transactions(models.Model):
     class Meta:
         verbose_name = _("Transactions")
         verbose_name_plural = _("Transactions")
+        ordering = ['-transaction_date', '-created_at', '-id']
+        constraints = [
+            models.UniqueConstraint(fields=['user_id', 'idempotency_key'], name='unique_user_trade_request'),
+        ]
+        indexes = [
+            models.Index(fields=['user_id', 'company_id', 'transaction_date'], name='trade_user_company_date'),
+        ]
 
     def __str__(self):
         return self.company_id.name
@@ -54,8 +67,24 @@ class Transactions(models.Model):
 
     number_of_shares = models.IntegerField(blank=True, null=True)
     transacted_price = models.FloatField(blank=True, null=True)
-    transaction_date = models.DateField(editable=False, default=now)
-    transaction_type = models.CharField(max_length=255, blank=True, null=True)
+    transaction_date = models.DateField(default=now)
+    transaction_type = models.CharField(max_length=255, blank=True, null=True, choices=[('buy', 'Buy'), ('sell', 'Sell'), ('bonus', 'Bonus shares')])
+    unit_price = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True)
+    gross_amount = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    fees = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    capital_gains_tax = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    cost_basis = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    net_amount = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    realized_gain = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    balance_shares = models.IntegerField(default=0)
+    balance_cost = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    purchase_type = models.CharField(max_length=20, default='secondary')
+    cgt_type = models.CharField(max_length=40, default='365 days or less (5%)')
+    fee_schedule = models.JSONField(default=dict, blank=True)
+    notes = models.CharField(max_length=500, blank=True, default='')
+    is_legacy = models.BooleanField(default=False)
+    idempotency_key = models.CharField(max_length=64, blank=True, null=True)
+    created_at = models.DateTimeField(default=now, editable=False)
 
 
 class WishLists(models.Model):

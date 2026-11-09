@@ -390,6 +390,47 @@
     transform: translateY(-1px);
 }
 
+.holding-form a.add-btn {
+    margin-top: 0;
+    text-decoration: none;
+}
+
+.portfolio-history-link {
+    display: block;
+    grid-column: 1 / -1;
+    margin-top: 14px;
+    color: #5b3e9e;
+    text-align: center;
+    font-weight: 700;
+}
+
+.holding-actions {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+}
+
+.holding-trade {
+    padding: 7px 10px;
+    border: 1px solid #7c8496;
+    border-radius: 8px;
+    color: #5b3e9e;
+    font-size: 12px;
+    font-weight: 750;
+    text-decoration: none;
+}
+
+.holding-trade:hover {
+    background: #f3f0fd;
+    border-color: #5b3e9e;
+}
+
+.sv-portfolio .position-costs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .form-note {
     display: flex;
     align-items: center;

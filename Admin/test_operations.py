@@ -40,8 +40,8 @@ class AdminOperationsTests(TestCase):
 
         today = timezone.localdate()
 
-        cls.buy = Transactions.objects.create(user_id=cls.alice, company_id=cls.bank, number_of_shares=20, transacted_price=5000, transaction_type='BUY', transaction_date=today)
-        cls.sell = Transactions.objects.create(user_id=cls.bob, company_id=cls.hydro, number_of_shares=10, transacted_price=3200, transaction_type='sell', transaction_date=today - timedelta(days=35))
+        cls.buy = Transactions.objects.create(user_id=cls.alice, company_id=cls.bank, number_of_shares=20, transacted_price=5000, transaction_type='BUY', transaction_date=today, is_legacy=True)
+        cls.sell = Transactions.objects.create(user_id=cls.bob, company_id=cls.hydro, number_of_shares=10, transacted_price=3200, transaction_type='sell', transaction_date=today - timedelta(days=35), is_legacy=True)
         cls.target = Targets.objects.create(user_id=cls.alice, company_id=cls.bank, target_type='buy', low_target=100, high_target=120)
         cls.invalid_target = Targets.objects.create(user_id=cls.alice, company_id=cls.hydro, target_type='sell', low_target=80, high_target=60)
         cls.removed_target = Targets.objects.create(user_id=cls.bob, company_id=cls.hydro, target_type='buy', low_target=50, high_target=70, is_deleted=True)
@@ -159,7 +159,13 @@ class AdminOperationsTests(TestCase):
         self.assertEqual(len(self.ids(context)), 3)
 
     def test_pagination_preserves_filters_and_exports_all_filtered_rows(self):
-        Portfolios.objects.bulk_create([Portfolios(user_id=self.alice, company_id=self.bank, number_of_shares=1, total_cost=10) for _ in range(23)])
+        companies = ListedCompanies.objects.bulk_create([
+            ListedCompanies(name=f'Alpine listing {index}', abbreviation=f'ALP{index}') for index in range(23)
+        ])
+        Portfolios.objects.bulk_create([
+            Portfolios(user_id=self.alice, company_id=company, number_of_shares=1, total_cost=10)
+            for company in companies
+        ])
 
         context = self.context(views.AdminPortfolios, {'q': 'ALP', 'page': '2', 'per_page': '20'})
 
@@ -180,7 +186,7 @@ class AdminOperationsTests(TestCase):
         self.assertEqual(rows[1][1], self.alice.email)
         self.assertEqual(rows[1][4], '\'=HYPERLINK("bad")')
         self.assertEqual(rows[1][6], '100')
-        self.assertEqual(rows[1][7], '25000.0')
+        self.assertEqual(rows[1][7], '25000.00')
 
     def test_each_record_export_uses_the_filtered_queryset(self):
         cases = [(views.AdminTransactions, {'type': 'sell'}), (views.AdminTargets, {'state': 'removed'}),

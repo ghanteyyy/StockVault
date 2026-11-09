@@ -50,6 +50,20 @@
                         </span><span>Portfolio</span><span class="sv-nav-current-dot" aria-hidden="true"></span></a>
                 </li>
                 <li>
+                    <a class="sv-nav-link {% if request.resolver_match.url_name == 'trades' %}is-active{% endif %}" href="{% url 'trades' %}" {% if request.resolver_match.url_name == 'trades' %}aria-current="page"{% endif %}><span class="sv-nav-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M3 7h17M16 3l4 4-4 4M21 17H4M8 13l-4 4 4 4" />
+                            </svg>
+                        </span><span>Buy &amp; sell</span><span class="sv-nav-current-dot" aria-hidden="true"></span></a>
+                </li>
+                <li>
+                    <a class="sv-nav-link {% if request.resolver_match.url_name == 'transactions' %}is-active{% endif %}" href="{% url 'transactions' %}" {% if request.resolver_match.url_name == 'transactions' %}aria-current="page"{% endif %}><span class="sv-nav-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3ZM9 7h6M9 11h6M9 15h3" />
+                            </svg>
+                        </span><span>Transactions</span><span class="sv-nav-current-dot" aria-hidden="true"></span></a>
+                </li>
+                <li>
                     <a class="sv-nav-link {% if request.resolver_match.url_name == 'wishlist' %}is-active{% endif %}" href="{% url 'wishlist' %}" {% if request.resolver_match.url_name == 'wishlist' %}aria-current="page"{% endif %}><span class="sv-nav-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24">
                                 <path d="M6 3h12v18l-6-4-6 4V3Z" />

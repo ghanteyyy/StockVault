@@ -1,0 +1,214 @@
+{% extends 'users/root.html' %}
+{% load static nepali_currency %}
+
+{% block global_assets %}{% endblock %}
+{% block public_footer %}{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/users/trading.css' %}?v=3">
+{% endblock %}
+
+{% block content %}
+    <div class="sv-trading sv-trading--history">
+        <header class="dealing-intro">
+            <div>
+                <p class="dealing-eyebrow"><span aria-hidden="true"></span> StockVault / Transactions</p>
+                <h1>Your moves, <span>in order.</span></h1>
+                <p>A complete record of your purchases, sales, and bonus shares.</p>
+            </div>
+            <div class="dealing-intro-actions">
+                {% if not errors %}
+                    <a class="dealing-button dealing-button--outline" href="?{% if query_string %}{{ query_string }}&amp;{% endif %}export=csv">Export CSV <span aria-hidden="true">↓</span></a>
+                {% endif %}
+                <a class="dealing-button" href="{% url 'trades' %}">Record transaction <span aria-hidden="true">+</span></a>
+            </div>
+        </header>
+
+        <div class="dealing-summary dealing-summary--four" aria-label="Filtered transaction summary">
+            <div><span>Transactions</span><strong>{{ totals.count }}</strong></div>
+            <div><span>Total purchase cost</span><strong><small>Rs.</small> {{ totals.purchases|default_if_none:0|npr_amount }}</strong></div>
+            <div><span>Net sale proceeds</span><strong><small>Rs.</small> {{ totals.sales|default_if_none:0|npr_amount }}</strong></div>
+            <div><span>Bonus shares received</span><strong>{{ totals.bonus_shares|default_if_none:0|floatformat:0 }}</strong></div>
+        </div>
+
+        <section class="dealing-card dealing-history" aria-labelledby="history-title">
+            <header class="dealing-section-heading">
+                <div>
+                    <p class="dealing-step">The details behind your portfolio</p>
+                    <h2 id="history-title">Transaction history</h2>
+                </div>
+                <span class="dealing-count">{{ totals.count }} record{{ totals.count|pluralize }}</span>
+            </header>
+            <form method="GET" action="{% url 'transactions' %}" class="dealing-history-filters">
+                <div class="dealing-field dealing-filter-search">
+                    <label for="history-search">Find a company</label>
+                    <input id="history-search" type="search" name="q" value="{{ filters.q }}" placeholder="Company name or symbol" maxlength="255">
+                </div>
+                <div class="dealing-field">
+                    <label for="history-type">Transaction type</label>
+                    <select id="history-type" name="type">
+                        <option value="">All transactions</option>
+                        <option value="buy" {% if filters.type == 'buy' %}selected{% endif %}>Purchases</option>
+                        <option value="sell" {% if filters.type == 'sell' %}selected{% endif %}>Sales</option>
+                        <option value="bonus" {% if filters.type == 'bonus' %}selected{% endif %}>Bonus shares</option>
+                    </select>
+                </div>
+                <div class="dealing-field">
+                    <label for="history-from">From</label>
+                    <input id="history-from" type="date" name="date_from" value="{{ filters.date_from }}">
+                </div>
+                <div class="dealing-field">
+                    <label for="history-to">To</label>
+                    <input id="history-to" type="date" name="date_to" value="{{ filters.date_to }}">
+                </div>
+                <button class="dealing-button" type="submit">Apply filters</button>
+                <a class="dealing-filter-reset" href="{% url 'transactions' %}">Reset</a>
+            </form>
+
+            {% if errors %}
+                <div class="dealing-errors dealing-errors--inset" role="alert">
+                    {% for error in errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if totals.legacy_count %}
+                <p class="dealing-legacy-note">Historical records show their original totals. The purchase and sale summaries use newer entries with a full price and fee breakdown.</p>
+            {% endif %}
+
+            {% if entries %}
+                <div class="dealing-table-scroll" tabindex="0" role="region" aria-label="Transaction history table">
+                    <table class="dealing-table dealing-history-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Company / date</th>
+                                <th scope="col">Transaction</th>
+                                <th scope="col" class="dealing-numeric">Shares</th>
+                                <th scope="col" class="dealing-numeric">Price / share</th>
+                                <th scope="col" class="dealing-numeric">Gross amount</th>
+                                <th scope="col" class="dealing-numeric">Fees & tax</th>
+                                <th scope="col" class="dealing-numeric">Net / recorded total</th>
+                                <th scope="col" class="dealing-numeric">Realized gain / loss</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in entries %}
+                                <tr>
+                                    <th scope="row">
+                                        <strong>{{ entry.company_id.name }}</strong>
+                                        <span>{{ entry.company_id.abbreviation }} · {{ entry.transaction_date|date:'M j, Y' }}</span>
+                                        {% if entry.notes %}
+                                            <details class="dealing-row-note"><summary>View note</summary><p>{{ entry.notes }}</p></details>
+                                        {% endif %}
+                                    </th>
+                                    <td>
+                                        <span class="dealing-badge dealing-badge--{{ entry.normalized_type }}">
+                                            {% if entry.normalized_type == 'buy' %}
+                                                ↗ Purchase
+
+                                            {% elif entry.normalized_type == 'sell' %}
+                                                ↙ Sale
+
+                                            {% elif entry.normalized_type == 'bonus' %}
+                                                + Bonus
+
+                                            {% else %}
+                                                {{ entry.transaction_type|default:'Transaction'|title }}
+                                            {% endif %}
+                                        </span>
+                                        {% if entry.is_legacy %}
+                                            <span class="dealing-cell-caption">Historical record</span>
+
+                                        {% elif entry.normalized_type == 'buy' %}
+                                            <span class="dealing-cell-caption">{{ entry.purchase_type|title }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="dealing-numeric">{{ entry.number_of_shares|default_if_none:0 }}</td>
+                                    <td class="dealing-numeric">
+                                        {% if entry.is_legacy %}
+                                            <span aria-label="Unavailable">—</span>
+
+                                        {% else %}
+                                            Rs. {{ entry.unit_price|npr_amount }}
+                                        {% endif %}
+                                    </td>
+                                    <td class="dealing-numeric">
+                                        {% if entry.is_legacy %}
+                                            <span aria-label="Unavailable">—</span>
+
+                                        {% else %}
+                                            Rs. {{ entry.gross_amount|npr_amount }}
+                                        {% endif %}
+                                    </td>
+                                    <td class="dealing-numeric">
+                                        {% if entry.is_legacy %}
+                                            <span aria-label="Unavailable">—</span>
+
+                                        {% else %}
+                                            <span>Fees: {{ entry.fees|npr_amount }}</span>
+                                            <span class="dealing-cell-caption">Tax: {{ entry.capital_gains_tax|npr_amount }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="dealing-numeric dealing-amount">
+                                        {% if entry.is_legacy %}
+                                            {% if entry.transacted_price is not None %}
+                                                Rs. {{ entry.transacted_price|npr_amount }}
+
+                                            {% else %}
+                                                <span aria-label="Unavailable">—</span>
+                                            {% endif %}
+                                            <span class="dealing-cell-caption">Recorded total</span>
+
+                                        {% else %}
+                                            Rs. {{ entry.net_amount|npr_amount }}
+                                        {% endif %}
+                                    </td>
+                                    <td class="dealing-numeric">
+                                        {% if entry.normalized_type == 'sell' and not entry.is_legacy %}
+                                            <strong class="{% if entry.realized_gain < 0 %}dealing-negative{% else %}dealing-positive{% endif %}">Rs. {{ entry.realized_gain|npr_amount }}</strong>
+
+                                        {% else %}
+                                            <span aria-label="Not applicable">—</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            {% else %}
+                <div class="dealing-empty-list dealing-empty-list--history">
+                    <span aria-hidden="true">↗</span>
+                    {% if filters.q or filters.type or filters.date_from or filters.date_to %}
+                        <h3>No transactions match these filters.</h3>
+                        <p>Try another company, type, or date range.</p>
+                        <a class="dealing-button dealing-button--outline" href="{% url 'transactions' %}">Clear filters</a>
+
+                    {% else %}
+                        <h3>Your story starts with a transaction.</h3>
+                        <p>Record your first purchase to build your history.</p>
+                        <a class="dealing-button" href="{% url 'trades' %}">Record a transaction <span aria-hidden="true">↗</span></a>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if page_obj.paginator.num_pages > 1 %}
+                <nav class="dealing-pagination" aria-label="Transaction history pages">
+                    <span>Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }}</span>
+                    <div>
+                        {% if page_obj.has_previous %}
+                            <a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" class="dealing-button dealing-button--outline">← Previous</a>
+                        {% endif %}
+                        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                        {% if page_obj.has_next %}
+                            <a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ page_obj.next_page_number }}" class="dealing-button dealing-button--outline">Next →</a>
+                        {% endif %}
+                    </div>
+                </nav>
+            {% endif %}
+            <p class="dealing-table-note">Purchase totals include fees. Sale proceeds are after fees and tax. Summary figures follow your current filters. All amounts are in NPR.</p>
+        </section>
+    </div>
+{% endblock %}

@@ -5,8 +5,6 @@ import math
 import warnings
 from io import BytesIO
 from PIL import Image, UnidentifiedImageError
-from decimal import Decimal
-from django.db.models import F, Sum, DecimalField
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -23,12 +21,7 @@ from django_ratelimit.decorators import ratelimit
 import Shares.serializers as share_serializers
 from Shares import scraper
 from utils import captcha as Captcha
-from utils import calculator
-from nepse import Nepse
-from utils.utils import nepali_comma
-
-
-nepse = Nepse()
+from .portfolio_views import DashboardPage, DeleteProtfolio, Portfolio
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
@@ -41,7 +34,7 @@ def HomePage(request):
     '''
 
     if request.user.is_authenticated:
-        return redirect('portfolio')
+        return redirect('dashboard')
 
     context = {
         'page_title': 'StockVault | Your investments, in focus',
@@ -213,199 +206,6 @@ def Logout(request):
     logout(request)
 
     return redirect('index')
-
-
-@ratelimit(key='ip', rate='100/m', block=True)
-@login_required(login_url='login')
-def DashboardPage(request):
-    total_investment = share_models.Portfolios.objects.filter(user_id=request.user).aggregate(
-        total_amount = Sum(F("total_cost"), output_field=DecimalField(max_digits=20, decimal_places=2)))['total_amount'] or 0
-
-    data_per_company_sector = {}
-    total_portfolio_value = Decimal('0.00')
-    price_cache = {}
-
-    portfolios = (share_models.Portfolios.objects.filter(user_id=request.user).select_related('company_id'))
-
-    for portfolio in portfolios:
-        company = portfolio.company_id
-        sector = company.sector
-
-        data_per_company_sector[sector] = (data_per_company_sector.get(sector, 0) + 1)
-        symbol = company.abbreviation
-
-        if symbol not in price_cache:
-            company_details = nepse.getCompanyDetails(symbol)
-            price_cache[symbol] = Decimal(str(company_details['securityDailyTradeDto']['lastTradedPrice']))
-
-        total_portfolio_value += (price_cache[symbol] * portfolio.number_of_shares)
-
-    total_portfolio_value = round(total_portfolio_value, 2)
-    percentage_change = round(((total_portfolio_value - total_investment) / total_investment) * 100, 2) if total_investment else 0
-
-    context = {
-        'page_title': 'Dashboard | Stock Vault',
-        'total_investment': str(total_investment),
-        'total_sales': str(total_portfolio_value),
-        'percentage_change': percentage_change,
-        'data_per_company_sector': data_per_company_sector
-    }
-    return render(request, 'users/dashboard.html', context)
-
-
-@ratelimit(key='ip', rate='100/m', block=True)
-@login_required(login_url='login')
-def Portfolio(request):
-    '''
-    Provides a portfolio page where users can see their current portfolio and add new shares
-
-    This view displays a user's portfolio, including the shares they own,
-    the number of shares, and the total value of their portfolio. It also
-    displays an input form where users can add new shares to their portfolio.
-    '''
-
-    errors = []
-
-    if request.method.lower() == 'get':
-        action = request.GET.get('action', '')
-
-        if action == 'delete':
-            portfolio_id = request.GET.get('portfolio_id', '')
-
-            portfolio = share_models.Portfolios.objects.filter(id__iexact=portfolio_id, user_id=request.user)
-            portfolio.delete()
-
-            return redirect('portfolio')
-
-    if request.method.lower() == 'post':
-        company = request.POST.get('company').strip()
-        quantity = request.POST.get('share_quantity').strip()
-        buying_rate = request.POST.get('buying_rate').strip()
-
-        if not any([company, quantity, buying_rate]):
-            errors.append('All fields are required')
-
-        if not quantity.isdigit():
-            errors.append('Quantity must be a valid number')
-
-        if not buying_rate.isdigit():
-            errors.append('Buying rate must be a valid number')
-
-        if not errors:
-            buy_type = request.POST.get('buy-type')
-            bought = calculator.buy_shares_calculation(float(quantity), float(buying_rate), buy_type)
-
-            company_name = share_models.ListedCompanies.objects.get(name__iexact=company)
-            portfolio = share_models.Portfolios.objects.filter(user_id=request.user, company_id=company_name)
-
-            if portfolio:
-                portfolio = portfolio.first()
-
-                number_of_shares = int(quantity) + portfolio.number_of_shares
-                total_cost = round(float(bought['total_amount']) + portfolio.total_cost, 2)
-
-                portfolio.number_of_shares = number_of_shares
-                portfolio.total_cost = total_cost
-                portfolio.save()
-
-            else:
-                share_models.Portfolios.objects.create(user_id=request.user, company_id=company_name, number_of_shares=int(quantity), total_cost=round(float(bought['total_amount']), 2))
-
-            share_models.Transactions.objects.create(user_id=request.user, company_id=company_name, number_of_shares=abs(int(quantity)), transacted_price=abs(round(float(bought['total_amount']), 2)), transaction_type='buy')
-
-    companies = share_models.ListedCompanies.objects.all()
-    serialized_companies = share_serializers.CompaniesSerializer(companies, many=True).data
-    companies = [company['name'] for company in serialized_companies]
-
-    share_holdings = []
-
-    for portfolio in share_models.Portfolios.objects.filter(user_id=request.user).order_by('company_id__name'):
-        data = dict()
-        nepse_data = nepse.getCompanyDetails(portfolio.company_id.abbreviation)['securityDailyTradeDto']
-
-        data["company_id"] = portfolio.company_id.id
-        data['company_name'] = portfolio.company_id.name
-        data['company_sector'] = portfolio.company_id.sector
-        data['number_of_shares'] = portfolio.number_of_shares
-
-        if 'tail' not in data:
-            data['tail'] = dict()
-
-        data['tail']['previousClose'] = (nepali_comma(nepse_data['previousClose']), 'Previous Close')
-        data['tail']['lastTradedPrice'] = (nepali_comma(nepse_data['lastTradedPrice']), 'Last Traded Price')
-        data['tail']['openPrice'] = (nepali_comma(nepse_data['openPrice']), 'Open Price')
-        data['tail']['highPrice'] = (nepali_comma(nepse_data['highPrice']), 'High Price')
-        data['tail']['lowPrice'] = (nepali_comma(nepse_data['lowPrice']), 'Low Price')
-        data['tail']['closePrice'] = (nepali_comma(nepse_data['closePrice']), 'Close Price')
-        data['tail']['fiftyTwoWeekHigh'] = (nepali_comma(nepse_data['fiftyTwoWeekHigh']), '52 Week High')
-        data['tail']['fiftyTwoWeekLow'] = (nepali_comma(nepse_data['fiftyTwoWeekLow']), '52 Week Low')
-        data['tail']['percentchange'] = (nepali_comma(str(round(((float(nepse_data['lastTradedPrice']) - float(nepse_data['previousClose'])) / float(nepse_data['previousClose'])) * 100, 2))) + " %", 'Percent Change')
-
-        share_holdings.append(data)
-
-        total = 0
-        when_to_sell_key = ''
-        when_to_sell_value = ''
-        data['when_to_sell'] = dict()
-        other_costs = calculator.calculate_trade_charges(portfolio.total_cost)
-
-        for key, value in other_costs.items():
-            key = key.replace('_', ' ').upper()
-
-            when_to_sell_key += key + ', '
-            when_to_sell_value += str(value) + ', '
-
-            total -= float(value)
-
-        data['when_to_sell'][when_to_sell_key.strip(', ')] = when_to_sell_value.strip(', ')
-        total += round(float(nepse_data['lastTradedPrice']) * portfolio.number_of_shares, 2)
-
-        data['when_to_sell']['NUMBER OF SHARES'] = nepali_comma(str(portfolio.number_of_shares))
-        data['when_to_sell']['BOUGHT AT'] = nepali_comma(str(portfolio.total_cost))
-        data['when_to_sell']['SOLD AT'] = nepali_comma(str(round(float(nepse_data['lastTradedPrice']) * portfolio.number_of_shares, 2)))
-        data['when_to_sell']['CASH IN HAND'] = nepali_comma(str(total))
-        data['when_to_sell']['PROFIT / LOSS'] = nepali_comma(str(round(total - portfolio.total_cost, 2)))
-
-    recent_activites = share_models.Transactions.objects.filter(user_id=request.user).order_by('-transaction_date')[:5]
-    recent_activites = share_serializers.TransactionsSerializer(recent_activites, many=True).data[:5]
-
-    context = {
-            'page_title': 'Portfolio | Stock Vault',
-            'companies': json.dumps(companies),
-            'portfolio_datasets': share_holdings,
-            'recent_activities': recent_activites,
-            'errors': errors,
-        }
-
-    return render(request, 'users/portfolio.html', context)
-
-
-@ratelimit(key='ip', rate='100/m', block=True)
-@login_required(login_url='login')
-def DeleteProtfolio(request):
-    try:
-        data = json.loads(request.body)
-        company_id = data.get("company_id")
-
-        portfolio = share_models.Portfolios.objects.get(company_id_id=company_id, user_id=request.user,)
-        portfolio.delete()
-
-        return JsonResponse({
-            "status": True,
-            "message": "Portfolio deleted successfully"
-        })
-
-    except share_models.Portfolios.DoesNotExist:
-        return JsonResponse({
-            "status": False,
-            "message": "Portfolio not found"
-        }, status=404)
-
-    except (json.JSONDecodeError, TypeError):
-        return JsonResponse({
-            "status": False,
-            "message": "Invalid request data"
-        }, status=400)
 
 
 def _wishlist_context(request, errors=None):

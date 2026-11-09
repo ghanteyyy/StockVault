@@ -2,6 +2,7 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
 from . import captcha
+from . import trading_views
 
 urlpatterns = [
     path('', views.HomePage, name='index'),
@@ -10,6 +11,8 @@ urlpatterns = [
     path('target/', views.TargetPage, name='target'),
     path('register/', views.SignupPage, name='signup'),
     path('portfolio/', views.Portfolio, name='portfolio'),
+    path('trades/', trading_views.TradePage, name='trades'),
+    path('transactions/', trading_views.TransactionHistory, name='transactions'),
     path('wishlist/', views.WishListPage, name='wishlist'),
     path('settings/', views.SettingsPage, name='settings'),
     path('dashboard/', views.DashboardPage, name='dashboard'),

@@ -1,0 +1,209 @@
+{% extends 'users/root.html' %}
+{% load static nepali_currency %}
+
+{% block global_assets %}{% endblock %}
+{% block public_footer %}{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/users/trading.css' %}?v=3">
+{% endblock %}
+
+{% block content %}
+    <div class="sv-trading" data-trading-page>
+        <header class="dealing-intro">
+            <div>
+                <p class="dealing-eyebrow"><span aria-hidden="true"></span> StockVault / Buy & sell</p>
+                <h1>Every move, <span>accounted for.</span></h1>
+                <p>Buy, sell, and add bonus shares. Keep your holdings together.</p>
+            </div>
+            <a class="dealing-button dealing-button--outline" href="{% url 'transactions' %}">
+                Transaction history <span aria-hidden="true">↗</span>
+            </a>
+        </header>
+
+        {% for message in messages %}
+            <p class="dealing-notice" role="status">{{ message }}</p>
+        {% endfor %}
+
+        {% if errors %}
+            <div class="dealing-errors" role="alert" tabindex="-1" id="trade-errors">
+                <strong>Check the transaction details.</strong>
+                <ul>
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <div class="dealing-summary" aria-label="Current holdings summary">
+            <div><span>Companies held</span><strong>{{ position_count }}</strong></div>
+            <div><span>Total shares</span><strong>{{ share_count|floatformat:0 }}</strong></div>
+            <div><span>Remaining purchase cost</span><strong><small>Rs.</small> {{ invested_total|npr_amount }}</strong></div>
+        </div>
+
+        <div class="dealing-layout">
+            <section class="dealing-card dealing-composer" aria-labelledby="record-title">
+                <header class="dealing-card-heading">
+                    <div>
+                        <p class="dealing-step">01 / Record a transaction</p>
+                        <h2 id="record-title">Your next move</h2>
+                    </div>
+                    <span class="dealing-heading-symbol" aria-hidden="true">↗</span>
+                </header>
+                <form action="{% url 'trades' %}" method="POST" id="dealing-form" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="idempotency_key" value="{{ form_values.idempotency_key }}">
+                    <fieldset class="dealing-modes">
+                        <legend class="dealing-visually-hidden">Transaction type</legend>
+                        <label>
+                            <input type="radio" name="transaction_type" value="buy" {% if form_values.transaction_type == 'buy' %}checked{% endif %}>
+                            <span><span aria-hidden="true">↗</span> Buy</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="transaction_type" value="sell" {% if form_values.transaction_type == 'sell' %}checked{% endif %}>
+                            <span><span aria-hidden="true">↙</span> Sell</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="transaction_type" value="bonus" {% if form_values.transaction_type == 'bonus' %}checked{% endif %}>
+                            <span><span aria-hidden="true">+</span> Bonus</span>
+                        </label>
+                    </fieldset>
+                    <p class="dealing-mode-description" data-buy-only>Each purchase adds to your company holding and updates its average cost.</p>
+                    <p class="dealing-mode-description" data-sell-only>A sale reduces the number of shares you hold and removes their share of the purchase cost.</p>
+                    <p class="dealing-mode-description" data-bonus-only>Add the bonus shares you received to an existing company holding.</p>
+                    <div class="dealing-field">
+                        <label for="dealing-company">Company</label>
+                        <select name="company" id="dealing-company" required>
+                            <option value="">Choose a company</option>
+                            {% for company in companies %}
+                                <option value="{{ company.pk }}" {% if form_values.company == company.pk %}selected{% endif %}>{{ company.name }} · {{ company.abbreviation }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="dealing-field-pair">
+                        <div class="dealing-field">
+                            <label for="dealing-quantity">Number of shares</label>
+                            <input id="dealing-quantity" type="number" name="quantity" value="{{ form_values.quantity }}" min="1" max="2147483647" step="1" inputmode="numeric" placeholder="e.g. 100" required>
+                        </div>
+                        <div class="dealing-field">
+                            <label for="dealing-date">Transaction date</label>
+                            <input id="dealing-date" type="date" name="transaction_date" value="{{ form_values.transaction_date }}" max="{{ today }}" required>
+                        </div>
+                    </div>
+                    <div class="dealing-field" data-priced-only>
+                        <label for="dealing-price"><span id="dealing-price-label">Price per share</span><span>NPR / share</span></label>
+                        <input id="dealing-price" type="number" name="unit_price" value="{{ form_values.unit_price }}" min="0.01" step="0.01" inputmode="decimal" placeholder="e.g. 500.00">
+                    </div>
+                    <div class="dealing-field" data-buy-only>
+                        <label for="dealing-source">Purchase type</label>
+                        <select id="dealing-source" name="purchase_type">
+                            {% for value, label in purchase_choices %}
+                                <option value="{{ value }}" {% if form_values.purchase_type == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="dealing-field" data-sell-only>
+                        <label for="dealing-tax">Capital gains tax category</label>
+                        <select id="dealing-tax" name="cgt_type">
+                            {% for category in tax_choices %}
+                                <option value="{{ category }}" {% if form_values.cgt_type == category %}selected{% endif %}>{{ category }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <p class="dealing-bonus-note" data-bonus-only>
+                        Bonus shares increase your quantity without adding purchase cost, spreading that cost across more shares.
+                    </p>
+                    <details class="dealing-notes" {% if form_values.notes %}open{% endif %}>
+                        <summary>Add a note <span>Optional</span></summary>
+                        <div class="dealing-field">
+                            <label for="dealing-notes">Transaction note</label>
+                            <textarea id="dealing-notes" name="notes" maxlength="500" rows="3" placeholder="e.g. Broker reference">{{ form_values.notes }}</textarea>
+                        </div>
+                    </details>
+                    <button class="dealing-button dealing-submit" type="submit" id="dealing-submit">
+                        <span id="dealing-submit-label">Record transaction</span><span aria-hidden="true">→</span>
+                    </button>
+                    <p class="dealing-form-footnote">Record your completed share transactions here.</p>
+                </form>
+            </section>
+
+            <aside class="dealing-card dealing-position" aria-labelledby="position-title">
+                <header class="dealing-card-heading">
+                    <div>
+                        <p class="dealing-step">02 / Know where you stand</p>
+                        <h2 id="position-title">Your company position</h2>
+                    </div>
+                    <span class="dealing-heading-symbol" aria-hidden="true">◎</span>
+                </header>
+                <div id="dealing-position-empty" class="dealing-position-empty" {% if selected_position %}hidden{% endif %}>
+                    <span aria-hidden="true">↗</span>
+                    <h3>A clear view of your holding.</h3>
+                    <p id="dealing-empty-description">Choose a company to see your shares, average cost, and break-even selling price.</p>
+                </div>
+                <div id="dealing-position-details" {% if not selected_position %}hidden{% endif %}>
+                    <p class="dealing-company-label" id="position-company-name">{{ selected_position.company.name }}</p>
+                    <dl class="dealing-position-numbers">
+                        <div><dt>Shares available</dt><dd id="position-quantity">{{ selected_position.quantity|floatformat:0 }}</dd></div>
+                        <div><dt>Remaining purchase cost</dt><dd>Rs. <span id="position-cost">{{ selected_position.total_cost|npr_amount|default:'—' }}</span></dd></div>
+                        <div><dt>Average cost / share</dt><dd>Rs. <span id="position-average">{{ selected_position.average_cost|npr_amount|default:'—' }}</span></dd></div>
+                    </dl>
+                    <div class="dealing-break-even">
+                        <p><span aria-hidden="true">↗</span> Break-even selling price</p>
+                        <strong>Rs. <span id="position-break-even">{{ selected_position.break_even_price|npr_amount|default:'—' }}</span><small>/ share</small></strong>
+                        <p id="position-break-even-context">Estimated price to recover your purchase cost when selling this entire holding.</p>
+                    </div>
+                    <p class="dealing-quote-status" id="dealing-quote-status" role="status" aria-live="polite"></p>
+                    <div class="dealing-explainer">
+                        <h3>How these figures are calculated</h3>
+                        <p>Average cost includes purchase fees. The break-even estimate accounts for selling charges and any tax on the gain.</p>
+                        <p>A partial sale reduces your remaining cost in proportion to the shares sold.</p>
+                    </div>
+                </div>
+                <a class="dealing-text-link" href="{% url 'trade-calculator' %}">Explore a trade estimate <span aria-hidden="true">↗</span></a>
+            </aside>
+        </div>
+
+        <section class="dealing-card dealing-holdings" aria-labelledby="holdings-title">
+            <header class="dealing-section-heading">
+                <div>
+                    <p class="dealing-step">Your shares, together</p>
+                    <h2 id="holdings-title">Current positions <span>{{ position_count }}</span></h2>
+                </div>
+                <a class="dealing-text-link" href="{% url 'portfolio' %}">View portfolio <span aria-hidden="true">↗</span></a>
+            </header>
+            {% if positions %}
+                <div class="dealing-table-scroll" tabindex="0" role="region" aria-label="Your current share positions">
+                    <table class="dealing-table">
+                        <thead>
+                            <tr><th scope="col">Company</th><th scope="col" class="dealing-numeric">Shares</th><th scope="col" class="dealing-numeric">Average cost</th><th scope="col" class="dealing-numeric">Break-even / share</th><th scope="col"><span class="dealing-visually-hidden">Record transaction</span></th></tr>
+                        </thead>
+                        <tbody>
+                            {% for position in positions %}
+                                <tr>
+                                    <th scope="row"><strong>{{ position.company.name }}</strong><span>{{ position.company.abbreviation }} · {{ position.company.sector }}</span></th>
+                                    <td class="dealing-numeric">{{ position.quantity|floatformat:0 }}</td>
+                                    <td class="dealing-numeric">Rs. {{ position.average_cost|npr_amount|default:'—' }}</td>
+                                    <td class="dealing-numeric">Rs. {{ position.break_even_price|npr_amount|default:'—' }}</td>
+                                    <td><a class="dealing-text-link" href="{% url 'trades' %}?company={{ position.company.pk|urlencode }}&amp;transaction_type={{ form_values.transaction_type|urlencode }}" data-pick-company="{{ position.company.pk }}">Record <span aria-hidden="true">↗</span></a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            {% else %}
+                <div class="dealing-empty-list">
+                    <h3>Your first position starts here.</h3>
+                    <p>Record a purchase to start tracking shares and average costs.</p>
+                </div>
+            {% endif %}
+            <p class="dealing-table-note">Break-even figures use the full position and the default tax category. Choose Sell above to calculate for a specific quantity.</p>
+        </section>
+        {{ holding_data|json_script:'dealing-holdings-data' }}
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/users/trading.js' %}?v=2" defer></script>
+{% endblock %}

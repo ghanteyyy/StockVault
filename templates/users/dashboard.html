@@ -47,11 +47,11 @@
                         </span>
                         <span class="card-tag">Invested capital</span>
                     </div>
-                    <p class="card-label">Total Invested</p>
+                    <p class="card-label">Current cost basis</p>
                     <h2 class="card-amount">
                         <span class="currency">Rs.</span> {{ total_investment|npr_amount }}
                     </h2>
-                    <p class="card-description">Total amount committed to shares</p>
+                    <p class="card-description">Acquisition cost of shares you still hold</p>
                 </article>
 
                 <article class="summary-card sales-card">
@@ -65,11 +65,11 @@
                         </span>
                         <span class="card-tag">Realized proceeds</span>
                     </div>
-                    <p class="card-label">Total Sale Proceeds</p>
+                    <p class="card-label">Net sale proceeds</p>
                     <h2 class="card-amount">
                         <span class="currency">Rs.</span> {{ total_sales|npr_amount }}
                     </h2>
-                    <p class="card-description">Total amount received from share sales</p>
+                    <p class="card-description">Net proceeds from sales in your trade journal</p>
                 </article>
 
                 <article class="summary-card change-card {% if percentage_change > 0 %}is-positive{% elif percentage_change < 0 %}is-negative{% else %}is-neutral{% endif %}">
@@ -83,8 +83,22 @@
                         <span class="card-tag">Value movement</span>
                     </div>
                     <p class="card-label">Portfolio Change</p>
-                    <h2 class="card-amount">{{ percentage_change|default_if_none:0|floatformat:2 }}%</h2>
-                    <p class="card-description">Percentage change in portfolio value</p>
+                    <h2 class="card-amount">
+                        {% if missing_quotes %}
+                            —
+
+                        {% else %}
+                            {{ percentage_change|floatformat:2 }}%
+                        {% endif %}
+                    </h2>
+                    <p class="card-description">
+                        {% if missing_quotes %}
+                            Waiting for a complete market snapshot
+
+                        {% else %}
+                            Market value compared with current cost basis
+                        {% endif %}
+                    </p>
                 </article>
             </div>
         </section>
@@ -127,7 +141,7 @@
                     <div class="chart-header">
                         <div>
                             <h2 id="capital-heading">Capital overview</h2>
-                            <p>Invested capital compared with proceeds from sales</p>
+                            <p>Current acquisition cost and recorded net sale proceeds</p>
                         </div>
                         <span class="chart-head-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24">
@@ -138,7 +152,7 @@
                     </div>
                     <div class="chart-body chart-body--bar">
                         <div class="chart-container">
-                            <canvas id="investmentChart" role="img" aria-label="Bar chart comparing total investment with total sale proceeds in Nepali rupees"></canvas>
+                            <canvas id="investmentChart" role="img" aria-label="Current cost basis and recorded net sale proceeds in Nepali rupees"></canvas>
                         </div>
                         <p class="chart-note">
                             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -162,9 +176,16 @@
 
     const getData = (id, fallback) => {
         const el = document.getElementById(id);
-        if (!el) return fallback;
-        try { return JSON.parse(el.textContent); }
-        catch (error) { console.error(`Invalid data in ${id}`, error); return fallback; }
+        if(!el){
+            return fallback;
+        }
+        try{
+            return JSON.parse(el.textContent);
+        }
+        catch(error){
+            console.error(`Invalid data in ${id}`, error);
+            return fallback;
+        }
     };
 
     const safeAmount = (value) => {
@@ -256,7 +277,7 @@
     new Chart(document.getElementById('investmentChart'), {
         type: 'bar',
         data: {
-            labels: ['Total invested', 'Sale proceeds'],
+            labels: ['Current cost basis', 'Net sale proceeds'],
             datasets: [{
                 label: 'Amount (NPR)',
                 data: [invested, sales],

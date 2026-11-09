@@ -1,35 +1,6 @@
 (() => {
     const portfolio = document.querySelector('.sv-portfolio');
 
-    document.querySelectorAll('.share_numbering').forEach(field => {
-        field.addEventListener('input', () => {
-            field.value = field.value.replace(/\D/g, '');
-        });
-    });
-
-    window.validatePortfolioForm = () => {
-        const buyingRate = document.querySelector('.buying_rate').value.trim();
-        const quantity = document.querySelector('.share_quantity').value.trim();
-        const buyType = document.querySelector('#buy-type').value;
-
-        if(!quantity || !buyingRate || !buyType){
-            return {
-                message: 'Please complete all required fields before submitting.',
-                success: false
-            };
-        }
-
-        if(!/^\d+$/.test(quantity) || !/^\d+$/.test(buyingRate) ||
-            Number(quantity) <= 0 || Number(buyingRate) <= 0){
-            return {
-                message: 'Number of shares and buying rate must be positive whole numbers.',
-                success: false
-            };
-        }
-
-        return { message: '', success: true };
-    };
-
     if(!portfolio){
         return;
     }
@@ -112,7 +83,7 @@
 
     async function removeHolding(button) {
         const holding = button.closest('.portfolio-item');
-        if(!holding || button.disabled){
+        if(!holding || button.disabled || !window.confirm('Remove this opening holding from your portfolio?')){
             return;
         }
 
@@ -145,7 +116,7 @@
 
             if(shouldMoveFocus){
                 const nextButton = getHoldings().find(item => !item.hidden)?.querySelector('.holding-remove');
-                const focusTarget = nextButton || search || portfolio.querySelector('#stock-input');
+                const focusTarget = nextButton || search || portfolio.querySelector('.portfolio-rail .add-btn');
                 if(focusTarget){
                     focusTarget.focus();
                 }
