@@ -4,7 +4,7 @@
 {% block body_class %}sv-home-page{% if request.user.is_authenticated %} has-user-sidebar{% endif %}{% endblock %}
 {% block global_assets %}{% endblock %}
 {% block meta %}
-    <meta name="description" content="Bring your holdings, price targets, saved companies, and trade cost estimates together in StockVault, a personal investment workspace for Nepal's stock market.">
+    <meta name="description" content="Track your holdings, manage buy and sell price targets, and estimate trade costs in StockVault, a personal investment workspace for Nepal's stock market.">
     <meta name="theme-color" content="#20243d">
 {% endblock %}
 {% block css %}
@@ -161,13 +161,12 @@
                         <a class="home-feature-tag home-calculator-link" href="#trade-calculator">Try the trade calculator <span aria-hidden="true">↓</span></a></article>
                     <article class="home-feature-card"><span class="home-feature-icon home-feature-icon--gold" aria-hidden="true">
                             <svg viewBox="0 0 24 24">
-                                <path d="M6 3h12v18l-6-4-6 4V3Z" />
-                                <path d="M9 8h6" />
+                                <path d="M4 19h16M6 16v-4m4 4V7m4 9V9m4 7V5" />
                             </svg>
                         </span><span class="home-feature-number">04</span>
-                        <h3>Good ideas, saved</h3>
-                        <p>Build a shortlist of companies. Search by name or symbol, filter by sector, and pick up where you left off.</p>
-                        <span class="home-feature-tag">Your wishlist</span></article>
+                        <h3>Follow the NEPSE market</h3>
+                        <p>See the NEPSE index, trading activity, and the latest top gainers and losers.</p>
+                        <span class="home-feature-tag">Market data</span></article>
                     <article class="home-feature-card"><span class="home-feature-icon home-feature-icon--mint" aria-hidden="true">
                             <svg viewBox="0 0 24 24">
                                 <circle cx="11" cy="13" r="8" />
@@ -175,9 +174,9 @@
                                 <path d="m11 13 9-9M16 3v5h5" />
                             </svg>
                         </span><span class="home-feature-number">05</span>
-                        <h3>A range for your next move</h3>
-                        <p>Set low and high prices for a buy or sell target, then see where the available market snapshot stands.</p>
-                        <span class="home-feature-tag">Price targets</span></article>
+                        <h3>Buy and sell price targets</h3>
+                        <p>Add a price range to your Wishlist and see how the available market price compares.</p>
+                        <span class="home-feature-tag">Wishlist</span></article>
                     <article class="home-feature-card"><span class="home-feature-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24">
                                 <circle cx="12" cy="8" r="4" />
@@ -257,7 +256,7 @@
                                 </svg>
                             </span><span class="home-example-label">Illustrative example</span>
                         </div>
-                        <p class="home-tour-preview-eyebrow">Price target / NABIL</p>
+                        <p class="home-tour-preview-eyebrow">Wishlist / NABIL</p>
                         <h3>A plan with clear boundaries.</h3>
                         <div class="home-tour-target-price">
                             <div>
@@ -365,7 +364,7 @@
                     <li>
                         <span class="home-step-number">03</span>
                         <h3>Build your everyday routine</h3>
-                        <p>Review your overview, save interesting companies, compare estimates, and refine your price targets.</p>
+                        <p>Review your portfolio, compare trade estimates, and adjust your buy and sell targets in Wishlist.</p>
                         <span class="home-step-note">A clearer place to come back to</span>
                     </li>
                 </ol>
@@ -390,7 +389,7 @@
                         StockVault helps investors in Nepal track their share portfolios. Record purchases, sales, and bonus shares, then review your holdings, market value, and profit or loss in your dashboard.
                     </p>
                     <p>
-                        Follow the NEPSE index and market movers, save companies to your wishlist, and set buy and sell price targets. Use the Trade Calculator to estimate fees and sale proceeds before you trade.
+                        Follow the NEPSE index and market movers, and track buy and sell price targets in your Wishlist. Use the Trade Calculator to estimate fees and sale proceeds before you trade.
                     </p>
                     <div class="home-about-points">
                         <span>
@@ -425,7 +424,7 @@
                             What can I keep track of in StockVault?<span aria-hidden="true">+</span>
                         </summary>
                         <p>
-                            You can record share holdings and purchase costs, review your portfolio overview, save companies to a wishlist, and set buy or sell price ranges. The trade calculator helps you estimate costs and sale proceeds.
+                            You can record share holdings and purchase costs, review your portfolio, and track buy and sell price ranges in your Wishlist. The Trade Calculator helps you estimate costs and sale proceeds.
                         </p>
                     </details>
                     <details>
@@ -438,10 +437,10 @@
                     </details>
                     <details>
                         <summary>
-                            How is a wishlist different from a price target?<span aria-hidden="true">+</span>
+                            How do I use my Wishlist?<span aria-hidden="true">+</span>
                         </summary>
                         <p>
-                            A wishlist saves companies you may want to revisit. A price target adds a low and high price range with a buy or sell intent, so you can compare your plan with the available market snapshot.
+                            Choose a listed company, select Buy or Sell, and enter a low and high target price. Wishlist shows whether the available market price falls within your range.
                         </p>
                     </details>
                     <details>
@@ -457,7 +456,7 @@
                             When are market prices updated?<span aria-hidden="true">+</span>
                         </summary>
                         <p>
-                            Portfolio and target pages use the market data available when you load the page. Refresh the page to request another snapshot. Availability depends on the underlying market-data source.
+                            Portfolio and Wishlist use the market data available when you load the page. Refresh the page to request another snapshot. Availability depends on the underlying market-data source.
                         </p>
                     </details>
                     <details>

@@ -157,13 +157,6 @@
         }
     });
 
-    page.closest('.sv-wishlist').querySelectorAll('[data-target-company]').forEach(link => {
-        link.addEventListener('click', () => {
-            companyInput.value = link.dataset.targetCompany;
-            clearError(form, formError);
-        });
-    });
-
     if(page.hasAttribute('data-focus-targets') && !window.location.hash){
         page.querySelector('.target-backend-errors')?.focus();
     }

@@ -62,25 +62,28 @@ class WishlistTargetTests(TestCase):
         self.assertNotContains(response, f'href="{reverse("target")}"')
         element_ids = re.findall(rb'\sid="([^"]+)"', response.content)
         self.assertCountEqual(element_ids, set(element_ids))
-        self.assertEqual([item['id'] for item in response.context['saved_companies']], [self.saved_item.pk])
         self.assertEqual([target['id'] for target in response.context['targets']], [self.target.pk])
         self.assertTrue(response.context['targets'][0]['show_buy_sell'])
 
     def test_target_create_edit_and_delete_return_to_the_wishlist_section(self):
         self.client.force_login(self.member)
-        response = self.client.post(self.create_target, {**self.target_values, 'target_type': 'sell'})
+        company = ListedCompanies.objects.create(name='New Manufacturing', abbreviation='NEW')
+        response = self.client.post(self.create_target, {
+            **self.target_values, 'company': company.name, 'target_type': 'sell',
+        })
         self.assertRedirects(response, f'{self.wishlist}?target_notice=created#price-targets')
-        created = Targets.objects.get(user_id=self.member, company_id=self.target_company, target_type='sell')
+        created = Targets.objects.get(user_id=self.member, company_id=company, target_type='sell')
+        self.assertFalse(WishLists.objects.filter(user_id=self.member, company_id=company).exists())
 
         response = self.client.post(self.edit_target, {
-            'target_id': created.pk, 'company_abbr': self.target_company.abbreviation,
+            'target_id': created.pk, 'company_abbr': company.abbreviation,
             'edit_low_target': '140', 'edit_high_target': '175',
         })
         self.assertRedirects(response, f'{self.wishlist}?target_notice=updated#price-targets')
         created.refresh_from_db()
         self.assertEqual((created.low_target, created.high_target), (140, 175))
 
-        response = self.client.post(self.delete_target, {'target_id': created.pk})
+        response = self.client.post(reverse('delete-target', args=[company.pk]), {'target_id': created.pk})
         self.assertRedirects(response, f'{self.wishlist}?target_notice=deleted#price-targets')
         created.refresh_from_db()
         self.assertTrue(created.is_deleted)
@@ -119,13 +122,21 @@ class WishlistTargetTests(TestCase):
         self.assertEqual((self.other_target.low_target, self.other_target.high_target), (200, 250))
         self.assertFalse(self.other_target.is_deleted)
 
-    def test_saving_and_removing_a_wishlist_company_preserves_its_targets(self):
+    def test_wishlist_only_shows_targets_and_preserves_legacy_saved_company_records(self):
         self.client.force_login(self.member)
-        response = self.client.post(self.wishlist, {'action': 'add', 'company': self.target_company.name})
-        self.assertRedirects(response, f'{self.wishlist}?notice=added')
-        saved = WishLists.objects.get(user_id=self.member, company_id=self.target_company)
+        response = self.client.get(self.wishlist)
+        self.assertContains(response, 'id="price-targets"')
+        self.assertNotContains(response, 'id="saved-companies"')
+        self.assertNotContains(response, 'id="wishlist-form"')
+        self.assertNotContains(response, self.saved_item.pk)
 
-        response = self.client.post(self.wishlist, {'action': 'delete', 'wishlist_id': saved.pk})
-        self.assertRedirects(response, f'{self.wishlist}?notice=removed')
-        self.assertFalse(WishLists.objects.filter(pk=saved.pk).exists())
+        for values in [
+            {'action': 'add', 'company': self.target_company.name},
+            {'action': 'delete', 'wishlist_id': self.saved_item.pk},
+        ]:
+            with self.subTest(action=values['action']):
+                self.assertEqual(self.client.post(self.wishlist, values).status_code, 405)
+
+        self.assertEqual(list(WishLists.objects.filter(user_id=self.member).values_list('pk', flat=True)),
+                         [self.saved_item.pk])
         self.assertTrue(Targets.objects.filter(pk=self.target.pk, is_deleted=False).exists())

@@ -1,8 +1,71 @@
 .sv-targets {
-    margin-top: clamp(32px, 4vw, 56px);
-    padding-top: clamp(25px, 3vw, 38px);
-    border-top: 1px solid #b2bac8;
+    --targets-ink: #1f2937;
+    width: 100%;
+    max-width: 1560px;
+    min-width: 0;
+    min-height: 100%;
+    margin-inline: auto;
+    padding: clamp(26px, 3vw, 44px);
+    border: 1px solid #b2bac8;
+    border-radius: 28px;
+    background: radial-gradient(ellipse at 3% 0, #eeebfc, transparent 43%), #f7f8fc;
+    color: var(--targets-ink);
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    -webkit-font-smoothing: antialiased;
     scroll-margin-top: 20px;
+}
+
+.sv-targets *,
+.sv-targets *::before,
+.sv-targets *::after {
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.sv-targets [hidden] {
+    display: none !important;
+}
+
+.sv-targets svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.sv-targets :is(button, input, select) {
+    font: inherit;
+}
+
+.sv-targets :is(button, input, select, a) {
+    -webkit-tap-highlight-color: transparent;
+}
+
+.sv-targets :is(button, input, select, a):focus-visible {
+    outline: 3px solid #5b3e9e;
+    outline-offset: 4px;
+}
+
+.sv-targets .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    border: 0;
+    white-space: nowrap;
+}
+
+.sv-targets ::selection {
+    background: #e6dffc;
+    color: var(--targets-ink);
 }
 
 .sv-targets fieldset {
@@ -14,17 +77,17 @@
 
 .sv-targets .targets-section-heading {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 20px;
+    gap: 16px 24px;
+    margin-bottom: 28px;
 }
 
-.sv-targets .targets-section-heading h2 {
-    margin: 0 0 5px;
-    color: var(--wish-ink);
-    font-size: clamp(22px, 2.3vw, 30px);
+.sv-targets .targets-section-heading h1 {
+    margin: 0 0 8px;
+    color: var(--targets-ink);
+    font-size: clamp(29px, 3.1vw, 42px);
     font-weight: 800;
     letter-spacing: -.04em;
     line-height: 1.2;
@@ -35,6 +98,29 @@
     color: #475569;
     font-size: 12px;
     line-height: 1.7;
+}
+
+.sv-targets .targets-portfolio-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 13px;
+    border: 1.5px solid #7c8496;
+    border-radius: 11px;
+    background: #ffffffb0;
+    color: #5b3e9e;
+    font-size: 11px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.sv-targets .targets-portfolio-link:hover {
+    background: #fff;
+}
+
+.sv-targets .targets-portfolio-link svg {
+    width: 16px;
+    height: 16px;
 }
 
 .sv-targets .targets-summary {
@@ -188,7 +274,7 @@
     height: 20px;
 }
 
-.sv-targets .target-composer-heading h3 {
+.sv-targets .target-composer-heading h2 {
     margin: 0 0 2px;
     color: #1f2937;
     font-size: 17px;
@@ -459,7 +545,7 @@
     margin-bottom: 19px;
 }
 
-.sv-targets .targets-collection-heading h3 {
+.sv-targets .targets-collection-heading h2 {
     margin: 0 0 5px;
     color: #1f2937;
     font-size: 19px;
@@ -640,7 +726,7 @@
     min-width: 0;
 }
 
-.sv-targets .target-company-name h4 {
+.sv-targets .target-company-name h3 {
     margin: 0 0 5px;
     color: #1f2937;
     font-size: 12px;
@@ -961,7 +1047,7 @@
     text-transform: uppercase;
 }
 
-.sv-targets .targets-empty h4 {
+.sv-targets .targets-empty h3 {
     margin: 0 0 10px;
     color: #475569;
     font-size: 23px;
@@ -1024,7 +1110,7 @@
     outline: none;
     background: #fff;
     box-shadow: 0 26px 90px #20132b38;
-    color: var(--wish-ink);
+    color: var(--targets-ink);
 }
 
 .sv-targets .target-dialog::backdrop {
@@ -1281,6 +1367,12 @@
 }
 
 @media (max-width: 768px) {
+    .sv-targets {
+        padding: 26px 16px 30px;
+        border: 0;
+        border-radius: 0;
+    }
+
     .sv-targets .target-composer {
         margin-bottom: 28px;
     }
@@ -1293,7 +1385,7 @@
         gap: 16px;
     }
 
-    .sv-targets .targets-collection-heading h3 {
+    .sv-targets .targets-collection-heading h2 {
         font-size: 18px;
     }
 }
@@ -1338,7 +1430,7 @@
         margin-bottom: 21px;
     }
 
-    .sv-targets .target-composer-heading h3 {
+    .sv-targets .target-composer-heading h2 {
         font-size: 17px;
     }
 
@@ -1380,7 +1472,7 @@
         gap: 9px;
     }
 
-    .sv-targets .targets-collection-heading h3 {
+    .sv-targets .targets-collection-heading h2 {
         font-size: 18px;
     }
 
@@ -1422,7 +1514,7 @@
         font-size: 11px;
     }
 
-    .sv-targets .target-company-name h4 {
+    .sv-targets .target-company-name h3 {
         font-size: 11px;
     }
 
@@ -1484,7 +1576,7 @@
         padding-inline: 15px;
     }
 
-    .sv-targets .targets-empty h4 {
+    .sv-targets .targets-empty h3 {
         font-size: 21px;
     }
 

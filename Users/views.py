@@ -206,54 +206,11 @@ def Logout(request):
     return redirect('index')
 
 
-def _wishlist_context(request, errors=None):
-    saved_companies = []
-    saved_company_ids = set()
-    saved_items = share_models.WishLists.objects.filter(user_id=request.user).select_related('company_id').order_by('company_id__name', 'id')
-
-    for item in saved_items:
-        company = item.company_id
-        saved_company_ids.add(company.id)
-
-        saved_companies.append({
-            'id': item.id,
-            'company_id': company.id,
-            'company_name': company.name,
-            'abbreviation': company.abbreviation,
-            'sector': (company.sector or '').strip(),
-        })
-
-    available = share_models.ListedCompanies.objects.exclude(id__in=saved_company_ids).order_by('name')
-
-    wishlist_companies = [{
-        'name': company.name,
-        'abbreviation': company.abbreviation,
-        'sector': (company.sector or '').strip(),
-    } for company in available]
-
-    notices = {
-        'added': 'The company has been added to your wishlist.',
-        'removed': 'The company has been removed from your wishlist.',
-    }
-
-    return {
-        'page_title': 'Wishlist | Stock Vault',
-        'saved_companies': saved_companies,
-        'wishlist_companies': wishlist_companies,
-        'saved_company_count': len(saved_companies),
-        'available_company_count': len(wishlist_companies),
-        'wishlist_sector_count': len({company['sector'] for company in saved_companies if company['sector']}),
-        'wishlist_notice': notices.get(request.GET.get('notice'), ''),
-        'errors': errors or [],
-    }
-
-
-def _render_wishlist(request, *, errors=None, wishlist_form='', target_errors=None, target_form=None):
+def _render_wishlist(request, *, target_errors=None, target_form=None):
     return render(request, 'users/wishlist.html', {
-        **_wishlist_context(request, errors),
         **_target_context(request),
+        'page_title': 'Wishlist | StockVault',
         'wishlist_page': True,
-        'wishlist_form': wishlist_form,
         'target_errors': target_errors or [],
         'target_form': target_form or {},
         'focus_targets': bool(target_errors),
@@ -262,47 +219,9 @@ def _render_wishlist(request, *, errors=None, wishlist_form='', target_errors=No
 
 @ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
+@require_safe
 def WishListPage(request):
-    '''
-    Manage only the current user's saved companies through explicit posts
-    '''
-
-    errors = []
-    company_name = ''
-
-    if request.method == 'POST':
-        action = (request.POST.get('action') or 'add').strip()
-
-        if action == 'delete':
-            wishlist_id = (request.POST.get('wishlist_id') or '').strip()
-
-            item = share_models.WishLists.objects.filter(id=wishlist_id, user_id=request.user).first() if wishlist_id else None
-
-            if item is None:
-                errors.append('This saved company could not be found. Please refresh and try again.')
-
-            else:
-                item.delete()
-                return redirect(f"{reverse('wishlist')}?notice=removed")
-
-        elif action == 'add':
-            company_name = (request.POST.get('company') or '').strip()
-            company = share_models.ListedCompanies.objects.filter(name__iexact=company_name).first() if company_name else None
-
-            if company is None:
-                errors.append('Choose a company from the current list.')
-
-            elif share_models.WishLists.objects.filter(user_id=request.user, company_id=company).exists():
-                errors.append(f'{company.name} is already in your wishlist.')
-
-            else:
-                share_models.WishLists.objects.create(user_id=request.user, company_id=company)
-
-                return redirect(f"{reverse('wishlist')}?notice=added")
-        else:
-            errors.append('Choose a wishlist action and try again.')
-
-    return _render_wishlist(request, errors=errors, wishlist_form=company_name)
+    return _render_wishlist(request)
 
 
 def _target_range(low_value, high_value):
