@@ -1,4 +1,9 @@
 /* StockVault's public introduction. All layout and typography stay on this page. */
+body.sv-home-page,
+.sv-home {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
 body.sv-home-page {
     --home-ink: #1f2937;
     --home-muted: #586277;
@@ -8,7 +13,6 @@ body.sv-home-page {
     min-height: 100vh;
     background: #fff;
     color: #1f2937;
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 14px;
     line-height: 1.7;
     -webkit-font-smoothing: antialiased;
