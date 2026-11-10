@@ -27,13 +27,10 @@ from .portfolio_views import DashboardPage, DeleteProtfolio, Portfolio
 @ratelimit(key='ip', rate='100/m', block=True)
 def HomePage(request):
     '''
-    Displays the homepage of Stock Vault.
-
-    If the user is logged in, it redirects to the portfolio page.
-    Otherwise, it renders the index.html template with the page title.
+    Display the public homepage or open its calculator from the workspace.
     '''
 
-    if request.user.is_authenticated:
+    if request.user.is_authenticated and request.GET.get('tool') != 'trade-calculator':
         return redirect('dashboard')
 
     context = {
@@ -716,7 +713,8 @@ def ChangePassword(request):
     return _settings_payload(request.user, field_errors, 'Your password has been updated.')
 
 
-@ratelimit(key='ip', rate='100/m', block=True)
-@login_required(login_url='login')
 def TradeCalculator(request):
-    return render(request, 'users/calculator.html', {'page_title': 'Calculator | Stock Vault'})
+    homepage = reverse('index')
+    if request.user.is_authenticated:
+        homepage += '?tool=trade-calculator'
+    return redirect(f'{homepage}#trade-calculator')

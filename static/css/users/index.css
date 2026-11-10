@@ -14,20 +14,20 @@ body.sv-home-page {
     -webkit-font-smoothing: antialiased;
 }
 
-.sv-home-page *,
-.sv-home-page *::before,
-.sv-home-page *::after {
+.sv-home *,
+.sv-home *::before,
+.sv-home *::after {
     box-sizing: border-box;
     font-family: inherit;
 }
 
-.sv-home-page>.container {
+.sv-home-page:not(.has-user-sidebar)>.container {
     display: block;
     width: 100%;
     height: auto;
 }
 
-.sv-home-page #workspace-content {
+.sv-home-page:not(.has-user-sidebar) #workspace-content {
     width: 100%;
     height: auto;
     min-width: 0;
@@ -35,11 +35,11 @@ body.sv-home-page {
     overflow: visible;
 }
 
-.sv-home-page [hidden] {
+.sv-home [hidden] {
     display: none !important;
 }
 
-.sv-home-page svg {
+.sv-home svg {
     display: block;
     width: 22px;
     height: 22px;
@@ -51,30 +51,30 @@ body.sv-home-page {
     stroke-linejoin: round;
 }
 
-.sv-home-page :is(a, button, summary) {
+.sv-home :is(a, button, summary) {
     -webkit-tap-highlight-color: transparent;
 }
 
-.sv-home-page :is(a, button, summary, [tabindex="0"]):focus-visible {
+.sv-home :is(a, button, summary, [tabindex="0"]):focus-visible {
     outline: 3px solid #6548b4;
     outline-offset: 5px;
 }
 
-.sv-home-page a {
+.sv-home a {
     color: inherit;
     text-decoration: none;
 }
 
-.sv-home-page button {
+.sv-home button {
     font: inherit;
     cursor: pointer;
 }
 
-.sv-home-page :is(h1, h2, h3, p) {
+.sv-home :is(h1, h2, h3, p) {
     margin: 0;
 }
 
-.sv-home-page ::selection {
+.sv-home ::selection {
     background: #dfd6f6;
     color: #475569;
 }
@@ -832,6 +832,23 @@ body.sv-home-page {
     color: #586277;
     font-size: 11px;
     font-weight: 600;
+}
+
+.sv-home-page .home-calculator-link {
+    color: #5b3e9e;
+}
+
+.sv-home-page .home-calculator-link:hover {
+    text-decoration: underline;
+}
+
+.sv-home-page:not(.has-user-sidebar) .home-calculator .trade-estimate-card {
+    scroll-margin-top: 98px;
+}
+
+.sv-home-page.has-user-sidebar .home-calculator {
+    padding-block: 24px 48px;
+    scroll-margin-top: 0;
 }
 
 .sv-home-page .home-tour {

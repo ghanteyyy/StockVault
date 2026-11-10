@@ -2,7 +2,6 @@
     --calc-ink: #1f2937;
     --calc-muted: #586277;
     --calc-line: #b2bac8;
-    --calc-accent: #5b3e9e;
     --calc-green: #166534;
     --calc-red: #9f1239;
     width: 100%;
@@ -80,15 +79,7 @@
 }
 
 .sv-calculator .calculator-intro {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
     margin-bottom: 34px;
-}
-
-.sv-calculator .calculator-intro>div {
-    min-width: 0;
 }
 
 .sv-calculator .calculator-eyebrow {
@@ -111,7 +102,7 @@
     box-shadow: 0 0 0 4px #e8e2fb;
 }
 
-.sv-calculator .calculator-intro h1 {
+.sv-calculator .calculator-intro h2 {
     margin: 0 0 10px;
     color: #1f2937;
     font-size: clamp(29px, 3.1vw, 42px);
@@ -120,47 +111,11 @@
     letter-spacing: -.055em;
 }
 
-.sv-calculator .calculator-intro h1>span {
-    color: var(--calc-accent);
-}
-
 .sv-calculator .calculator-subtitle {
     margin: 0;
     color: #475569;
     font-size: 12px;
     line-height: 1.8;
-}
-
-.sv-calculator .calculator-portfolio-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    flex-shrink: 0;
-    padding: 11px 14px;
-    border: 1.5px solid #7c8496;
-    border-radius: 11px;
-    background: #ffffffb0;
-    color: #5b3e9e;
-    font-size: 11px;
-    font-weight: 700;
-    text-decoration: none;
-    transition: background .2s, border-color .2s;
-}
-
-.sv-calculator .calculator-portfolio-link svg {
-    width: 16px;
-    height: 16px;
-}
-
-.sv-calculator .calculator-portfolio-link>span {
-    margin-left: 7px;
-    font-size: 17px;
-}
-
-.sv-calculator .calculator-portfolio-link:hover {
-    background: white;
-    border-color: #7c8496;
 }
 
 .sv-calculator .calculator-workspace {
@@ -197,8 +152,8 @@
     text-transform: uppercase;
 }
 
-.sv-calculator .trade-card-heading h2,
-.sv-calculator .estimate-heading h2 {
+.sv-calculator .trade-card-heading h3,
+.sv-calculator .estimate-heading h3 {
     margin: 0;
     font-size: 21px;
     font-weight: 800;
@@ -771,7 +726,7 @@
     background: #9fcdbd;
 }
 
-.sv-calculator .estimate-empty h3 {
+.sv-calculator .estimate-empty h4 {
     margin: 0 0 9px;
     color: #475569;
     font-size: 19px;
@@ -1052,12 +1007,6 @@
         gap: 24px;
     }
 
-    .sv-calculator .calculator-intro {
-        align-items: flex-start;
-        flex-wrap: wrap;
-        gap: 16px;
-    }
-
     .sv-calculator .purchase-options {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -1073,16 +1022,15 @@
 
 @media (max-width: 768px) {
     .sv-calculator {
-        padding: 42px 20px 30px;
-        border: 0;
-        border-radius: 0;
+        padding: 24px clamp(12px, 3vw, 20px);
+        border-radius: 20px;
     }
 
     .sv-calculator .calculator-intro {
         margin-bottom: 25px;
     }
 
-    .sv-calculator .calculator-intro h1 {
+    .sv-calculator .calculator-intro h2 {
         font-size: 33px;
     }
 
@@ -1091,11 +1039,6 @@
     }
 
     .sv-calculator .calculator-subtitle {
-        font-size: 11px;
-    }
-
-    .sv-calculator .calculator-portfolio-link {
-        padding: 9px 12px;
         font-size: 11px;
     }
 
@@ -1125,11 +1068,7 @@
 }
 
 @media (max-width: 480px) {
-    .sv-calculator {
-        padding-inline: 16px;
-    }
-
-    .sv-calculator .calculator-intro h1 {
+    .sv-calculator .calculator-intro h2 {
         font-size: 31px;
     }
 
@@ -1142,8 +1081,8 @@
         margin-bottom: 20px;
     }
 
-    .sv-calculator .trade-card-heading h2,
-    .sv-calculator .estimate-heading h2 {
+    .sv-calculator .trade-card-heading h3,
+    .sv-calculator .estimate-heading h3 {
         font-size: 20px;
     }
 
@@ -1244,7 +1183,7 @@
         min-height: 330px;
     }
 
-    .sv-calculator .estimate-empty h3 {
+    .sv-calculator .estimate-empty h4 {
         font-size: 18px;
     }
 

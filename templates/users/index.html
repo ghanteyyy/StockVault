@@ -1,14 +1,15 @@
 {% extends 'users/root.html' %}
 {% load static %}
 
-{% block public_body_class %}sv-home-page{% endblock %}
+{% block body_class %}sv-home-page{% if request.user.is_authenticated %} has-user-sidebar{% endif %}{% endblock %}
 {% block global_assets %}{% endblock %}
 {% block meta %}
     <meta name="description" content="Bring your holdings, price targets, saved companies, and trade cost estimates together in StockVault, a personal investment workspace for Nepal's stock market.">
     <meta name="theme-color" content="#20243d">
 {% endblock %}
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/users/index.css' %}?v=contrast-1">
+    <link rel="stylesheet" href="{% static 'css/users/index.css' %}?v=calculator-1">
+    <link rel="stylesheet" href="{% static 'css/users/calculator.css' %}?v=home-1">
 {% endblock %}
 
 {% block content %}
@@ -28,7 +29,13 @@
                         Bring your holdings, price targets, and next ideas into one thoughtful workspace. Keep track of what you own and make room for what’s next.
                     </p>
                     <div class="home-hero-actions">
-                        <a class="home-button home-button--hero" href="{% url 'signup' %}">Create your account <span aria-hidden="true">↗</span></a><a class="home-hero-secondary" href="#features">Explore the tools <span aria-hidden="true">↓</span></a>
+                        {% if request.user.is_authenticated %}
+                            <a class="home-button home-button--hero" href="{% url 'dashboard' %}">Go to your dashboard <span aria-hidden="true">↗</span></a>
+
+                        {% else %}
+                            <a class="home-button home-button--hero" href="{% url 'signup' %}">Create your account <span aria-hidden="true">↗</span></a>
+                        {% endif %}
+                        <a class="home-hero-secondary" href="#trade-calculator">Try the calculator <span aria-hidden="true">↓</span></a>
                     </div>
                     <div class="home-hero-notes">
                         <span>
@@ -178,7 +185,7 @@
                         <p>
                             Estimate buy and sell costs with a breakdown of brokerage, SEBON fees, DP charges, and applicable capital gains tax.
                         </p>
-                        <span class="home-feature-tag">Trade calculator</span></article>
+                        <a class="home-feature-tag home-calculator-link" href="#trade-calculator">Try the trade calculator <span aria-hidden="true">↓</span></a></article>
                     <article class="home-feature-card"><span class="home-feature-icon home-feature-icon--gold" aria-hidden="true">
                             <svg viewBox="0 0 24 24">
                                 <path d="M6 3h12v18l-6-4-6 4V3Z" />
@@ -349,6 +356,12 @@
             </div>
         </section>
 
+        <section class="home-section home-calculator" id="trade-calculator" aria-labelledby="trade-calculator-title">
+            <div class="home-shell">
+                {% include 'users/calculator.html' %}
+            </div>
+        </section>
+
         <section class="home-section home-how" id="how-it-works" aria-labelledby="home-how-title">
             <div class="home-shell">
                 <div class="home-centered-heading">
@@ -359,9 +372,16 @@
                 <ol class="home-steps">
                     <li>
                         <span class="home-step-number">01</span>
-                        <h3>Create your workspace</h3>
-                        <p>Register an account and set up a personal space for your investment details.</p>
-                        <a href="{% url 'signup' %}">Create an account <span aria-hidden="true">↗</span></a>
+                        {% if request.user.is_authenticated %}
+                            <h3>Open your workspace</h3>
+                            <p>Go to your dashboard to review your investments and recent activity.</p>
+                            <a href="{% url 'dashboard' %}">Open your dashboard <span aria-hidden="true">↗</span></a>
+
+                        {% else %}
+                            <h3>Create your workspace</h3>
+                            <p>Register an account and set up a personal space for your investment details.</p>
+                            <a href="{% url 'signup' %}">Create an account <span aria-hidden="true">↗</span></a>
+                        {% endif %}
                     </li>
                     <li>
                         <span class="home-step-number">02</span>
@@ -424,7 +444,7 @@
                         <span>begins here.</span>
                     </h2>
                     <p>Get to know the workspace before you make it your own.</p>
-                    <a class="home-text-link" href="{% url 'signup' %}">Ready to get started? <span aria-hidden="true">↗</span></a>
+                    <a class="home-text-link" href="#trade-calculator">Try the trade calculator <span aria-hidden="true">↑</span></a>
                 </div>
                 <div class="home-faq-list">
                     <details>
@@ -495,7 +515,13 @@
                 </h2>
                 <p>Start with your holdings. Bring your ideas and plans together as you go.</p>
                 <div>
-                    <a class="home-button home-button--hero" href="{% url 'signup' %}">Create your account <span aria-hidden="true">↗</span></a><a class="home-final-signin" href="{% url 'login' %}">Already have an account? Sign in <span aria-hidden="true">↗</span></a>
+                    {% if request.user.is_authenticated %}
+                        <a class="home-button home-button--hero" href="{% url 'dashboard' %}">Go to your dashboard <span aria-hidden="true">↗</span></a>
+
+                    {% else %}
+                        <a class="home-button home-button--hero" href="{% url 'signup' %}">Create your account <span aria-hidden="true">↗</span></a>
+                        <a class="home-final-signin" href="{% url 'login' %}">Already have an account? Sign in <span aria-hidden="true">↗</span></a>
+                    {% endif %}
                 </div>
             </div>
         </section>
@@ -504,4 +530,5 @@
 
 {% block js %}
     <script src="{% static 'js/users/index.js' %}?v=3" defer></script>
+    <script src="{% static 'js/users/calculator.js' %}?v=2" defer></script>
 {% endblock %}
