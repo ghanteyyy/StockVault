@@ -139,6 +139,37 @@
     line-height: 1.8;
 }
 
+.sv-wishlist .wishlist-section-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.sv-wishlist :is(.wishlist-section-link, .wishlist-set-target) {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+    border: 1px solid #a69abc;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--wish-accent);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.5;
+    text-decoration: none;
+}
+
+.sv-wishlist :is(.wishlist-section-link, .wishlist-set-target):hover {
+    border-color: var(--wish-accent);
+    background: #f0ebfd;
+}
+
+.sv-wishlist #saved-companies {
+    scroll-margin-top: 20px;
+}
+
 .sv-wishlist .wishlist-portfolio-link {
     display: inline-flex;
     align-items: center;
@@ -733,6 +764,18 @@
     flex: 0 0 5px;
     border-radius: 50%;
     background: #b8a6d0;
+}
+
+.sv-wishlist .wishlist-card-actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 3px;
+}
+
+.sv-wishlist .wishlist-set-target {
+    padding-inline: 7px;
+    white-space: nowrap;
 }
 
 .sv-wishlist .wishlist-remove {

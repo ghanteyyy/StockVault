@@ -12,6 +12,7 @@ class AdminRedirectMiddleware:
             'login', 'signup', 'buy-sell', 'dashboard',
             'portfolio', 'settings', 'wishlist', 'profit-loss', 'timeline',
             'trades', 'transactions', 'market-data',
+            'target', 'create-target', 'edit-target', 'delete-target',
         }
 
     def __call__(self, request):

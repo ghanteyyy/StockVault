@@ -5,8 +5,8 @@
     }
 
     const form = page.querySelector('#target-form');
-    const companyInput = page.querySelector('#stock-input');
-    const suggestions = page.querySelector('#suggestions');
+    const companyInput = page.querySelector('#target-company-input');
+    const suggestions = page.querySelector('#target-company-suggestions');
     const formError = page.querySelector('#target-form-error');
     const cards = [...page.querySelectorAll('.target-card')];
     const search = page.querySelector('#target-search');
@@ -112,7 +112,7 @@
 
     companyInput.setAttribute('role', 'combobox');
     companyInput.setAttribute('aria-autocomplete', 'list');
-    companyInput.setAttribute('aria-controls', 'suggestions');
+    companyInput.setAttribute('aria-controls', suggestions.id);
     companyInput.setAttribute('aria-expanded', 'false');
     suggestions.setAttribute('role', 'listbox');
     hideSuggestions();
@@ -156,6 +156,17 @@
             hideSuggestions();
         }
     });
+
+    page.closest('.sv-wishlist').querySelectorAll('[data-target-company]').forEach(link => {
+        link.addEventListener('click', () => {
+            companyInput.value = link.dataset.targetCompany;
+            clearError(form, formError);
+        });
+    });
+
+    if(page.hasAttribute('data-focus-targets') && !window.location.hash){
+        page.querySelector('.target-backend-errors')?.focus();
+    }
 
     form.addEventListener('input', () => clearError(form, formError));
     form.addEventListener('change', () => clearError(form, formError));

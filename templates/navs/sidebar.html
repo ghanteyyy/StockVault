@@ -71,21 +71,12 @@
                         </span><span>Transactions</span><span class="sv-nav-current-dot" aria-hidden="true"></span></a>
                 </li>
                 <li>
-                    <a class="sv-nav-link {% if request.resolver_match.url_name == 'wishlist' %}is-active{% endif %}" href="{% url 'wishlist' %}" {% if request.resolver_match.url_name == 'wishlist' %}aria-current="page"{% endif %}><span class="sv-nav-icon" aria-hidden="true">
+                    <a class="sv-nav-link {% if wishlist_page %}is-active{% endif %}" href="{% url 'wishlist' %}" {% if wishlist_page %}aria-current="page"{% endif %}><span class="sv-nav-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24">
                                 <path d="M6 3h12v18l-6-4-6 4V3Z" />
                                 <path d="M9 8h6" />
                             </svg>
                         </span><span>Wishlist</span><span class="sv-nav-current-dot" aria-hidden="true"></span></a>
-                </li>
-                <li>
-                    <a class="sv-nav-link {% if request.resolver_match.url_name == 'target' %}is-active{% endif %}" href="{% url 'target' %}" {% if request.resolver_match.url_name == 'target' %}aria-current="page"{% endif %}><span class="sv-nav-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24">
-                                <circle cx="11" cy="13" r="8" />
-                                <circle cx="11" cy="13" r="4" />
-                                <path d="m11 13 9-9M16 3v5h5" />
-                            </svg>
-                        </span><span>Price targets</span><span class="sv-nav-current-dot" aria-hidden="true"></span></a>
                 </li>
             </ul>
         </div>

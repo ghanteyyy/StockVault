@@ -15,13 +15,14 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST, require_safe
 import Users.models as user_models
 import Shares.models as share_models
 from django_ratelimit.decorators import ratelimit
 import Shares.serializers as share_serializers
-from Shares import scraper
 from utils import captcha as Captcha
 from .portfolio_views import DashboardPage, DeleteProtfolio, Portfolio
+from .target_quotes import market_prices as _target_market_prices
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
@@ -239,13 +240,24 @@ def _wishlist_context(request, errors=None):
         'page_title': 'Wishlist | Stock Vault',
         'saved_companies': saved_companies,
         'wishlist_companies': wishlist_companies,
-        'companies': json.dumps([company['name'] for company in wishlist_companies]),
         'saved_company_count': len(saved_companies),
         'available_company_count': len(wishlist_companies),
         'wishlist_sector_count': len({company['sector'] for company in saved_companies if company['sector']}),
         'wishlist_notice': notices.get(request.GET.get('notice'), ''),
         'errors': errors or [],
     }
+
+
+def _render_wishlist(request, *, errors=None, wishlist_form='', target_errors=None, target_form=None):
+    return render(request, 'users/wishlist.html', {
+        **_wishlist_context(request, errors),
+        **_target_context(request),
+        'wishlist_page': True,
+        'wishlist_form': wishlist_form,
+        'target_errors': target_errors or [],
+        'target_form': target_form or {},
+        'focus_targets': bool(target_errors),
+    })
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
@@ -256,6 +268,7 @@ def WishListPage(request):
     '''
 
     errors = []
+    company_name = ''
 
     if request.method == 'POST':
         action = (request.POST.get('action') or 'add').strip()
@@ -289,7 +302,7 @@ def WishListPage(request):
         else:
             errors.append('Choose a wishlist action and try again.')
 
-    return render(request, 'users/wishlist.html', _wishlist_context(request, errors))
+    return _render_wishlist(request, errors=errors, wishlist_form=company_name)
 
 
 def _target_range(low_value, high_value):
@@ -312,36 +325,24 @@ def _target_range(low_value, high_value):
     return (low_target, high_target), None
 
 
-def _target_page_context(request, errors=None):
+def _target_context(request):
     targets = []
-    market_prices = {}
-
-    companies = list(share_models.ListedCompanies.objects.values_list('name', flat=True))
-    holdings = user_models.Targets.objects.filter(user_id=request.user, is_deleted=False).select_related('company_id')
+    holdings = list(user_models.Targets.objects.filter(
+        user_id=request.user, is_deleted=False,
+    ).select_related('company_id').order_by('-created_at', 'id'))
+    market_prices = _target_market_prices({holding.company_id.abbreviation for holding in holdings})
 
     for holding in holdings:
         company = holding.company_id
-        abbreviation = company.abbreviation
-
-        if abbreviation not in market_prices:
-            try:
-                market_data = scraper.get_market_data(abbreviation)
-                market_price = float(str(market_data['market_price']).replace(',', '').strip())
-                market_prices[abbreviation] = market_price if math.isfinite(market_price) and market_price >= 0 else None
-
-            except Exception:  # One unavailable quote should not hide the rest of the watchlist.
-                market_prices[abbreviation] = None
-
-        market_price = market_prices[abbreviation]
+        market_price = market_prices.get(company.abbreviation)
         price_range, _ = _target_range(holding.low_target, holding.high_target)
         in_range = market_price is not None and price_range is not None and price_range[0] <= market_price <= price_range[1]
 
         targets.append({
             'id': holding.id,
-            'user_email': getattr(request.user, 'email', ''),
             'company_name': company.name,
             'company_id': company.id,
-            'abbreviation': abbreviation,
+            'abbreviation': company.abbreviation,
             'low_target': holding.low_target,
             'high_target': holding.high_target,
             'target_type': holding.target_type,
@@ -358,59 +359,55 @@ def _target_page_context(request, errors=None):
     }
 
     return {
-        'errors': errors or [],
         'targets': targets,
-        'page_title': 'Target | Stock Vault',
-        'companies': json.dumps(companies),
-        'target_companies': companies,
-        'target_notice': notices.get(request.GET.get('notice'), ''),
+        'target_companies': list(share_models.ListedCompanies.objects.order_by('name').values_list('name', flat=True)),
+        'target_notice': notices.get(request.GET.get('target_notice'), ''),
     }
 
 
-def _target_redirect(notice):
-    return redirect(f"{reverse('target')}?notice={notice}")
+def _target_redirect(notice=None):
+    query = f'?target_notice={notice}' if notice else ''
+    return redirect(f"{reverse('wishlist')}{query}#price-targets")
+
+
+@login_required(login_url='login')
+@require_safe
+def LegacyTargetRedirect(request):
+    return _target_redirect()
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
 @login_required(login_url='login')
-def TargetPage(request):
-    '''
-    Display a user's targets and add a validated buy or sell price range
-    '''
-
+@require_POST
+def TargetCreate(request):
+    form = {field: (request.POST.get(field) or '').strip() for field in (
+        'company', 'target_type', 'low_target', 'high_target',
+    )}
+    target_type = form['target_type']
+    price_range, range_error = _target_range(form['low_target'], form['high_target'])
     errors = []
 
-    if request.method == 'POST':
-        company_name = (request.POST.get('company') or '').strip()
-        target_type = (request.POST.get('target_type') or '').strip()
+    if range_error:
+        errors.append(range_error)
 
-        price_range, range_error = _target_range(request.POST.get('low_target'), request.POST.get('high_target'))
+    if target_type not in ('buy', 'sell'):
+        errors.append('Choose a buy or sell target.')
 
-        if range_error:
-            errors.append(range_error)
+    company = share_models.ListedCompanies.objects.filter(name__iexact=form['company']).first() if form['company'] else None
+    if company is None:
+        errors.append('Choose a company from the current list.')
 
-        if target_type not in ('buy', 'sell'):
-            errors.append('Choose a buy or sell target.')
+    if errors:
+        return _render_wishlist(request, target_errors=errors, target_form=form)
 
-        company = share_models.ListedCompanies.objects.filter(name__iexact=company_name).first() if company_name else None
+    if user_models.Targets.objects.filter(user_id=request.user, company_id=company, target_type=target_type, is_deleted=False).exists():
+        return _render_wishlist(request, target_errors=[f'A {target_type} target for {company.name} already exists.'], target_form=form)
 
-        if company is None:
-            errors.append('Choose a company from the current list.')
-
-        if not errors:
-            if user_models.Targets.objects.filter(user_id=request.user, company_id=company, target_type=target_type, is_deleted=False).exists():
-                errors.append(f'A {target_type} target for {company.name} already exists.')
-
-            else:
-                user_models.Targets.objects.create(
-                    user_id=request.user, company_id=company,
-                    low_target=price_range[0], high_target=price_range[1],
-                    target_type=target_type
-                )
-
-                return _target_redirect('created')
-
-    return render(request, 'users/target.html', _target_page_context(request, errors))
+    user_models.Targets.objects.create(
+        user_id=request.user, company_id=company, target_type=target_type,
+        low_target=price_range[0], high_target=price_range[1],
+    )
+    return _target_redirect('created')
 
 
 @ratelimit(key='ip', rate='100/m', block=True)
@@ -421,7 +418,7 @@ def TargetDelete(request, company):
     '''
 
     if request.method != 'POST':
-        return redirect('target')
+        return _target_redirect()
 
     target_id = (request.POST.get('target_id') or '').strip()
 
@@ -430,9 +427,7 @@ def TargetDelete(request, company):
     ).first() if target_id else None
 
     if target is None:
-        return render(request, 'users/target.html', _target_page_context(
-            request, ['This target could not be found. Please refresh and try again.']
-        ))
+        return _render_wishlist(request, target_errors=['This target could not be found. Please refresh and try again.'])
 
     target.is_deleted = True
     target.save(update_fields=['is_deleted'])
@@ -448,7 +443,7 @@ def TargetEdit(request):
     '''
 
     if request.method != 'POST':
-        return redirect('target')
+        return _target_redirect()
 
     target_id = (request.POST.get('target_id') or '').strip()
     company_abbr = (request.POST.get('company_abbr') or '').strip()
@@ -458,14 +453,12 @@ def TargetEdit(request):
     ).select_related('company_id').first() if target_id else None
 
     if target is None or (company_abbr and company_abbr.casefold() != target.company_id.abbreviation.casefold()):
-        return render(request, 'users/target.html', _target_page_context(
-            request, ['This target could not be found. Please refresh and try again.']
-        ))
+        return _render_wishlist(request, target_errors=['This target could not be found. Please refresh and try again.'])
 
     price_range, range_error = _target_range(request.POST.get('edit_low_target'), request.POST.get('edit_high_target'))
 
     if range_error:
-        return render(request, 'users/target.html', _target_page_context(request, [range_error]))
+        return _render_wishlist(request, target_errors=[range_error])
 
     target.low_target, target.high_target = price_range
     target.save(update_fields=['low_target', 'high_target'])

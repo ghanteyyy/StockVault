@@ -10,7 +10,8 @@ def get_market_data(company_symbol):
 
     url = f'https://merolagani.com/CompanyDetail.aspx?symbol={company_symbol}'
 
-    page = requests.get(url)  # Getting information of the given company
+    page = requests.get(url, timeout=(2, 2))
+    page.raise_for_status()
     soup = BeautifulSoup(page.content, "html.parser")
 
     company_name = soup.find_all(id="ctl00_ContentPlaceHolder1_CompanyDetail1_companyName")[0].text  # Extracting company name

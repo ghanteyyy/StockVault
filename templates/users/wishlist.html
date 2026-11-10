@@ -5,7 +5,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/users/wishlist.css' %}?v=contrast-1">
+    <link rel="stylesheet" href="{% static 'css/users/wishlist.css' %}?v=targets-1">
+    <link rel="stylesheet" href="{% static 'css/users/target.css' %}?v=wishlist-1">
 {% endblock %}
 
 {% block content %}
@@ -16,9 +17,13 @@
                     <span aria-hidden="true"></span> StockVault / Wishlist
                 </p>
                 <h1>
-                    Good ideas, <span>kept close.</span>
+                    Your <span>wishlist.</span>
                 </h1>
-                <p class="wishlist-subtitle">A place for the companies you’d like to come back to.</p>
+                <p class="wishlist-subtitle">Save companies and keep track of your buy and sell price targets.</p>
+                <nav class="wishlist-section-links" aria-label="Wishlist sections">
+                    <a class="wishlist-section-link" href="#saved-companies">Saved companies</a>
+                    <a class="wishlist-section-link" href="#price-targets">Price targets</a>
+                </nav>
             </div>
             <a class="wishlist-portfolio-link" href="{% url 'portfolio' %}">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -65,7 +70,7 @@
                             <circle cx="10.5" cy="10.5" r="6.5" />
                             <path d="m16 16 4.5 4.5" />
                         </svg>
-                        <input type="text" id="stock-input" name="company" placeholder="Search company name or symbol" value="{{ request.POST.company }}" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggestions" aria-describedby="wishlist-availability-text wishlist-form-error" autocomplete="off" {% if not available_company_count %}disabled{% endif %} required>
+                        <input type="text" id="stock-input" name="company" placeholder="Search company name or symbol" value="{{ wishlist_form }}" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggestions" aria-describedby="wishlist-availability-text wishlist-form-error" autocomplete="off" {% if not available_company_count %}disabled{% endif %} required>
                         <div id="suggestions" class="wishlist-suggestions" role="listbox" aria-label="Company suggestions" hidden></div>
                     </div>
                     <button type="submit" id="add-btn" class="wishlist-add-button" {% if not available_company_count %}disabled{% endif %}>
@@ -88,7 +93,7 @@
             </form>
         </section>
 
-        <section class="wishlist-collection" aria-labelledby="wishlist-collection-title">
+        <section class="wishlist-collection" id="saved-companies" aria-labelledby="wishlist-collection-title">
             <div class="wishlist-collection-heading">
                 <div>
                     <h2 id="wishlist-collection-title">
@@ -137,11 +142,14 @@
                         <h3>{{ company.company_name }}</h3>
                         <div class="wishlist-card-footer">
                             <span class="wishlist-company-sector"><span aria-hidden="true"></span>{{ company.sector|default:'Uncategorized' }}</span>
-                            <button type="button" class="wishlist-remove" data-wishlist-id="{{ company.id }}" data-company-name="{{ company.company_name }}" data-abbreviation="{{ company.abbreviation }}" aria-label="Remove {{ company.company_name }} from wishlist" title="Remove saved company">
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" />
-                                </svg>
-                            </button>
+                            <div class="wishlist-card-actions">
+                                <a class="wishlist-set-target" href="#new-target" data-target-company="{{ company.company_name }}" aria-label="Set a price target for {{ company.company_name }}">Set target</a>
+                                <button type="button" class="wishlist-remove" data-wishlist-id="{{ company.id }}" data-company-name="{{ company.company_name }}" data-abbreviation="{{ company.abbreviation }}" aria-label="Remove {{ company.company_name }} from wishlist" title="Remove saved company">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </article>
                 {% endfor %}
@@ -218,9 +226,12 @@
             </form>
         </dialog>
         {{ wishlist_companies|json_script:'wishlist-companies' }}
+
+        {% include 'users/_wishlist_targets.html' %}
     </div>
 {% endblock %}
 
 {% block js %}
     <script src="{% static 'js/users/wishlist.js' %}?v=2" defer></script>
+    <script src="{% static 'js/users/target.js' %}?v=wishlist-1" defer></script>
 {% endblock %}
