@@ -94,6 +94,10 @@ body.sv-home-page {
     scroll-margin-top: 98px;
 }
 
+.sv-home-page .home-how {
+    border-top: 1px solid #b2bac8;
+}
+
 .sv-home-page .home-eyebrow {
     margin-bottom: 17px;
     color: #5b3e9e;
