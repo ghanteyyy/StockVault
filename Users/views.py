@@ -54,7 +54,7 @@ def LoginPage(request):
     if not next_url or not url_has_allowed_host_and_scheme(
         next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
     ):
-        next_url = reverse('portfolio')
+        next_url = reverse('dashboard')
 
     errors = []
     email = ''
