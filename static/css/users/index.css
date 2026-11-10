@@ -168,7 +168,6 @@ body.sv-home-page {
     position: relative;
     overflow: hidden;
     padding-top: 76px;
-    border-radius: 0 0 38px 38px;
     background: radial-gradient(ellipse at 75% 10%, #68518b2e, transparent 53%), radial-gradient(ellipse at 0 100%, #47847914, transparent 50%), linear-gradient(120deg, #1c2337, #28243f);
     color: #f3efff;
 }
