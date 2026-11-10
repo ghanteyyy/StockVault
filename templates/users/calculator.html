@@ -73,6 +73,27 @@
                             <span class="field-unit" aria-hidden="true">shares</span>
                         </div>
                     </div>
+                    <div class="trade-field bonus-field" id="bonus-quantity-wrapper" hidden>
+                        <label for="bonus-quantity">Bonus shares included (optional)</label>
+                        <div class="trade-field-control">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="4" y="4" width="16" height="16" rx="4" />
+                                <path d="M8 12h8m-4-4v8" />
+                            </svg>
+                            <input type="text" inputmode="numeric" id="bonus-quantity" name="bonus_quantity" placeholder="0" autocomplete="off" aria-describedby="bonus-quantity-help calculator-error" disabled>
+                            <span class="field-unit" aria-hidden="true">shares</span>
+                        </div>
+                        <p class="trade-field-help" id="bonus-quantity-help">Count only the bonus shares included in this sale.</p>
+                    </div>
+                    <div class="trade-field bonus-field" id="bonus-tax-basis-wrapper" hidden>
+                        <label for="bonus-tax-basis">Bonus share value for tax</label>
+                        <div class="trade-field-control">
+                            <span class="field-prefix" aria-hidden="true">Rs.</span>
+                            <input type="text" inputmode="decimal" id="bonus-tax-basis" name="bonus_tax_basis" autocomplete="off" aria-describedby="bonus-tax-basis-help calculator-error" disabled>
+                            <span class="field-unit" aria-hidden="true">/ share</span>
+                        </div>
+                        <p class="trade-field-help" id="bonus-tax-basis-help">Use the purchase price shown for the bonus shares in MeroShare. This value is used only for the tax estimate.</p>
+                    </div>
                     <div class="trade-field">
                         <label for="purchase-price" id="purchase-price-label">Purchase price</label>
                         <div class="trade-field-control">
@@ -96,13 +117,14 @@
                                 <path d="M5 3h14v18l-3-2-4 2-4-2-3 2V3Z" />
                                 <path d="m9 15 6-6M9 9h.01M15 15h.01" />
                             </svg>
-                            <select id="CGT" name="cgt" aria-describedby="calculator-error">
+                            <select id="CGT" name="cgt" aria-describedby="calculator-tax-help calculator-error">
                                 <option value="" selected disabled>Select holding period or investor type</option>
                                 <option value="365 days or less (5%)">Up to 365 days (5%)</option>
                                 <option value="365 days or more (3.75%)">Over 365 days (3.75%)</option>
                                 <option value="Institutional (10%)">Institutional (10%)</option>
                             </select>
                         </div>
+                        <p class="trade-field-help" id="calculator-tax-help">The selected category applies to all shares in this estimate.</p>
                     </div>
                 </div>
 

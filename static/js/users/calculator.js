@@ -8,6 +8,9 @@
     const output = calculator.querySelector('#output');
     const transactionType = calculator.querySelector('#transaction-type');
     const quantityField = calculator.querySelector('#share-quantity');
+    const bonusField = calculator.querySelector('#bonus-quantity');
+    const bonusBasisField = calculator.querySelector('#bonus-tax-basis');
+    const purchaseSource = form.querySelector('.purchase-source');
     const purchaseField = calculator.querySelector('#purchase-price');
     const sellingField = calculator.querySelector('#selling-price');
     const taxField = calculator.querySelector('#CGT');
@@ -80,7 +83,7 @@
 
     function calculatePurchase(quantity, priceCents, purchaseType) {
         const gross = quantity * priceCents;
-        const fees = purchaseType === 'secondary' ?
+        const fees = quantity > 0n && purchaseType === 'secondary' ?
             tradeCharges(gross) : {
                 rate: 0,
                 brokerage: 0n,
@@ -94,18 +97,20 @@
         };
     }
 
-    function calculateSale(quantity, purchasePriceCents, sellingPriceCents, purchaseType, taxRate) {
-        const purchase = calculatePurchase(quantity, purchasePriceCents, purchaseType);
-        const gross = quantity * sellingPriceCents;
+    function calculateSale(trade) {
+        const purchase = calculatePurchase(trade.purchasedQuantity, trade.purchasePrice, trade.purchaseType);
+        const gross = trade.quantity * trade.sellingPrice;
         const fees = tradeCharges(gross);
         const beforeTax = gross - fees.brokerage - fees.sebon - fees.dp;
-        const gain = beforeTax - purchase.total;
-        const tax = applyRate(gain > 0n ? gain : 0n, taxRate);
+        const bonusTaxCost = trade.bonusQuantity * trade.bonusTaxBasis;
+        const gain = beforeTax - purchase.total - bonusTaxCost;
+        const tax = applyRate(gain > 0n ? gain : 0n, trade.taxRate);
         const proceeds = beforeTax - tax;
         return {
             purchase,
             gross,
             fees,
+            bonusTaxCost,
             tax,
             proceeds,
             profit: proceeds - purchase.total
@@ -133,24 +138,55 @@
         estimateState.classList.toggle('is-stale', hasCalculated);
     }
 
+    function parseShareCount(value) {
+        const text = value.trim();
+        const count = Number(text);
+        if(!/^\d+$/.test(text) || !Number.isSafeInteger(count)){
+            return null;
+        }
+        return BigInt(count);
+    }
+
+    function syncPurchaseFields() {
+        const selling = transactionType.value === 'sell';
+        const bonusQuantity = parseShareCount(bonusField.value);
+        const includesBonus = selling && bonusQuantity !== null && bonusQuantity > 0n;
+        const allBonus = includesBonus && bonusQuantity === parseShareCount(quantityField.value);
+
+        calculator.querySelector('#bonus-tax-basis-wrapper').hidden = !includesBonus;
+        bonusBasisField.disabled = !includesBonus;
+        bonusBasisField.required = includesBonus;
+        purchaseSource.hidden = allBonus;
+        purchaseSource.disabled = allBonus;
+        purchaseField.closest('.trade-field').hidden = allBonus;
+        purchaseField.disabled = allBonus;
+        purchaseField.required = !allBonus;
+        const priceLabel = selling ? 'Original purchase price' : 'Purchase price';
+        calculator.querySelector('#purchase-price-label').textContent = includesBonus ?
+            'Original price per purchased share' : priceLabel;
+    }
+
     function syncMode() {
         const selected = form.querySelector('input[name="transaction-mode"]:checked');
         transactionType.value = selected?.value || 'buy';
         const selling = transactionType.value === 'sell';
+        quantityField.labels[0].textContent = selling ? 'Total shares to sell' : 'Number of shares';
+        calculator.querySelector('#bonus-quantity-wrapper').hidden = !selling;
+        bonusField.disabled = !selling;
         calculator.querySelector('#selling_price_wrapper').hidden = !selling;
         calculator.querySelector('.CGT').hidden = !selling;
         sellingField.required = selling;
         taxField.required = selling;
-        calculator.querySelector('#purchase-price-label').textContent = selling ?
-            'Original purchase price' : 'Purchase price';
+        syncPurchaseFields();
         resultMode.textContent = selling ? 'Sell estimate' : 'Buy estimate';
     }
 
-    function readPrice(field, label) {
+    function readPrice(field, label, { allowZero = false } = {}) {
         const value = field.value.trim();
         if(!/^(?:\d+(?:\.\d{1,2})?|\.\d{1,2})$/.test(value) ||
-            !Number.isFinite(Number(value)) || Number(value) <= 0){
-            showError(field, `Enter a positive ${label} with up to two decimal places.`);
+            !Number.isFinite(Number(value)) || (!allowZero && Number(value) <= 0)){
+            const minimum = allowZero ? 'non-negative' : 'positive';
+            showError(field, `Enter a ${minimum} ${label} with up to two decimal places.`);
             return null;
         }
         const cents = priceToCents(value);
@@ -162,28 +198,45 @@
     }
 
     function readTrade() {
-        const quantity = quantityField.value.trim();
-        if(!/^\d+$/.test(quantity) || !Number.isSafeInteger(Number(quantity)) || Number(quantity) <= 0){
+        const quantity = parseShareCount(quantityField.value);
+        if(quantity === null || quantity === 0n){
             showError(quantityField, 'Enter a positive whole number of shares.');
             return null;
         }
-        const quantityValue = BigInt(quantity);
-        const purchaseType = form.querySelector('input[name="buy-type"]:checked');
-        if(!purchaseType || !['ipo', 'secondary'].includes(purchaseType.value)){
-            showError(form.querySelector('input[name="buy-type"]'), 'Choose a purchase type.');
-            return null;
-        }
-        const purchasePrice = readPrice(purchaseField, 'purchase price');
-        if(purchasePrice === null){
-            return null;
-        }
         const selling = transactionType.value === 'sell';
+        const bonusQuantity = selling && bonusField.value.trim() ? parseShareCount(bonusField.value) : 0n;
+        if(bonusQuantity === null || bonusQuantity > quantity){
+            showError(bonusField, 'Enter a whole number from 0 to the total shares to sell.');
+            return null;
+        }
+
+        const purchasedQuantity = quantity - bonusQuantity;
+        let purchaseType = null;
+        let purchasePrice = 0n;
+        if(purchasedQuantity > 0n){
+            const selectedPurchaseType = form.querySelector('input[name="buy-type"]:checked');
+            if(!selectedPurchaseType || !['ipo', 'secondary'].includes(selectedPurchaseType.value)){
+                showError(form.querySelector('input[name="buy-type"]'), 'Choose a purchase type.');
+                return null;
+            }
+            purchaseType = selectedPurchaseType.value;
+            purchasePrice = readPrice(purchaseField, 'purchase price');
+            if(purchasePrice === null){
+                return null;
+            }
+        }
+
+        const bonusTaxBasis = bonusQuantity > 0n ?
+            readPrice(bonusBasisField, 'bonus share tax cost per share', { allowZero: true }) : 0n;
+        if(bonusTaxBasis === null){
+            return null;
+        }
         const sellingPrice = selling ? readPrice(sellingField, 'selling price') : null;
         if(selling && sellingPrice === null){
             return null;
         }
-        if(quantityValue * purchasePrice > maxAmountCents ||
-            (selling && quantityValue * sellingPrice > maxAmountCents)){
+        const combinedCost = purchasedQuantity * purchasePrice + bonusQuantity * bonusTaxBasis;
+        if(combinedCost > maxAmountCents || (selling && quantity * sellingPrice > maxAmountCents)){
             showError(quantityField, 'This trade is too large. Please reduce the quantity or price.');
             return null;
         }
@@ -192,10 +245,13 @@
             return null;
         }
         return {
-            quantity: quantityValue,
+            quantity,
+            purchasedQuantity,
+            bonusQuantity,
+            bonusTaxBasis,
             purchasePrice,
             sellingPrice,
-            purchaseType: purchaseType.value,
+            purchaseType,
             taxRate: selling ? charges.capitalGainsTax[taxField.value] : null,
         };
     }
@@ -244,12 +300,19 @@
         addTitle('Sale breakdown');
         addRow('Sale value', result.gross);
         addFeeRows(result.fees);
+        if(trade.bonusQuantity > 0n){
+            addRow('Bonus share tax basis', result.bonusTaxCost);
+        }
         addRow(`Capital gains tax (${rateLabel(trade.taxRate)})`, result.tax);
         addRow('Net sale proceeds', result.proceeds, 'answer-div');
         addRow('Estimated profit / loss', result.profit,
             `profit-row ${result.profit < 0n ? 'is-negative' : 'is-positive'}`);
 
-        if(trade.purchaseType === 'secondary'){
+        if(trade.purchasedQuantity === 0n){
+            addRow('Total purchase cost', result.purchase.total);
+        }
+
+        else if(trade.purchaseType === 'secondary'){
             const details = document.createElement('details');
             details.className = 'purchase-breakdown';
             const summary = document.createElement('summary');
@@ -275,10 +338,10 @@
         }
         const selling = transactionType.value === 'sell';
         const result = selling ?
-            calculateSale(trade.quantity, trade.purchasePrice, trade.sellingPrice, trade.purchaseType, trade.taxRate) :
+            calculateSale(trade) :
             calculatePurchase(trade.quantity, trade.purchasePrice, trade.purchaseType);
-        const purchaseTotal = selling ? result.purchase.total : result.total;
-        if(purchaseTotal > maxAmountCents){
+        const combinedCost = selling ? result.purchase.total + result.bonusTaxCost : result.total;
+        if(combinedCost > maxAmountCents){
             showError(quantityField, 'This trade is too large after charges. Please reduce the quantity or price.');
             return;
         }
@@ -294,6 +357,9 @@
         estimateState.classList.add('is-ready');
         estimateState.classList.remove('is-stale');
         resultContext.textContent = `${wholeNumber.format(trade.quantity)} ${trade.quantity === 1n ? 'share' : 'shares'} × Rs. ${formatMoney(selling ? trade.sellingPrice : trade.purchasePrice)}`;
+        if(trade.bonusQuantity > 0n){
+            resultContext.textContent += ` (${wholeNumber.format(trade.purchasedQuantity)} purchased, ${wholeNumber.format(trade.bonusQuantity)} bonus)`;
+        }
 
         if(typeof matchMedia === 'function' && matchMedia('(max-width: 1180px)').matches){
             const estimateCard = calculator.querySelector('.trade-estimate-card');
@@ -306,8 +372,11 @@
         }
     });
 
-    form.addEventListener('input', () => {
+    form.addEventListener('input', event => {
         clearError();
+        if(event.target === quantityField || event.target === bonusField){
+            syncPurchaseFields();
+        }
         renderEmpty();
     });
     form.addEventListener('change', () => {

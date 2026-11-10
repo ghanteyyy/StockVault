@@ -319,7 +319,9 @@
 }
 
 .sv-calculator .quantity-field,
+.sv-calculator .bonus-field,
 .sv-calculator .CGT,
+.sv-calculator .trade-field[hidden] + #selling_price_wrapper,
 .sv-calculator .trade-fields:has(#selling_price_wrapper[hidden])>.trade-field {
     grid-column: 1 / -1;
 }
@@ -330,6 +332,13 @@
     color: #475569;
     font-size: 12px;
     font-weight: 700;
+}
+
+.sv-calculator .trade-field-help {
+    margin-top: 6px;
+    color: #475569;
+    font-size: 11px;
+    line-height: 1.5;
 }
 
 .sv-calculator .trade-field-control {
