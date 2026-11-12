@@ -15,6 +15,7 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST, require_safe
 import Users.models as user_models
 import Shares.models as share_models
@@ -28,11 +29,9 @@ from .target_quotes import market_prices as _target_market_prices
 
 @ratelimit(key='ip', rate='100/m', block=True)
 def HomePage(request):
-    '''
-    Display the public homepage or open its calculator from the workspace.
-    '''
-
-    if request.user.is_authenticated and request.GET.get('tool') != 'trade-calculator':
+    if request.user.is_authenticated:
+        if request.GET.get('tool') == 'trade-calculator':
+            return redirect('trade-calculator')
         return redirect('dashboard')
 
     context = {
@@ -640,8 +639,11 @@ def ChangePassword(request):
     return _settings_payload(request.user, field_errors, 'Your password has been updated.')
 
 
+@never_cache
+@require_safe
 def TradeCalculator(request):
-    homepage = reverse('index')
-    if request.user.is_authenticated:
-        homepage += '?tool=trade-calculator'
-    return redirect(f'{homepage}#trade-calculator')
+    if not request.user.is_authenticated:
+        return redirect(f"{reverse('index')}#trade-calculator")
+    return render(request, 'users/trade_calculator.html', {
+        'page_title': 'Trade Calculator | StockVault',
+    })

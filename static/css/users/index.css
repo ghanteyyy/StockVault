@@ -25,13 +25,13 @@ body.sv-home-page {
     font-family: inherit;
 }
 
-.sv-home-page:not(.has-user-sidebar)>.container {
+.sv-home-page>.container {
     display: block;
     width: 100%;
     height: auto;
 }
 
-.sv-home-page:not(.has-user-sidebar) #workspace-content {
+.sv-home-page #workspace-content {
     width: 100%;
     height: auto;
     min-width: 0;
@@ -784,13 +784,8 @@ body.sv-home-page {
     text-decoration: underline;
 }
 
-.sv-home-page:not(.has-user-sidebar) .home-calculator .trade-estimate-card {
+.sv-home-page .home-calculator .trade-estimate-card {
     scroll-margin-top: 98px;
-}
-
-.sv-home-page.has-user-sidebar .home-calculator {
-    padding-block: 24px 48px;
-    scroll-margin-top: 0;
 }
 
 .sv-home-page .home-tour {

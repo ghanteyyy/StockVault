@@ -1,7 +1,7 @@
 {% extends 'users/root.html' %}
 {% load static %}
 
-{% block body_class %}sv-home-page{% if request.user.is_authenticated %} has-user-sidebar{% endif %}{% endblock %}
+{% block public_body_class %}sv-home-page{% endblock %}
 {% block global_assets %}{% endblock %}
 {% block meta %}
     <meta name="description" content="Track your holdings, manage buy and sell price targets, and estimate trade costs in StockVault, a personal investment workspace for Nepal's stock market.">
@@ -29,12 +29,7 @@
                         Bring your holdings, price targets, and next ideas into one thoughtful workspace. Keep track of what you own and make room for what’s next.
                     </p>
                     <div class="home-hero-actions">
-                        {% if request.user.is_authenticated %}
-                            <a class="home-button home-button--hero" href="{% url 'dashboard' %}">Go to your dashboard <span aria-hidden="true">↗</span></a>
-
-                        {% else %}
-                            <a class="home-button home-button--hero" href="{% url 'signup' %}">Create your account <span aria-hidden="true">↗</span></a>
-                        {% endif %}
+                        <a class="home-button home-button--hero" href="{% url 'signup' %}">Create your account <span aria-hidden="true">↗</span></a>
                         <a class="home-hero-secondary" href="#trade-calculator">Try the calculator <span aria-hidden="true">↓</span></a>
                     </div>
                     <div class="home-hero-notes">
@@ -344,16 +339,9 @@
                 <ol class="home-steps">
                     <li>
                         <span class="home-step-number">01</span>
-                        {% if request.user.is_authenticated %}
-                            <h3>Open your workspace</h3>
-                            <p>Go to your dashboard to review your investments and recent activity.</p>
-                            <a href="{% url 'dashboard' %}">Open your dashboard <span aria-hidden="true">↗</span></a>
-
-                        {% else %}
-                            <h3>Create your workspace</h3>
-                            <p>Register an account and set up a personal space for your investment details.</p>
-                            <a href="{% url 'signup' %}">Create an account <span aria-hidden="true">↗</span></a>
-                        {% endif %}
+                        <h3>Create your workspace</h3>
+                        <p>Register an account and set up a personal space for your investment details.</p>
+                        <a href="{% url 'signup' %}">Create an account <span aria-hidden="true">↗</span></a>
                     </li>
                     <li>
                         <span class="home-step-number">02</span>
@@ -487,13 +475,8 @@
                 </h2>
                 <p>Start with your holdings. Bring your ideas and plans together as you go.</p>
                 <div>
-                    {% if request.user.is_authenticated %}
-                        <a class="home-button home-button--hero" href="{% url 'dashboard' %}">Go to your dashboard <span aria-hidden="true">↗</span></a>
-
-                    {% else %}
-                        <a class="home-button home-button--hero" href="{% url 'signup' %}">Create your account <span aria-hidden="true">↗</span></a>
-                        <a class="home-final-signin" href="{% url 'login' %}">Already have an account? Sign in <span aria-hidden="true">↗</span></a>
-                    {% endif %}
+                    <a class="home-button home-button--hero" href="{% url 'signup' %}">Create your account <span aria-hidden="true">↗</span></a>
+                    <a class="home-final-signin" href="{% url 'login' %}">Already have an account? Sign in <span aria-hidden="true">↗</span></a>
                 </div>
             </div>
         </section>

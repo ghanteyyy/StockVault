@@ -84,7 +84,7 @@
             <p class="sv-nav-group-label" id="tools-nav-label">Tools</p>
             <ul aria-labelledby="tools-nav-label">
                 <li>
-                    <a class="sv-nav-link {% if request.resolver_match.url_name == 'index' and request.GET.tool == 'trade-calculator' %}is-active{% endif %}" href="{% url 'index' %}?tool=trade-calculator#trade-calculator" {% if request.resolver_match.url_name == 'index' and request.GET.tool == 'trade-calculator' %}aria-current="page"{% endif %}><span class="sv-nav-icon" aria-hidden="true">
+                    <a class="sv-nav-link {% if request.resolver_match.url_name == 'trade-calculator' %}is-active{% endif %}" href="{% url 'trade-calculator' %}" {% if request.resolver_match.url_name == 'trade-calculator' %}aria-current="page"{% endif %}><span class="sv-nav-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24">
                                 <rect x="5" y="2" width="14" height="20" rx="3" />
                                 <path d="M8 6h8M8 10h1M15 10h1M8 14h1M15 14h1M8 18h1M15 18h1" />

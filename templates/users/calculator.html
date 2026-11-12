@@ -4,7 +4,10 @@
             <span aria-hidden="true"></span> StockVault / Trading tools
         </p>
         <h2 id="trade-calculator-title">Trade calculator</h2>
-        <p class="calculator-subtitle">Estimate the total cost of buying shares or how much you’ll receive when selling. No account required.</p>
+        <p class="calculator-subtitle">
+            Estimate the total cost of buying shares or how much you’ll receive when selling.
+            {% if not request.user.is_authenticated %}No account required.{% endif %}
+        </p>
     </header>
 
     <div class="calculator-workspace">

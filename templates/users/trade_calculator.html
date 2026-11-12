@@ -1,0 +1,18 @@
+{% extends 'users/root.html' %}
+{% load static %}
+
+{% block global_assets %}{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/users/calculator.css' %}?v=bonus-shares-1">
+{% endblock %}
+
+{% block content %}
+    <section id="trade-calculator" aria-labelledby="trade-calculator-title">
+        {% include 'users/calculator.html' %}
+    </section>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/users/calculator.js' %}?v=bonus-shares-1" defer></script>
+{% endblock %}
