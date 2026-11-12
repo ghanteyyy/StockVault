@@ -21,6 +21,7 @@ import Shares.models as share_models
 from django_ratelimit.decorators import ratelimit
 import Shares.serializers as share_serializers
 from utils import captcha as Captcha
+from utils.utils import format_npr_amount
 from .portfolio_views import DashboardPage, DeleteProtfolio, Portfolio
 from .target_quotes import market_prices as _target_market_prices
 
@@ -246,6 +247,7 @@ def _target_range(low_value, high_value):
 
 def _target_context(request):
     targets = []
+    alerts = []
     holdings = list(user_models.Targets.objects.filter(
         user_id=request.user, is_deleted=False,
     ).select_related('company_id').order_by('-created_at', 'id'))
@@ -256,6 +258,17 @@ def _target_context(request):
         market_price = market_prices.get(company.abbreviation)
         price_range, _ = _target_range(holding.low_target, holding.high_target)
         in_range = market_price is not None and price_range is not None and price_range[0] <= market_price <= price_range[1]
+        if in_range:
+            low, high = price_range
+            alerts.append(user_models.Notification(
+                user=request.user,
+                event_key=f'target:{holding.pk}:{low}:{high}',
+                title=f'{holding.get_target_type_display()} target in range',
+                detail=(
+                    f'{company.name} ({company.abbreviation}) was quoted at Rs. {format_npr_amount(market_price)}. '
+                    f'Your range is Rs. {format_npr_amount(low)} to Rs. {format_npr_amount(high)}.'
+                ),
+            ))
 
         targets.append({
             'id': holding.id,
@@ -270,6 +283,8 @@ def _target_context(request):
             'show_buy_sell': in_range,
             'market_error': 'Market price is currently unavailable.' if market_price is None else '',
         })
+
+    user_models.Notification.objects.bulk_create(alerts, ignore_conflicts=True)
 
     notices = {
         'created': 'Your price target has been added.',

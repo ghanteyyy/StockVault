@@ -13,7 +13,9 @@ from django.db import transaction as db_transaction
 from django.utils import timezone
 
 from Shares.models import ListedCompanies, Portfolios, Transactions
+from Users.models import Notification
 from utils import calculator
+from utils.utils import format_npr_amount, nepali_comma
 
 
 D = Decimal
@@ -302,6 +304,19 @@ def record_transaction(*, user, company, transaction_type, quantity, unit_price=
     entry = Transactions.objects.create(user_id=user, company_id=company, idempotency_key=key, is_legacy=False, fee_schedule=_schedule(), **values)
     _replay(holding)
     entry.refresh_from_db()
+    if not user.is_staff:
+        title = {
+            'buy': 'Purchase recorded',
+            'sell': 'Sale recorded',
+            'bonus': 'Bonus shares recorded',
+        }[entry.transaction_type]
+        shares = 'share' if entry.number_of_shares == 1 else 'shares'
+        detail = f'{nepali_comma(entry.number_of_shares)} {shares} of {company.name} ({company.abbreviation}).'
+        if entry.transaction_type == 'buy':
+            detail += f' Total cost Rs. {format_npr_amount(entry.net_amount)}.'
+        elif entry.transaction_type == 'sell':
+            detail += f' Net proceeds Rs. {format_npr_amount(entry.net_amount)}.'
+        Notification.objects.create(user=user, event_key=f'trade:{entry.pk}', title=title, detail=detail)
     return entry
 
 

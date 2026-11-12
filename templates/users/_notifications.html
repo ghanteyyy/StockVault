@@ -1,0 +1,21 @@
+<div class="sv-notifications" data-feed-url="{% url 'notification-feed' %}" data-read-url="{% url 'notification-read' %}">
+    {% csrf_token %}
+    <button class="notification-bell" type="button" aria-label="Notifications" aria-expanded="false" aria-controls="notification-panel">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18 8a6 6 0 0 0-12 0c0 6-2 7-2 9h16c0-2-2-3-2-9ZM10 21h4" />
+        </svg>
+        <span class="notification-badge" aria-hidden="true" hidden></span>
+    </button>
+    <section class="notification-panel" id="notification-panel" aria-labelledby="notification-title" hidden>
+        <header class="notification-panel-header">
+            <h2 id="notification-title">Notifications</h2>
+            <button class="notification-close" type="button" aria-label="Close notifications">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m6 6 12 12M18 6 6 18" />
+                </svg>
+            </button>
+        </header>
+        <p class="notification-status" role="status" hidden></p>
+        <ul class="notification-list" role="list" aria-label="Recent notifications" tabindex="0" hidden></ul>
+    </section>
+</div>

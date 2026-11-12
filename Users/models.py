@@ -107,6 +107,25 @@ class CustomUser(AbstractUser):
         return self.email
 
 
+class Notification(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='notifications', db_index=False)
+    event_key = models.CharField(max_length=512)
+    title = models.CharField(max_length=160)
+    detail = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-id']
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'event_key'], name='notification_user_event_unique'),
+        ]
+        indexes = [
+            models.Index(fields=['user', '-id'], name='notification_user_feed'),
+            models.Index(fields=['user', 'id'], condition=models.Q(read_at__isnull=True), name='notification_user_unread'),
+        ]
+
+
 class Targets(models.Model):
     class Meta:
         verbose_name = _("Targets")

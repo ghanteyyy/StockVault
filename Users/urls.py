@@ -3,6 +3,7 @@ from django.contrib.auth import views as auth_views
 from . import views
 from . import captcha
 from . import market_views
+from . import notification_views
 from . import trading_views
 
 urlpatterns = [
@@ -21,6 +22,8 @@ urlpatterns = [
     path('settings/', views.SettingsPage, name='settings'),
     path('dashboard/', views.DashboardPage, name='dashboard'),
     path('market-data/', market_views.MarketDataPage, name='market-data'),
+    path('notifications/', notification_views.notification_feed, name='notification-feed'),
+    path('notifications/read/', notification_views.mark_notifications_read, name='notification-read'),
     path('testonomials/', views.TestonomialsPage, name='testonomials'),
     path('portfolio/delete/', views.DeleteProtfolio, name='portfolio-delete'),
     path('verify-captcha/', captcha.VerifyCaptcha, name='verify-captcha'),

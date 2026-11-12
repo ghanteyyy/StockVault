@@ -16,6 +16,10 @@
             <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
             <link rel="stylesheet" href="{% static 'css/navs/sidebar.css' %}?v=contrast-1">
             <script src="{% static 'js/navs/sidebar.js' %}?v=2" defer></script>
+            {% if not request.user.is_staff %}
+                <link rel="stylesheet" href="{% static 'css/users/notifications.css' %}">
+                <script src="{% static 'js/users/notifications.js' %}" defer></script>
+            {% endif %}
 
         {% else %}
             <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,6 +57,9 @@
             {% endif %}
 
             <main class="main-content" id="workspace-content" tabindex="-1">
+                {% if request.user.is_authenticated and not request.user.is_staff %}
+                    {% include 'users/_notifications.html' %}
+                {% endif %}
                 {% block content %}{% endblock %}
             </main>
         </div>
