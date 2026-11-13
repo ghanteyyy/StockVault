@@ -32,10 +32,6 @@ body.sv-admin {
     text-decoration: none;
 }
 
-.sv-admin a:hover {
-    color: #5b3e9e;
-}
-
 .sv-admin button {
     cursor: pointer;
 }
