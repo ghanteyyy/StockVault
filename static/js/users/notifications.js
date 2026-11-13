@@ -1,27 +1,59 @@
 (() => {
-    const sidebar = document.querySelector('#workspace-sidebar');
-    const panel = sidebar?.querySelector('#notification-panel');
-    if(!panel){
+    const bell = document.querySelector('#workspace-sidebar .notification-bell');
+    if(!bell){
         return;
     }
 
-    const bell = sidebar.querySelector('.notification-bell');
     const badge = bell.querySelector('.notification-badge');
-    const closeButton = panel.querySelector('.notification-close');
-    const status = panel.querySelector('.notification-status');
-    const list = panel.querySelector('.notification-list');
-    const moreButton = panel.querySelector('.notification-more');
-    const moreStatus = panel.querySelector('.notification-more-status');
-    const csrf = panel.querySelector('input[name="csrfmiddlewaretoken"]').value;
-    const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
     let requestVersion = 0;
-    let nextBefore = null;
 
     function setCount(count) {
         badge.hidden = count === 0;
         badge.textContent = count > 99 ? '99+' : String(count);
         bell.setAttribute('aria-label', count ? `Notifications, ${count} unread` : 'Notifications');
     }
+
+    async function fetchJSON(url, options) {
+        const response = await fetch(url, options);
+        if(!response.ok){
+            throw new Error(`Notification request failed (${response.status})`);
+        }
+        return response.json();
+    }
+
+    async function refreshBadge() {
+        const version = ++requestVersion;
+        try{
+            const feed = await fetchJSON(bell.dataset.feedUrl);
+            if(version === requestVersion){
+                setCount(feed.unread_count);
+            }
+        }
+
+        catch(error){
+            // Keep the last known badge if the feed cannot be reached.
+        }
+    }
+
+    const panel = document.querySelector('#notification-panel');
+    if(!panel){
+        window.addEventListener('focus', refreshBadge);
+        window.addEventListener('pageshow', event => {
+            if(event.persisted){
+                refreshBadge();
+            }
+        });
+        refreshBadge();
+        return;
+    }
+
+    const status = panel.querySelector('.notification-status');
+    const list = panel.querySelector('.notification-list');
+    const moreButton = panel.querySelector('.notification-more');
+    const moreStatus = panel.querySelector('.notification-more-status');
+    const csrf = panel.querySelector('input[name="csrfmiddlewaretoken"]').value;
+    const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+    let nextBefore = null;
 
     function setStatus(message) {
         status.textContent = message;
@@ -31,7 +63,7 @@
     function notificationItem(notification) {
         const item = document.createElement('li');
         item.className = 'notification-item';
-        const title = document.createElement('h3');
+        const title = document.createElement('h2');
         title.textContent = notification.title;
         const detail = document.createElement('p');
         detail.textContent = notification.detail;
@@ -56,27 +88,11 @@
         return item;
     }
 
-    async function fetchJSON(url, options) {
-        const response = await fetch(url, options);
-        if(!response.ok){
-            throw new Error(`Notification request failed (${response.status})`);
-        }
-        return response.json();
-    }
-
-    async function refresh(opening = false) {
-        const version = ++requestVersion;
+    async function loadNotifications() {
         let loaded = false;
         try{
-            const feed = await fetchJSON(panel.dataset.feedUrl);
-            if(version !== requestVersion){
-                return;
-            }
+            const feed = await fetchJSON(bell.dataset.feedUrl);
             setCount(feed.unread_count);
-            if(!opening || panel.hidden){
-                return;
-            }
-
             list.replaceChildren(...feed.items.map(notificationItem));
             list.hidden = feed.items.length === 0;
             nextBefore = feed.next_before;
@@ -89,16 +105,12 @@
                     headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
                     body: JSON.stringify({ through_id: feed.items[0].id }),
                 });
-                if(version === requestVersion){
-                    setCount(result.unread_count);
-                }
+                setCount(result.unread_count);
             }
         }
 
         catch(error){
-            if(opening && !panel.hidden && version === requestVersion){
-                setStatus(loaded ? 'Could not update the unread count.' : 'Could not load notifications.');
-            }
+            setStatus(loaded ? 'Could not update the unread count.' : 'Could not load notifications. Refresh to try again.');
         }
     }
 
@@ -106,78 +118,33 @@
         if(!nextBefore || moreButton.getAttribute('aria-disabled') === 'true'){
             return;
         }
-        const version = requestVersion;
-        const url = new URL(panel.dataset.feedUrl, window.location.href);
+        const url = new URL(bell.dataset.feedUrl, window.location.href);
         url.searchParams.set('before', nextBefore);
         moreButton.setAttribute('aria-disabled', 'true');
         moreStatus.textContent = 'Loading older notifications…';
         moreStatus.hidden = false;
         try{
             const feed = await fetchJSON(url);
-            if(version !== requestVersion || panel.hidden){
-                return;
-            }
-            list.append(...feed.items.map(notificationItem));
+            const items = feed.items.map(notificationItem);
+            list.append(...items);
             nextBefore = feed.next_before;
-            if(!nextBefore && document.activeElement === moreButton){
-                list.focus({ preventScroll: true });
+            if(document.activeElement === moreButton){
+                const firstNewItem = items[0] || list;
+                firstNewItem.tabIndex = -1;
+                firstNewItem.focus();
             }
             moreButton.hidden = !nextBefore;
             moreStatus.hidden = true;
         }
 
         catch(error){
-            if(version === requestVersion && !panel.hidden){
-                moreStatus.textContent = 'Could not load older notifications. Try again.';
-            }
+            moreStatus.textContent = 'Could not load older notifications. Try again.';
         }
 
         finally{
-            if(version === requestVersion){
-                moreButton.removeAttribute('aria-disabled');
-            }
+            moreButton.removeAttribute('aria-disabled');
         }
     });
 
-    function closePanel(restoreFocus = false) {
-        if(panel.hidden){
-            return;
-        }
-        panel.hidden = true;
-        sidebar.classList.remove('notifications-open');
-        bell.setAttribute('aria-expanded', 'false');
-        if(restoreFocus){
-            bell.focus();
-        }
-    }
-
-    bell.addEventListener('click', () => {
-        panel.hidden = false;
-        sidebar.classList.add('notifications-open');
-        bell.setAttribute('aria-expanded', 'true');
-        list.hidden = true;
-        moreButton.hidden = true;
-        moreButton.removeAttribute('aria-disabled');
-        moreStatus.hidden = true;
-        nextBefore = null;
-        setStatus('Loading notifications…');
-        closeButton.focus();
-        refresh(true);
-    });
-    closeButton.addEventListener('click', () => closePanel(true));
-    sidebar.addEventListener('stockvault:sidebar-closed', () => closePanel());
-    sidebar.addEventListener('keydown', event => {
-        if(!panel.hidden && event.key === 'Escape'){
-            event.preventDefault();
-            event.stopPropagation();
-            closePanel(true);
-        }
-    });
-    window.addEventListener('focus', () => {
-        if(panel.hidden){
-            refresh();
-        }
-    });
-
-    refresh();
+    loadNotifications();
 })();

@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+from bs4 import BeautifulSoup
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
@@ -15,6 +16,7 @@ class NotificationTests(TestCase):
         users = get_user_model().objects
         cls.member = users.create_user(email='notifications@example.test', name='Member')
         cls.other = users.create_user(email='other-notifications@example.test', name='Other Member')
+        cls.staff = users.create_user(email='staff-notifications@example.test', name='Staff', is_staff=True)
         cls.company = ListedCompanies.objects.create(name='Notification Bank', abbreviation='NBNK')
 
     def setUp(self):
@@ -31,6 +33,30 @@ class NotificationTests(TestCase):
         return self.client.post(
             self.read_url, {'through_id': notification_id}, content_type='application/json',
         )
+
+    def test_notifications_page_uses_workspace_access_rules(self):
+        page_url = reverse('notifications')
+        self.assertRedirects(
+            self.client.get(page_url), f"{reverse('login')}?next={page_url}", fetch_redirect_response=False,
+        )
+        self.client.force_login(self.staff)
+        self.assertRedirects(self.client.get(page_url), reverse('admin-index'), fetch_redirect_response=False)
+
+    def test_notifications_page_keeps_sidebar_and_renders_history_in_main_content(self):
+        self.client.force_login(self.member)
+        page_url = reverse('notifications')
+        response = self.client.get(page_url)
+
+        self.assertEqual(response.status_code, 200)
+        document = BeautifulSoup(response.content, 'html.parser')
+        self.assertIsNotNone(document.select_one(
+            f'#workspace-sidebar a.notification-bell[href="{page_url}"][aria-current="page"]',
+        ))
+        self.assertIsNone(document.select_one('#workspace-sidebar #notification-panel'))
+        panel = document.select_one('main#workspace-content #notification-panel')
+        self.assertIsNotNone(panel)
+        self.assertEqual(panel.h1.get_text(strip=True), 'Notifications')
+        self.assertIsNotNone(panel.select_one('.notification-list'))
 
     def test_notification_endpoints_require_sign_in_and_read_requires_csrf(self):
         self.assertEqual(self.client.get(self.feed_url).status_code, 401)

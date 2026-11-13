@@ -33,7 +33,7 @@
             <ul aria-labelledby="workspace-nav-label">
                 {% if not request.user.is_staff %}
                     <li>
-                        <button class="sv-nav-link notification-bell" type="button" aria-expanded="false" aria-controls="notification-panel">
+                        <a class="sv-nav-link notification-bell" href="{% url 'notifications' %}" data-feed-url="{% url 'notification-feed' %}"{% if request.resolver_match.url_name == 'notifications' %} aria-current="page"{% endif %}>
                             <span class="sv-nav-icon" aria-hidden="true">
                                 <svg viewBox="0 0 24 24">
                                     <path d="M18 8a6 6 0 0 0-12 0c0 6-2 7-2 9h16c0-2-2-3-2-9ZM10 21h4" />
@@ -41,7 +41,7 @@
                             </span>
                             <span>Notifications</span>
                             <span class="notification-badge" aria-hidden="true" hidden></span>
-                        </button>
+                        </a>
                     </li>
                 {% endif %}
                 <li>
@@ -135,7 +135,4 @@
             </svg>
             <span>Sign out</span></a>
     </footer>
-    {% if not request.user.is_staff %}
-        {% include 'users/_notifications.html' %}
-    {% endif %}
 </aside>

@@ -11,7 +11,7 @@ class AdminRedirectMiddleware:
         self.frontend_views = {
             'login', 'signup', 'buy-sell', 'dashboard',
             'portfolio', 'settings', 'wishlist', 'profit-loss', 'timeline',
-            'trades', 'transactions', 'market-data', 'trade-calculator',
+            'trades', 'transactions', 'market-data', 'trade-calculator', 'notifications',
             'target', 'create-target', 'edit-target', 'delete-target',
         }
 

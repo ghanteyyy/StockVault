@@ -23,6 +23,7 @@ urlpatterns = [
     path('dashboard/', views.DashboardPage, name='dashboard'),
     path('market-data/', market_views.MarketDataPage, name='market-data'),
     path('notifications/', notification_views.notification_feed, name='notification-feed'),
+    path('notifications/history/', notification_views.notifications_page, name='notifications'),
     path('notifications/read/', notification_views.mark_notifications_read, name='notification-read'),
     path('testonomials/', views.TestonomialsPage, name='testonomials'),
     path('portfolio/delete/', views.DeleteProtfolio, name='portfolio-delete'),

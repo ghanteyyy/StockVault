@@ -130,10 +130,6 @@
                 sidebar.removeAttribute('aria-hidden');
             }
 
-            if(wasOpen && !open){
-                sidebar.dispatchEvent(new Event('stockvault:sidebar-closed'));
-            }
-
             if(open && !wasOpen){
                 scheduleDrawerFocus(version);
             }

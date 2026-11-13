@@ -1,0 +1,19 @@
+{% extends 'users/root.html' %}
+
+{% block global_assets %}{% endblock %}
+{% block public_footer %}{% endblock %}
+
+{% block content %}
+    <section class="sv-notifications" id="notification-panel" aria-labelledby="notification-title" data-read-url="{% url 'notification-read' %}">
+        {% csrf_token %}
+        <header class="notification-page-heading">
+            <h1 id="notification-title">Notifications</h1>
+        </header>
+        <div class="notification-history">
+            <p class="notification-status" role="status">Loading notifications…</p>
+            <ul class="notification-list" role="list" aria-label="Notifications" tabindex="-1" hidden></ul>
+            <p class="notification-more-status" role="status" hidden></p>
+            <button class="notification-more" type="button" hidden>Load older notifications</button>
+        </div>
+    </section>
+{% endblock %}

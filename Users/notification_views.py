@@ -1,6 +1,8 @@
 import json
 
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST, require_safe
@@ -10,6 +12,13 @@ from .models import Notification
 
 FEED_LIMIT = 20
 MAX_NOTIFICATION_ID = 2**63 - 1
+
+
+@never_cache
+@login_required(login_url='login')
+@require_safe
+def notifications_page(request):
+    return render(request, 'users/notifications.html', {'page_title': 'Notifications | StockVault'})
 
 
 def _access_error(request):
