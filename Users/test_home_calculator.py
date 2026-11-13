@@ -44,7 +44,7 @@ class HomepageCalculatorTests(TestCase):
         self.assertTemplateNotUsed(response, 'users/index.html')
         self.assertTemplateNotUsed(response, 'users/dashboard.html')
         self.assertContains(response, 'id="workspace-sidebar"')
-        self.assertContains(response, 'class="notification-bell"')
+        self.assertContains(response, 'aria-controls="notification-panel"', count=1)
         self.assertContains(response, f'href="{calculator}"')
         self.assertContains(response, 'id="trade-calculator"', count=1)
         self.assertContains(response, 'id="trade-form"', count=1)

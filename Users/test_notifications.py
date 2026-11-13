@@ -48,9 +48,9 @@ class NotificationTests(TestCase):
 
     def test_feed_is_private_and_lists_latest_twenty_with_full_unread_count(self):
         oldest = self.notification(self.member, 'trade:old')
+        self.notification(self.other, 'trade:private')
         entries = [self.notification(self.member, f'trade:{index}') for index in range(21)]
         newest = self.notification(self.member, 'trade:read', read=True)
-        self.notification(self.other, 'trade:private')
         self.client.force_login(self.member)
 
         response = self.client.get(self.feed_url)
@@ -67,8 +67,25 @@ class NotificationTests(TestCase):
         self.assertTrue(payload['items'][0]['created_at'])
         self.assertFalse(payload['items'][0]['unread'])
         self.assertTrue(payload['items'][1]['unread'])
+        self.assertEqual(payload['next_before'], entries[2].pk)
+
+        older = self.client.get(self.feed_url, {'before': payload['next_before']}).json()
+        self.assertEqual([item['id'] for item in older['items']], [entries[1].pk, entries[0].pk, oldest.pk])
+        self.assertEqual(older['unread_count'], 22)
+        self.assertIsNone(older['next_before'])
+
+        empty = self.client.get(self.feed_url, {'before': oldest.pk}).json()
+        self.assertEqual(empty, {'items': [], 'unread_count': 22, 'next_before': None})
         oldest.refresh_from_db()
         self.assertIsNone(oldest.read_at)
+
+    def test_feed_rejects_invalid_cursors(self):
+        self.client.force_login(self.member)
+        for cursor in ('', '0', '-1', '1.5', '123x', '９', str(2**63), '9' * 100):
+            with self.subTest(cursor=cursor):
+                response = self.client.get(self.feed_url, {'before': cursor})
+                self.assertEqual(response.status_code, 400)
+                self.assertIn('error', response.json())
 
     def test_read_through_marks_only_the_current_members_seen_updates(self):
         first = self.notification(self.member, 'trade:first')

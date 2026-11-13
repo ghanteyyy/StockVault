@@ -28,6 +28,17 @@ def notification_feed(request):
         return error
 
     notifications = Notification.objects.filter(user=request.user)
+    page = notifications
+    cursor = request.GET.get('before')
+    if cursor is not None:
+        if len(cursor) > 19 or not cursor.isascii() or not cursor.isdecimal():
+            return JsonResponse({'error': 'Choose a valid notification cursor.'}, status=400)
+        before = int(cursor)
+        if not 0 < before <= MAX_NOTIFICATION_ID:
+            return JsonResponse({'error': 'Choose a valid notification cursor.'}, status=400)
+        page = page.filter(pk__lt=before)
+
+    rows = list(page[:FEED_LIMIT + 1])
     items = [
         {
             'id': item.id,
@@ -36,11 +47,12 @@ def notification_feed(request):
             'created_at': item.created_at.isoformat(),
             'unread': item.read_at is None,
         }
-        for item in notifications[:FEED_LIMIT]
+        for item in rows[:FEED_LIMIT]
     ]
     return JsonResponse({
         'unread_count': notifications.filter(read_at__isnull=True).count(),
         'items': items,
+        'next_before': rows[FEED_LIMIT - 1].pk if len(rows) > FEED_LIMIT else None,
     })
 
 

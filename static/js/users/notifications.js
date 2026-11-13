@@ -1,18 +1,21 @@
 (() => {
-    const notifications = document.querySelector('.sv-notifications');
-    if(!notifications){
+    const sidebar = document.querySelector('#workspace-sidebar');
+    const panel = sidebar?.querySelector('#notification-panel');
+    if(!panel){
         return;
     }
 
-    const bell = notifications.querySelector('.notification-bell');
-    const badge = notifications.querySelector('.notification-badge');
-    const panel = notifications.querySelector('.notification-panel');
-    const closeButton = notifications.querySelector('.notification-close');
-    const status = notifications.querySelector('.notification-status');
-    const list = notifications.querySelector('.notification-list');
-    const csrf = notifications.querySelector('input[name="csrfmiddlewaretoken"]').value;
+    const bell = sidebar.querySelector('.notification-bell');
+    const badge = bell.querySelector('.notification-badge');
+    const closeButton = panel.querySelector('.notification-close');
+    const status = panel.querySelector('.notification-status');
+    const list = panel.querySelector('.notification-list');
+    const moreButton = panel.querySelector('.notification-more');
+    const moreStatus = panel.querySelector('.notification-more-status');
+    const csrf = panel.querySelector('input[name="csrfmiddlewaretoken"]').value;
     const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
     let requestVersion = 0;
+    let nextBefore = null;
 
     function setCount(count) {
         badge.hidden = count === 0;
@@ -65,7 +68,7 @@
         const version = ++requestVersion;
         let loaded = false;
         try{
-            const feed = await fetchJSON(notifications.dataset.feedUrl);
+            const feed = await fetchJSON(panel.dataset.feedUrl);
             if(version !== requestVersion){
                 return;
             }
@@ -76,10 +79,12 @@
 
             list.replaceChildren(...feed.items.map(notificationItem));
             list.hidden = feed.items.length === 0;
+            nextBefore = feed.next_before;
+            moreButton.hidden = !nextBefore;
             setStatus(feed.items.length ? '' : 'You have no notifications yet.');
             loaded = true;
             if(feed.unread_count && feed.items.length){
-                const result = await fetchJSON(notifications.dataset.readUrl, {
+                const result = await fetchJSON(panel.dataset.readUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
                     body: JSON.stringify({ through_id: feed.items[0].id }),
@@ -97,8 +102,49 @@
         }
     }
 
+    moreButton.addEventListener('click', async () => {
+        if(!nextBefore || moreButton.getAttribute('aria-disabled') === 'true'){
+            return;
+        }
+        const version = requestVersion;
+        const url = new URL(panel.dataset.feedUrl, window.location.href);
+        url.searchParams.set('before', nextBefore);
+        moreButton.setAttribute('aria-disabled', 'true');
+        moreStatus.textContent = 'Loading older notifications…';
+        moreStatus.hidden = false;
+        try{
+            const feed = await fetchJSON(url);
+            if(version !== requestVersion || panel.hidden){
+                return;
+            }
+            list.append(...feed.items.map(notificationItem));
+            nextBefore = feed.next_before;
+            if(!nextBefore && document.activeElement === moreButton){
+                list.focus({ preventScroll: true });
+            }
+            moreButton.hidden = !nextBefore;
+            moreStatus.hidden = true;
+        }
+
+        catch(error){
+            if(version === requestVersion && !panel.hidden){
+                moreStatus.textContent = 'Could not load older notifications. Try again.';
+            }
+        }
+
+        finally{
+            if(version === requestVersion){
+                moreButton.removeAttribute('aria-disabled');
+            }
+        }
+    });
+
     function closePanel(restoreFocus = false) {
+        if(panel.hidden){
+            return;
+        }
         panel.hidden = true;
+        sidebar.classList.remove('notifications-open');
         bell.setAttribute('aria-expanded', 'false');
         if(restoreFocus){
             bell.focus();
@@ -106,29 +152,24 @@
     }
 
     bell.addEventListener('click', () => {
-        if(!panel.hidden){
-            closePanel();
-            return;
-        }
         panel.hidden = false;
+        sidebar.classList.add('notifications-open');
         bell.setAttribute('aria-expanded', 'true');
         list.hidden = true;
+        moreButton.hidden = true;
+        moreButton.removeAttribute('aria-disabled');
+        moreStatus.hidden = true;
+        nextBefore = null;
         setStatus('Loading notifications…');
+        closeButton.focus();
         refresh(true);
     });
     closeButton.addEventListener('click', () => closePanel(true));
-
-    function dismissOutside(event) {
-        if(!panel.hidden && !notifications.contains(event.target)){
-            closePanel();
-        }
-    }
-
-    document.addEventListener('click', dismissOutside);
-    document.addEventListener('focusin', dismissOutside);
-    document.addEventListener('keydown', event => {
-        if(!panel.hidden && !event.defaultPrevented && event.key === 'Escape'){
+    sidebar.addEventListener('stockvault:sidebar-closed', () => closePanel());
+    sidebar.addEventListener('keydown', event => {
+        if(!panel.hidden && event.key === 'Escape'){
             event.preventDefault();
+            event.stopPropagation();
             closePanel(true);
         }
     });
