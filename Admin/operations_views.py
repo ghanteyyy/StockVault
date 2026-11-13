@@ -8,12 +8,12 @@ from django.contrib.admin.models import ADDITION, CHANGE, DELETION, LogEntry
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Exists, F, OuterRef, Q, Sum
 from django.db.models.functions import TruncDate
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 
-from Shares.models import ListedCompanies, Portfolios, Transactions, WishLists
+from Shares.models import ListedCompanies, Portfolios, Transactions
 from Users.models import Targets
 from .access import staff_required
 from .utils import csv_response, paginate_queryset, pagination_context
@@ -217,7 +217,17 @@ def AdminTransactions(request):
 
 @staff_required
 def AdminTargets(request):
+    url = reverse('admin-wishlists')
+    query = request.GET.urlencode()
+    return redirect(f'{url}?{query}' if query else url)
+
+
+@staff_required
+def AdminWishlists(request):
     queryset, filters = _common_filters(request, Targets.objects.select_related('user_id', 'company_id'))
+    if filters['sector']:
+        queryset = queryset.filter(company_id__sector=filters['sector'])
+
     filters['type'] = filters['type'] if filters['type'] in ('buy', 'sell') else ''
 
     if filters['type']:
@@ -241,10 +251,12 @@ def AdminTargets(request):
         'company': ('Company A–Z', ('company_id__name', 'pk')),
         'low_target': ('Lowest target first', ('low_target', 'pk')),
         'high_target': ('Highest target first', ('-high_target', 'pk')),
+        'user': ('Account A–Z', ('user_id__email', 'pk')),
+        'sector': ('Sector A–Z', ('company_id__sector', 'pk')),
     }, 'newest')
 
     if request.GET.get('export') == 'csv':
-        return csv_response('stockvault-price-targets.csv',
+        return csv_response('stockvault-wishlist.csv',
             ['Target ID', 'Account email', 'Symbol', 'Company', 'Type', 'Low target (NPR)', 'High target (NPR)', 'State', 'Created'],
             ((row.pk, row.user_id.email, row.company_id.abbreviation, row.company_id.name, row.target_type,
               row.low_target, row.high_target, 'Removed' if row.is_deleted else 'Active', row.created_at.isoformat())
@@ -260,41 +272,8 @@ def AdminTargets(request):
         {'label': 'Accounts represented', 'value': summary['accounts'], 'hint': 'Distinct account holders'},
     ]
 
-    return render(request, 'admin/records.html', _record_context(request, queryset, 'targets', 'Price targets',
-        'Review user-defined price ranges, including removed or incomplete records.', filters, metrics, sorts, errors))
-
-
-@staff_required
-def AdminWishlists(request):
-    queryset, filters = _common_filters(request, WishLists.objects.select_related('user_id', 'company_id'))
-
-    if filters['sector']:
-        queryset = queryset.filter(company_id__sector=filters['sector'])
-
-    queryset, sorts = _ordered(queryset, filters, {
-        'company': ('Company A–Z', ('company_id__name', 'pk')),
-        'user': ('Account A–Z', ('user_id__email', 'pk')),
-        'sector': ('Sector A–Z', ('company_id__sector', 'company_id__name', 'pk')),
-    }, 'company')
-
-    if request.GET.get('export') == 'csv':
-        return csv_response('stockvault-wishlists.csv', ['Wishlist ID', 'Account email', 'Account name', 'Symbol', 'Company', 'Sector'],
-            ((row.pk, row.user_id.email, row.user_id.name, row.company_id.abbreviation, row.company_id.name, row.company_id.sector)
-             for row in queryset.iterator(chunk_size=1000)))
-
-    summary = queryset.aggregate(count=Count('pk'), accounts=Count('user_id', distinct=True),
-        companies=Count('company_id', distinct=True),
-        sectors=Count('company_id__sector', distinct=True, filter=~Q(company_id__sector='')))
-
-    metrics = [
-        {'label': 'Saved companies', 'value': summary['count'], 'hint': 'Matching wishlist entries'},
-        {'label': 'Accounts represented', 'value': summary['accounts'], 'hint': 'Distinct account holders'},
-        {'label': 'Companies represented', 'value': summary['companies'], 'hint': 'Distinct listed companies'},
-        {'label': 'Sectors represented', 'value': summary['sectors'], 'hint': 'As recorded in the company directory'},
-    ]
-
-    return render(request, 'admin/records.html', _record_context(request, queryset, 'wishlists', 'Wishlists',
-        'Understand which companies users have saved. Wishlist records are read-only.', filters, metrics, sorts))
+    return render(request, 'admin/records.html', _record_context(request, queryset, 'wishlists', 'Wishlist',
+        'Review members’ buy and sell price targets, including removed or incomplete records.', filters, metrics, sorts, errors))
 
 
 @staff_required
@@ -352,8 +331,7 @@ def AdminOverview(request):
         cost=Sum('total_cost', filter=Q(number_of_shares__gt=0)), shares=Sum('number_of_shares', filter=Q(number_of_shares__gt=0)))
     transaction_counts = Transactions.objects.aggregate(total=Count('pk'), recent=Count('pk', filter=Q(transaction_date__gte=recent_since, transaction_date__lte=today)))
     company_count = ListedCompanies.objects.count()
-    target_count = Targets.objects.filter(is_deleted=False).count()
-    wishlist_count = WishLists.objects.count()
+    active_targets = Targets.objects.filter(is_deleted=False)
 
     totals = {
         'users': user_counts['total'], 'active_users': user_counts['active'], 'inactive_users': user_counts['total'] - user_counts['active'],
@@ -362,7 +340,7 @@ def AdminOverview(request):
         'holdings': holding_counts['total'], 'positive_holdings': holding_counts['positive'],
         'recorded_capital': _finite(holding_counts['cost']), 'shares': holding_counts['shares'] or 0,
         'transactions': transaction_counts['total'],
-        'transactions_30d': transaction_counts['recent'], 'active_targets': target_count, 'wishlist_entries': wishlist_count,
+        'transactions_30d': transaction_counts['recent'], 'wishlist_entries': active_targets.count(),
     }
 
     sectors = list(Portfolios.objects.filter(number_of_shares__gt=0).values('company_id__sector').annotate(count=Count('pk')).order_by('-count', 'company_id__sector')[:6])
@@ -378,8 +356,8 @@ def AdminOverview(request):
          'hint': 'Complete the directory to improve sector reporting.', 'url': reverse('admin-companies') + '?sector=__missing__'},
         {'label': 'Empty holdings', 'value': Portfolios.objects.filter(Q(number_of_shares__lte=0) | Q(number_of_shares__isnull=True)).count(),
          'hint': 'Review zero, negative, or missing quantities without changing the ledger.', 'url': reverse('admin-portfolios') + '?status=empty'},
-        {'label': 'Targets needing review', 'value': Targets.objects.filter(_invalid_target_range(), is_deleted=False).count(),
-         'hint': 'Active targets with missing or invalid price ranges.', 'url': reverse('admin-targets') + '?state=invalid'},
+        {'label': 'Targets needing review', 'value': active_targets.filter(_invalid_target_range()).count(),
+         'hint': 'Active targets with missing or invalid price ranges.', 'url': reverse('admin-wishlists') + '?state=invalid'},
     ]
 
     return render(request, 'admin/dashboard.html', {

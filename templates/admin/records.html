@@ -57,7 +57,7 @@
                     </select>
                 </div>
             {% endif %}
-            {% if record_kind == 'transactions' or record_kind == 'targets' %}
+            {% if record_kind == 'transactions' or record_kind == 'wishlists' %}
                 <div class="adm-field">
                     <label for="record-type">Type</label>
                     <select name="type" id="record-type">
@@ -70,7 +70,7 @@
                     </select>
                 </div>
             {% endif %}
-            {% if record_kind == 'targets' %}
+            {% if record_kind == 'wishlists' %}
                 <div class="adm-field">
                     <label for="record-state">Target state</label>
                     <select name="state" id="record-state">
@@ -80,8 +80,6 @@
                         <option value="all"{% if filters.state == 'all' %} selected{% endif %}>All targets</option>
                     </select>
                 </div>
-            {% endif %}
-            {% if record_kind == 'wishlists' %}
                 <div class="adm-field">
                     <label for="record-sector">Sector</label>
                     <select name="sector" id="record-sector">
@@ -91,17 +89,15 @@
                         {% endfor %}
                     </select>
                 </div>
-
-            {% else %}
-                <div class="adm-field">
-                    <label for="date-from">From date</label>
-                    <input type="date" id="date-from" name="date_from" value="{{ filters.date_from }}">
-                </div>
-                <div class="adm-field">
-                    <label for="date-to">To date</label>
-                    <input type="date" id="date-to" name="date_to" value="{{ filters.date_to }}">
-                </div>
             {% endif %}
+            <div class="adm-field">
+                <label for="date-from">From date</label>
+                <input type="date" id="date-from" name="date_from" value="{{ filters.date_from }}">
+            </div>
+            <div class="adm-field">
+                <label for="date-to">To date</label>
+                <input type="date" id="date-to" name="date_to" value="{{ filters.date_to }}">
+            </div>
             <div class="adm-field">
                 <label for="record-sort">Sort by</label>
                 <select name="sort" id="record-sort">
@@ -129,17 +125,11 @@
                             <tr>
                                 <th scope="col">Member</th>
                                 <th scope="col">Company</th>
-                                {% if record_kind == 'targets' %}
-                                    <th scope="col">Type</th>
-                                    <th scope="col" class="adm-numeric">Low · NPR</th>
-                                    <th scope="col" class="adm-numeric">High · NPR</th>
-                                    <th scope="col">State</th>
-                                    <th scope="col">Created</th>
-
-                                {% else %}
-                                    <th scope="col">Sector</th>
-                                    <th scope="col">Account status</th>
-                                {% endif %}
+                                <th scope="col">Type</th>
+                                <th scope="col" class="adm-numeric">Low · NPR</th>
+                                <th scope="col" class="adm-numeric">High · NPR</th>
+                                <th scope="col">State</th>
+                                <th scope="col">Created</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -151,47 +141,34 @@
                                     <td>
                                         <strong>{{ record.company_id.abbreviation }}</strong><small>{{ record.company_id.name }}</small>
                                     </td>
-                                    {% if record_kind == 'targets' %}
-                                        <td>
-                                            <span class="adm-badge{% if record.target_type == 'buy' %} adm-badge--success{% else %} adm-badge--purple{% endif %}">{{ record.target_type|title }}</span>
-                                        </td>
-                                        <td class="adm-numeric">
-                                            {% if record.low_target != None %}
-                                                {{ record.low_target|npr_amount }}
+                                    <td>
+                                        <span class="adm-badge{% if record.target_type == 'buy' %} adm-badge--success{% else %} adm-badge--purple{% endif %}">{{ record.target_type|title }}</span>
+                                    </td>
+                                    <td class="adm-numeric">
+                                        {% if record.low_target != None %}
+                                            {{ record.low_target|npr_amount }}
 
-                                            {% else %}
-                                                —
-                                            {% endif %}
-                                        </td>
-                                        <td class="adm-numeric">
-                                            {% if record.high_target != None %}
-                                                {{ record.high_target|npr_amount }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td class="adm-numeric">
+                                        {% if record.high_target != None %}
+                                            {{ record.high_target|npr_amount }}
 
-                                            {% else %}
-                                                —
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if record.is_deleted %}
-                                                <span class="adm-badge">Removed</span>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if record.is_deleted %}
+                                            <span class="adm-badge">Removed</span>
 
-                                            {% else %}
-                                                <span class="adm-badge adm-badge--success">Active</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ record.created_at|date:'j M Y' }}</td>
-
-                                    {% else %}
-                                        <td>{{ record.company_id.sector|default:'Unclassified' }}</td>
-                                        <td>
-                                            {% if record.user_id.is_active %}
-                                                <span class="adm-badge adm-badge--success">Active</span>
-
-                                            {% else %}
-                                                <span class="adm-badge">Inactive</span>
-                                            {% endif %}
-                                        </td>
-                                    {% endif %}
+                                        {% else %}
+                                            <span class="adm-badge adm-badge--success">Active</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ record.created_at|date:'j M Y' }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>

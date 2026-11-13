@@ -230,19 +230,21 @@ class AdminMemberTests(TestCase):
         self.assertNotIn('Initial-Member', text)
         self.assertIn('attachment', response['Content-Disposition'])
 
-    def test_profile_counts_and_unsupported_targets_are_not_leaked(self):
+    def test_profile_counts_active_member_targets_in_wishlist(self):
         company = ListedCompanies.objects.create(name='Example Bank', abbreviation='EXBK', sector='Commercial Banks')
 
         Targets.objects.create(user_id=self.member, company_id=company, target_type='buy', is_deleted=True)
+        Targets.objects.create(user_id=self.member, company_id=company, target_type='buy', is_deleted=False)
         Targets.objects.create(user_id=self.member, company_id=company, target_type='sell', is_deleted=False)
+        Targets.objects.create(user_id=self.other_admin, company_id=company, target_type='sell', is_deleted=False)
         WishLists.objects.create(user_id=self.member, company_id=company)
 
         with patch('Admin.user_views.render', return_value=HttpResponse('profile')) as render:
             self.client.get('/admin/profile', {'id': self.member.pk})
             context = render.call_args.args[2]
 
-            self.assertEqual(context['member_counts']['targets'], 1)
-            self.assertEqual(context['member_counts']['wishlists'], 1)
+            self.assertEqual(context['member_counts']['wishlists'], 2)
+            self.assertNotIn('targets', context['member_counts'])
             self.assertTrue(context['can_change_status'])
 
         self.assertEqual(self.client.get('/admin/profile', {'user': 'missing@example.com'}).status_code, 404)

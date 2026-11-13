@@ -6,7 +6,7 @@ import csv
 from datetime import timedelta
 from io import StringIO
 from unittest.mock import patch
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, urlsplit
 
 from django.contrib.admin.models import ADDITION, CHANGE, LogEntry
 from django.contrib.auth import get_user_model
@@ -47,6 +47,7 @@ class AdminOperationsTests(TestCase):
         cls.removed_target = Targets.objects.create(user_id=cls.bob, company_id=cls.hydro, target_type='buy', low_target=50, high_target=70, is_deleted=True)
         cls.wishlist_a = WishLists.objects.create(user_id=cls.alice, company_id=cls.bank)
         cls.wishlist_b = WishLists.objects.create(user_id=cls.bob, company_id=cls.hydro)
+        cls.saved_only = WishLists.objects.create(user_id=cls.alice, company_id=cls.unclassified)
         content_type = ContentType.objects.get_for_model(ListedCompanies)
         cls.add_log = LogEntry.objects.create(user=cls.staff, content_type=content_type, object_id=cls.bank.pk,
             object_repr=cls.bank.name, action_flag=ADDITION, change_message='Added company')
@@ -113,7 +114,7 @@ class AdminOperationsTests(TestCase):
         self.assertEqual(self.ids(self.context(views.AdminPortfolios, {'user': 'missing@example.com'})), set())
 
     def test_related_record_data_is_loaded_without_row_queries(self):
-        for view in (views.AdminPortfolios, views.AdminTransactions, views.AdminTargets, views.AdminWishlists):
+        for view in (views.AdminPortfolios, views.AdminTransactions, views.AdminWishlists):
             context = self.context(view)
 
             with self.subTest(view=view.__name__), self.assertNumQueries(1):
@@ -139,18 +140,51 @@ class AdminOperationsTests(TestCase):
         self.assertIn('date_to', context['filter_errors'])
         self.assertEqual(len(self.ids(context)), 2)
 
-    def test_target_state_defaults_hide_removed_records(self):
-        self.assertEqual(self.ids(self.context(views.AdminTargets)), {self.target.pk, self.invalid_target.pk})
-        self.assertEqual(self.ids(self.context(views.AdminTargets, {'state': 'removed'})), {self.removed_target.pk})
-        self.assertEqual(self.ids(self.context(views.AdminTargets, {'state': 'invalid'})), {self.invalid_target.pk})
-        self.assertEqual(len(self.ids(self.context(views.AdminTargets, {'state': 'all'}))), 3)
+    def test_wishlist_defaults_to_active_targets_and_preserves_target_state_filters(self):
+        context = self.context(views.AdminWishlists)
+        self.assertEqual(context['record_kind'], 'wishlists')
+        self.assertEqual(self.ids(context), {self.target.pk, self.invalid_target.pk})
+        self.assertEqual(self.ids(self.context(views.AdminWishlists, {'state': 'removed'})), {self.removed_target.pk})
+        self.assertEqual(self.ids(self.context(views.AdminWishlists, {'state': 'invalid'})), {self.invalid_target.pk})
+        self.assertEqual(self.ids(self.context(views.AdminWishlists, {'state': 'all'})),
+                         {self.target.pk, self.invalid_target.pk, self.removed_target.pk})
 
-    def test_wishlists_filter_sector_and_use_honest_non_date_sort(self):
-        context = self.context(views.AdminWishlists, {'sector': 'Hydro Power'})
+    def test_wishlist_combines_sector_type_and_date_filters(self):
+        target_date = timezone.localdate(self.invalid_target.created_at)
+        context = self.context(views.AdminWishlists, {
+            'sector': 'Hydro Power', 'type': 'sell', 'date_from': target_date.isoformat(),
+        })
 
-        self.assertEqual(self.ids(context), {self.wishlist_b.pk})
-        self.assertEqual(context['filters']['sort'], 'company')
-        self.assertNotIn('newest', dict(context['sort_options']))
+        self.assertEqual(self.ids(context), {self.invalid_target.pk})
+        self.assertEqual(context['filters']['sort'], 'newest')
+        self.assertEqual(self.ids(self.context(views.AdminWishlists, {'sector': 'Hydro Power', 'state': 'all'})),
+                         {self.invalid_target.pk, self.removed_target.pk})
+        self.assertEqual(self.ids(self.context(views.AdminWishlists, {'type': 'buy'})), {self.target.pk})
+        later = (target_date + timedelta(days=1)).isoformat()
+        self.assertFalse(self.ids(self.context(views.AdminWishlists, {'date_from': later})))
+
+    def test_legacy_targets_route_redirects_with_filters_and_export(self):
+        self.client.force_login(self.staff)
+        query = {'state': 'removed', 'user': self.bob.email, 'export': 'csv'}
+        response = self.client.get(reverse('admin-targets'), query)
+
+        self.assertEqual(response.status_code, 302)
+        destination = urlsplit(response.url)
+        self.assertEqual(destination.path, reverse('admin-wishlists'))
+        self.assertEqual(parse_qs(destination.query), {key: [value] for key, value in query.items()})
+
+    def test_wishlist_renders_targets_without_legacy_saved_company_entries(self):
+        self.client.force_login(self.staff)
+        response = self.client.get(reverse('admin-wishlists'))
+
+        self.assertContains(response, '<h1>Wishlist</h1>', html=True)
+        self.assertContains(response, 'aria-current="page"')
+        self.assertContains(response, 'name="state"')
+        self.assertContains(response, 'name="sector"')
+        self.assertContains(response, 'Low · NPR')
+        self.assertNotContains(response, self.unclassified.name)
+        self.assertNotContains(response, f'href="{reverse("admin-targets")}"')
+        self.assertTrue(WishLists.objects.filter(pk=self.saved_only.pk).exists())
 
     def test_invalid_sort_cannot_become_a_database_order_expression(self):
         context = self.context(views.AdminPortfolios, {'sort': 'user_id__password'})
@@ -189,12 +223,17 @@ class AdminOperationsTests(TestCase):
         self.assertEqual(rows[1][7], '25000.00')
 
     def test_each_record_export_uses_the_filtered_queryset(self):
-        cases = [(views.AdminTransactions, {'type': 'sell'}), (views.AdminTargets, {'state': 'removed'}),
-            (views.AdminWishlists, {'sector': 'Hydro Power'})]
+        cases = [(views.AdminTransactions, {'type': 'sell'}), (views.AdminWishlists, {'sector': 'Hydro Power'})]
 
         for view, params in cases:
             with self.subTest(view=view.__name__):
                 self.assertEqual(len(self.csv_rows(view, params)), 2)
+
+        rows = self.csv_rows(views.AdminWishlists, {'state': 'removed'})
+        self.assertEqual(rows[0][:5], ['Target ID', 'Account email', 'Symbol', 'Company', 'Type'])
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[1][:5], [self.removed_target.pk, self.bob.email, 'RIV', self.hydro.name, 'buy'])
+        self.assertEqual(rows[1][-2], 'Removed')
 
     def test_activity_search_action_and_export_use_audit_records(self):
         context = self.context(views.AdminActivity, {'action': 'change'})
@@ -218,20 +257,20 @@ class AdminOperationsTests(TestCase):
         self.assertEqual(totals['positive_holdings'], 2)
         self.assertEqual(totals['recorded_capital'], 40000)
         self.assertEqual(totals['transactions_30d'], 1)
-        self.assertEqual(totals['active_targets'], 2)
         self.assertEqual(totals['wishlist_entries'], 2)
+        self.assertNotIn('active_targets', totals)
         self.assertEqual(len(context['metrics']), 4)
         self.assertEqual(len(context['daily_signups']), 7)
         self.assertEqual(sum(day['count'] for day in context['daily_signups']), 3)
         self.assertEqual(sum(row['percentage'] for row in context['sector_breakdown']), 100)
         self.assertEqual([signal['value'] for signal in context['quality_signals']], [1, 1, 1])
         self.assertIn('sector=__missing__', context['quality_signals'][0]['url'])
-        self.assertIn('state=invalid', context['quality_signals'][2]['url'])
+        self.assertEqual(context['quality_signals'][2]['url'], f"{reverse('admin-wishlists')}?state=invalid")
 
     def test_reports_do_not_change_financial_records(self):
         original = (Portfolios.objects.count(), Transactions.objects.count(), Targets.objects.count(), WishLists.objects.count())
 
-        for view in (views.AdminPortfolios, views.AdminTransactions, views.AdminTargets, views.AdminWishlists, views.AdminOverview):
+        for view in (views.AdminPortfolios, views.AdminTransactions, views.AdminWishlists, views.AdminOverview):
             self.context(view)
 
         after = (Portfolios.objects.count(), Transactions.objects.count(), Targets.objects.count(), WishLists.objects.count())

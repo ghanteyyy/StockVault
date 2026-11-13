@@ -25,11 +25,9 @@
                 {% include 'admin/_icon.html' with name='portfolios' %}
                 <span>Holdings</span></a><a href="{% url 'admin-transactions' %}" class="adm-nav-link{% if nav_section == 'transactions' or admin_section == 'transactions' %} is-active{% endif %}"{% if nav_section == 'transactions' or admin_section == 'transactions' %} aria-current="page"{% endif %}>
                 {% include 'admin/_icon.html' with name='transactions' %}
-                <span>Transactions</span></a><a href="{% url 'admin-targets' %}" class="adm-nav-link{% if nav_section == 'targets' or admin_section == 'targets' %} is-active{% endif %}"{% if nav_section == 'targets' or admin_section == 'targets' %} aria-current="page"{% endif %}>
-                {% include 'admin/_icon.html' with name='targets' %}
-                <span>Price targets</span></a><a href="{% url 'admin-wishlists' %}" class="adm-nav-link{% if nav_section == 'wishlists' or admin_section == 'wishlists' %} is-active{% endif %}"{% if nav_section == 'wishlists' or admin_section == 'wishlists' %} aria-current="page"{% endif %}>
+                <span>Transactions</span></a><a href="{% url 'admin-wishlists' %}" class="adm-nav-link{% if nav_section == 'wishlists' or admin_section == 'wishlists' %} is-active{% endif %}"{% if nav_section == 'wishlists' or admin_section == 'wishlists' %} aria-current="page"{% endif %}>
                 {% include 'admin/_icon.html' with name='wishlists' %}
-                <span>Wishlists</span></a>
+                <span>Wishlist</span></a>
         </div>
         <div class="adm-nav-group">
             <p>Operations</p>

@@ -11,7 +11,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_POST
 
-from Shares.models import Portfolios, Transactions, WishLists
+from Shares.models import Portfolios, Transactions
 from Users.models import CustomUser, Targets
 from .access import staff_required
 from .user_forms import CreateMemberForm, MemberDetailsForm, ProfileImageForm
@@ -104,8 +104,7 @@ def UserProfile(request):
         'can_change_status': not (member.is_staff or member.is_superuser or member.pk == request.user.pk),
         'member_counts': {'portfolios': Portfolios.objects.filter(user_id=member).count(),
                           'transactions': Transactions.objects.filter(user_id=member).count(),
-                          'targets': Targets.objects.filter(user_id=member, is_deleted=False).count(),
-                          'wishlists': WishLists.objects.filter(user_id=member).count()},
+                          'wishlists': Targets.objects.filter(user_id=member, is_deleted=False).count()},
     }
 
     return render(request, 'admin/profile.html', context)

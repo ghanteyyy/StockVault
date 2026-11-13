@@ -32,7 +32,7 @@
         </div>
     </div>
     <div class="adm-stats adm-member-records">
-        <a class="adm-stat" href="{% url 'admin-portfolios' %}?user={{ user_profile.email|urlencode }}"><span>Holdings</span><strong>{{ member_counts.portfolios }}</strong><small>Review portfolio records <span aria-hidden="true">↗</span></small></a><a class="adm-stat" href="{% url 'admin-transactions' %}?user={{ user_profile.email|urlencode }}"><span>Transactions</span><strong>{{ member_counts.transactions }}</strong><small>Explore recorded trades <span aria-hidden="true">↗</span></small></a><a class="adm-stat" href="{% url 'admin-targets' %}?user={{ user_profile.email|urlencode }}"><span>Active price targets</span><strong>{{ member_counts.targets }}</strong><small>Review the member’s plans <span aria-hidden="true">↗</span></small></a><a class="adm-stat" href="{% url 'admin-wishlists' %}?user={{ user_profile.email|urlencode }}"><span>Saved companies</span><strong>{{ member_counts.wishlists }}</strong><small>Open the wishlist <span aria-hidden="true">↗</span></small></a>
+        <a class="adm-stat" href="{% url 'admin-portfolios' %}?user={{ user_profile.email|urlencode }}"><span>Holdings</span><strong>{{ member_counts.portfolios }}</strong><small>Review portfolio records <span aria-hidden="true">↗</span></small></a><a class="adm-stat" href="{% url 'admin-transactions' %}?user={{ user_profile.email|urlencode }}"><span>Transactions</span><strong>{{ member_counts.transactions }}</strong><small>Explore recorded trades <span aria-hidden="true">↗</span></small></a><a class="adm-stat" href="{% url 'admin-wishlists' %}?user={{ user_profile.email|urlencode }}"><span>Wishlist</span><strong>{{ member_counts.wishlists }}</strong><small>Review active price targets <span aria-hidden="true">↗</span></small></a>
     </div>
     <div class="adm-profile-layout">
         <aside class="adm-card adm-profile-summary">
@@ -291,7 +291,7 @@
             </div>
             <p class="adm-dialog-description">
                 {% if user_profile.is_active %}
-                    {{ user_profile.name }} will be unable to sign in. Holdings, transactions, price targets, and saved companies will be retained.
+                    {{ user_profile.name }} will be unable to sign in. Holdings, transactions, and wishlist price targets will be retained.
 
                 {% else %}
                     {{ user_profile.name }} can sign in again using their existing credentials and workspace.

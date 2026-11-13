@@ -183,7 +183,7 @@ def AdminListedCompaniesDelete(request):
                   or WishLists.objects.filter(company_id=company).exists())
 
         if linked:
-            return _error('This company has linked holdings, transactions, targets, or wishlists and cannot be removed.', status=409)
+            return _error('This company has linked holdings, transactions, price targets, or historical saved-company records and cannot be removed.', status=409)
 
         record_admin_action(request, company, 'Removed an unused company from the catalogue.', action=DELETION)
         company.delete()
